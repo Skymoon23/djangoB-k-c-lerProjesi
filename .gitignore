@@ -1,0 +1,17 @@
+# sanal Ortam .venv
+.venv/
+venv/
+
+# sqlite database
+db.sqlite3
+
+# python önbellek dosya
+__pycache__/
+*.pyc
+
+# IDE ayar klasörleri
+.idea/
+.vscode/
+
+# gizli ayarlar
+.env

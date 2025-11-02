@@ -1,0 +1,18 @@
+<h1>Hoca Paneli: Derslerim</h1>
+<p>Merhaba, {{ request.user.get_full_name }}. Yönetebileceğiniz dersler aşağıdadır:</p>
+
+{% if courses %}
+    <ul>
+        {% for course in courses %}
+            <li>
+                <strong>{{ course.course_code }} - {{ course.course_name }}</strong>
+                <a href="{% url 'manage_course' course.id %}">[Yönet]</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Üzerinize atanmış bir ders bulunmamaktadır.</p>
+{% endif %}
+
+<hr>
+<a href="{% url 'admin:index' %}">Admin Paneli (Bölüm Başkanı)</a> |

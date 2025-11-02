@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğrenci Paneli</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; }
+        h1, h3 { color: #333; }
+        table { width: 50%; border-collapse: collapse; margin-bottom: 20px; min-width: 400px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        tfoot tr { background-color: #f0f0f0; font-weight: bold; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+    <h1>Öğrenci Paneli: Notlarım</h1>
+    <p>Merhaba, {{ request.user.get_full_name }}. Kayıtlı olduğunuz dersler ve notlarınız:</p>
+    <p><a href="{% url 'logout' %}">Çıkış Yap</a></p>
+
+    {% if not course_data %}
+        <p>Henüz herhangi bir derse kayıtlı değilsiniz.</p>
+    {% endif %}
+
+    {% for data in course_data %}
+        <hr>
+        <h3>{{ data.course.course_code }} - {{ data.course.course_name }}</h3>
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Değerlendirme</th>
+                    <th>Yüzdesi</th>
+                    <th>Notunuz</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data.component_grade_list %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>%{{ item.percentage }}</td>
+                    <td>
+                        {% if item.score is not None %}
+                            {{ item.score|floatformat:2 }}
+                        {% else %}
+                            (N/A) {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" style="text-align: right;"><strong>Dönem Sonu Ortalama:</strong></td>
+                    <td><strong>{{ data.final_grade }}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+    {% endfor %}
+
+</body>
+</html>

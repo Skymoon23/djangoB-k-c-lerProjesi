@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ders Yönetimi: {{ course.course_name }}</title>
+
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 1200px; margin: auto; }
+        h1, h2, h3 { color: #333; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+        table { width:100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        form { background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        input[type="text"], input[type="number"], textarea, select { width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        textarea { width: 98%; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #0056b3; }
+        ul, ol { padding-left: 20px; }
+        .form-section { margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+
+    <h1>{{ course.course_code }} - {{ course.course_name }}</h1>
+    <p><a href="{% url 'instructor_dashboard' %}">&larr; Derslerime Geri Dön</a></p>
+
+    <hr>
+
+    <div class="form-section">
+        <h3>Değerlendirme Bileşenleri (Sınavlar, Yüzdeler)</h3>
+        <ul>
+            {% for component in components %}
+                <li>{{ component.name }}: %{{ component.percentage }}</li>
+            {% empty %}
+                <li>Henüz bir değerlendirme bileşeni eklenmemiş.</li>
+            {% endfor %}
+        </ul>
+
+        <form method="POST">
+            {% csrf_token %}
+            <h4>Yeni Bileşen Ekle</h4>
+            {{ eval_form.as_p }}
+            <button type="submit" name="submit_evaluation">Sınav/Bileşen Ekle</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <div class="form-section">
+        <h3>Öğrenim Çıktıları</h3>
+        <ol>
+            {% for outcome in outcomes %}
+                <li>{{ outcome.description }}</li>
+            {% empty %}
+                <li>Henüz bir öğrenim çıktısı eklenmemiş.</li>
+            {% endfor %}
+        </ol>
+
+        <form method="POST">
+            {% csrf_token %}
+            <h4>Yeni Öğrenim Çıktısı Ekle</h4>
+            {{ outcome_form.as_p }}
+            <button type="submit" name="submit_outcome">Öğrenim Çıktısı Ekle</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <div class="form-section">
+        <h3>Not Girişi</h3>
+        <p>Bu derse kayıtlı {{ students.count }} öğrenci bulunmaktadır.</p>
+
+        {% if not components %}
+            <p style="color: red; font-weight: bold;">Not girişi yapabilmek için lütfen önce "Değerlendirme Bileşeni" (Sınav, Proje vb.) ekleyin.</p>
+        {% elif not students %}
+            <p style="color: orange;">Bu derse henüz kayıtlı öğrenci yok. (Admin panelinden atama yapmalısınız)</p>
+        {% else %}
+            <form method="POST">
+                {% csrf_token %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Öğrenci</th>
+                            {% for component in components %}
+                                <th>{{ component.name }} (%{{ component.percentage }})</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in student_grade_rows %}
+                        <tr>
+                            <td>{{ row.student_object.get_full_name }} ({{ row.student_object.username }})</td>
+
+                            {% for grade_info in row.grades_list %}
+                                <td>
+                                    <input
+                                        type="number"
+                                        name="grade_{{ row.student_object.id }}_{{ grade_info.component_id }}"
+                                        value="{% if grade_info.score is not None %}{{ grade_info.score|floatformat:2 }}{% endif %}"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                        style="width: 80px;"
+                                    >
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <br>
+                <button type="submit" name="submit_grades">Tüm Notları Kaydet</button>
+            </form>
+        {% endif %}
+    </div>
+
+</body>
+</html>
