@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bölüm Başkanı Paneli</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 1200px; margin: auto; }
+        h1, h2, h3 { color: #333; }
+        .summary-box { display: flex; justify-content: space-around; background-color: #f4f4f4; padding: 20px; border-radius: 5px; margin-bottom: 30px; }
+        .summary-item { text-align: center; }
+        .summary-item h2 { margin: 0 0 5px 0; }
+        .summary-item p { margin: 0; font-size: 1.2em; color: #555; }
+        .list-section { margin-bottom: 30px; }
+        ul { list-style-type: none; padding-left: 0; }
+        li { background-color: #f9f9f9; border: 1px solid #ddd; padding: 10px 15px; margin-bottom: 8px; border-radius: 4px; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 30px 0; }
+        
+        /* Form stilleri */
+        .form-container { display: flex; gap: 30px; }
+        .form-section { flex: 1; min-width: 300px; background-color: #fcfcfc; border: 1px solid #eee; padding: 20px; border-radius: 5px; }
+        .form-section form p { margin-bottom: 15px; }
+        .form-section label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .form-section input[type="text"], .form-section select {
+            width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;
+        }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px; font-size: 1em; }
+        button:hover { background-color: #0056b3; }
+
+        /* Mesaj stilleri */
+        .messages { list-style-type: none; padding: 0; margin-bottom: 20px; }
+        .messages li { padding: 10px; border-radius: 5px; }
+        .messages li.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .messages li.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+    <h1>Bölüm Başkanı Paneli</h1>
+    <p>Merhaba, {{ request.user.get_full_name }}. Sisteme hoş geldiniz.</p>
+    <p>
+        <a href="{% url 'admin:index' %}">[Detaylı Yönetim için Admin Paneli]</a> | 
+        <a href="{% url 'logout' %}">[Çıkış Yap]</a>
+    </p>
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <hr>
+    <h2>Sistem Özeti</h2>
+    <div class="summary-box">
+        <div class="summary-item">
+            <h2>{{ course_count }}</h2>
+            <p>Toplam Ders</p>
+        </div>
+        <div class="summary-item">
+            <h2>{{ instructor_count }}</h2>
+            <p>Toplam Öğretim Görevlisi</p>
+        </div>
+        <div class="summary-item">
+            <h2>{{ student_count }}</h2>
+            <p>Toplam Öğrenci</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Hızlı İşlemler</h2>
+    <div class="form-container">
+        <div class="form-section">
+            <h3>Yeni Ders Ekle</h3>
+            <form method="POST">
+                {% csrf_token %}
+                {{ course_form.as_p }}
+                <button type="submit" name="submit_course_create">Dersi Kaydet</button>
+            </form>
+        </div>
+
+        <div class="form-section">
+            <h3>Derse Hoca Ata</h3>
+            <form method="POST">
+                {% csrf_token %}
+                {{ assign_form.as_p }}
+                <button type="submit" name="submit_instructor_assign">Hocayı Ata</button>
+            </form>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="list-section">
+        <h2>Tüm Dersler ({{ course_count }})</h2>
+        <ul>
+            {% for course in all_courses %}
+                <li>
+                    <strong>{{ course.course_code }}</strong> - {{ course.course_name }}
+                    
+                    <div style="margin-top: 5px; font-size: 0.9em; color: #555;">
+                        <strong>Atanan Hocalar:</strong>
+                        {% for instructor in course.instructors.all %}
+                            {{ instructor.get_full_name|default:instructor.username }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            (Henüz hoca atanmamış)
+                        {% endfor %}
+                    </div>
+                </li>
+            {% empty %}
+                <li>Sistemde kayıtlı ders bulunmamaktadır.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="list-section">
+        <h2>Öğretim Görevlileri ({{ instructor_count }})</h2>
+        <ul>
+            {% for instructor in all_instructors %}
+                <li>{{ instructor.get_full_name }} ({{ instructor.username }})</li>
+            {% empty %}
+                <li>Sistemde kayıtlı öğretim görevlisi bulunmamaktadır.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="list-section">
+        <h2>Öğrenciler ({{ student_count }})</h2>
+        <ul>
+            {% for student in all_students %}
+                <li>{{ student.get_full_name }} ({{ student.username }})</li>
+            {% empty %}
+                <li>Sistemde kayıtlı öğrenci bulunmamaktadır.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</body>
+</html>

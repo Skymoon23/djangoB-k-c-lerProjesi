@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User     # <--  size zoomda bahsettiğim djangonun kendi
-from django.conf import settings                #      user modeli ama biz bu modeli genişleteceğiz
+from django.conf import settings                     # user modeli ama biz bu modeli genişleteceğiz
 
 
 class Profile(models.Model):
@@ -59,7 +59,7 @@ class EvaluationComponent(models.Model):
         verbose_name_plural = "Değerlendirme Bileşenleri"
         # bir ders için aynı isimde iki bileşen olmasın (örn: 2 tane Vize) --> bu aslında sonradan değişecek fakat
         unique_together = ('course', 'name')                                 # şu an sistem hata vermesin diye
-                                                                             # her bileşen unique yaptım
+                                                                             # her bileşeni unique yaptım
 
     def __str__(self):
         return f"{self.course.course_code} - {self.name} (%{self.percentage})"

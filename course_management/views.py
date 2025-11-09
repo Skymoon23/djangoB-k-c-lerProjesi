@@ -2,15 +2,16 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from decimal import Decimal
+from django.contrib import messages
 
 # modeller
-from .models import Profile, Course, EvaluationComponent, LearningOutcome, Grade
+from .models import Profile, Course, EvaluationComponent, LearningOutcome, Grade, User
 
 # formlar
-from .forms import EvaluationComponentForm, LearningOutcomeForm
+from .forms import EvaluationComponentForm, LearningOutcomeForm, CourseCreateForm, InstructorAssignForm
 
 # decoratorlarımız <-- roller ile kontrol
-from .decorators import user_is_instructor, user_is_student
+from .decorators import user_is_instructor, user_is_student, user_is_department_head
 
 
 @login_required
@@ -32,7 +33,7 @@ def dashboard_redirect(request):
     elif role == 'student':
         return redirect('student_dashboard')
     elif role == 'department_head':
-        return redirect('admin:index')
+        return redirect('department_head_dashboard')
     else:
         return redirect('login')
 
@@ -174,3 +175,81 @@ def student_dashboard(request):
         'course_data': course_data,
     }
     return render(request, 'course_management/student_dashboard.html', context)
+
+
+@login_required
+@user_is_department_head
+def department_head_dashboard(request):
+    """
+    bölüm başkanının panelini gösterir
+    tüm dersler hocalar ve öğrenciler hakkında genel bilgi sağlar
+    ders ekleme ve hoca atama işlemlerini de yapar
+    """
+
+    # formları POST verisiyle doldur (eğer POST ise) veya boş oluştur (eğer GET ise)
+    if request.method == 'POST':
+        # hangi formun gönderildiğini submit butonunun 'name' ye göre kontrol et
+
+        if 'submit_course_create' in request.POST:
+            # --- YENİ DERS EKLEME İŞLEMİ
+            course_form = CourseCreateForm(request.POST)
+            assign_form = InstructorAssignForm()  # diğer formu boş ata
+
+            if course_form.is_valid():
+                course_form.save()
+                messages.success(request, 'Yeni ders başarıyla eklendi.')
+                return redirect('department_head_dashboard')
+            else:
+                messages.error(request, 'Ders eklenirken bir hata oluştu. Lütfen formu kontrol edin.')
+
+        elif 'submit_instructor_assign' in request.POST:
+            # --- HOCA ATAMA İŞLEMİ
+            assign_form = InstructorAssignForm(request.POST)
+            course_form = CourseCreateForm()  # diğer formu boş ata
+
+            if assign_form.is_valid():
+                course = assign_form.cleaned_data['course']
+                instructor = assign_form.cleaned_data['instructor']
+
+                # ManyToMany alanına hocayı ekle
+                course.instructors.add(instructor)
+
+                messages.success(request,
+                                 f'"{instructor.get_full_name()}" hocası "{course.course_code}" dersine başarıyla atandı.')
+                return redirect('department_head_dashboard')
+            else:
+                messages.error(request, 'Hoca atanırken bir hata oluştu. Lütfen formu kontrol edin.')
+
+        else:
+            # beklenmedik bir POST durumu
+            course_form = CourseCreateForm()
+            assign_form = InstructorAssignForm()
+
+    else:
+        # --- GET İSTEĞİ
+        # her iki formu da boş olarak oluştur
+        course_form = CourseCreateForm()
+        assign_form = InstructorAssignForm()
+
+    # --- VERİLERİ ÇEK
+
+    # 'instructors' kullanarak veritabanı sorgusunu optimize et
+    # ders listesinde hocaları gösterirken her ders için ayrı sorgu atmama
+    all_courses = Course.objects.all().prefetch_related('instructors').order_by('course_code')
+
+    all_instructors = User.objects.filter(profile__role='instructor').order_by('last_name', 'first_name')
+    all_students = User.objects.filter(profile__role='student').order_by('last_name', 'first_name')
+
+    context = {
+        'all_courses': all_courses,
+        'all_instructors': all_instructors,
+        'all_students': all_students,
+        'course_count': all_courses.count(),
+        'instructor_count': all_instructors.count(),
+        'student_count': all_students.count(),
+
+        # Formları context'e ekle
+        'course_form': course_form,
+        'assign_form': assign_form,
+    }
+    return render(request, 'course_management/department_head_dashboard.html', context)
