@@ -87,7 +87,7 @@ class StudentAssignForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        """Dropdown'larda daha okunaklı isimler göster"""
+        """dropdown'larda daha okunaklı isimler göster"""
         super().__init__(*args, **kwargs)
         self.fields['course'].label_from_instance = lambda obj: f"{obj.course_code} - {obj.course_name}"
         self.fields['student'].label_from_instance = lambda obj: obj.get_full_name() or obj.username
