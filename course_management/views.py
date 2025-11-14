@@ -13,6 +13,10 @@ from .forms import EvaluationComponentForm, LearningOutcomeForm, CourseCreateFor
 # decoratorlarımız <-- roller ile kontrol
 from .decorators import user_is_instructor, user_is_student, user_is_department_head
 
+def home(request):
+    return render(request, 'registration/home.html')
+
+
 
 @login_required
 def dashboard_redirect(request):

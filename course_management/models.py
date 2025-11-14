@@ -130,3 +130,11 @@ class ProgramOutcome(models.Model):
     def __str__(self):
         # açıklamanın ilk 50 karakterini göster
         return f"{self.code}: {self.description[:50]}..."
+
+class Student(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    student_number = models.CharField(max_length=20, unique=True)
+    department = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.student_number}"

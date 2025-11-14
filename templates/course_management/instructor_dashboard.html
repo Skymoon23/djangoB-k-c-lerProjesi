@@ -1,91 +1,90 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hoca Paneli</title>
+    <title>Hoca Paneli - ALMS University</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Diğer panellerle uyumlu CSS stilleri */
-        body { font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 1200px; margin: auto; }
-        h1, h2, h3 { color: #333; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 30px 0; }
-        
-        /* Liste tasarımı */
-        ul { list-style-type: none; padding-left: 0; }
-        li { 
-            background-color: #f9f9f9; 
-            border: 1px solid #ddd; 
-            padding: 15px; 
-            margin-bottom: 10px; 
-            border-radius: 4px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        
-        /* Buton benzeri link tasarımı */
-        .btn { 
-            background-color: #007bff; 
-            color: white; 
-            padding: 8px 15px; 
-            border: none; 
-            cursor: pointer; 
-            border-radius: 4px; 
-            text-decoration: none; 
-            font-size: 0.9em; 
+        .container-main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 40px;
         }
-        .btn:hover { background-color: #0056b3; text-decoration: none; color: white; }
-        
-        /* Mesaj kutuları */
-        .messages { list-style-type: none; padding: 0; margin-bottom: 20px; }
-        .messages li { padding: 10px; border-radius: 5px; }
-        .messages li.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .messages li.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .dashboard-card {
+            width: 700px;
+            padding: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        li {
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+        .admin-link {
+            margin-top: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'home' %}">ALMS University</a>
+            <div class="d-flex">
+                <a class="btn btn-outline-light" href="{% url 'home' %}">Çıkış Yap</a>
+            </div>
+        </div>
+    </nav>
 
-    <h1>Hoca Paneli: Derslerim</h1>
-    <p>Merhaba, {{ request.user.get_full_name }}. Yönetebileceğiniz dersler aşağıdadır:</p>
-    
-    <p>
-        <form method="POST" action="{% url 'logout' %}" style="display: inline; margin: 0; padding: 0;">
-            {% csrf_token %}
-            <button type="submit" style="background: none; border: none; color: #007bff; text-decoration: underline; cursor: pointer; padding: 0; font-family: inherit; font-size: inherit;">
-                [Çıkış Yap]
-            </button>
-        </form>
-    </p>
+    <!-- Dashboard -->
+    <div class="container-main">
+        <div class="dashboard-card">
+            <h1>Hoca Paneli: Derslerim</h1>
+            <p>Merhaba, {{ request.user.get_full_name }}. Yönetebileceğiniz dersler aşağıdadır:</p>
 
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+            {% if courses %}
+                <ul>
+                    {% for course in courses %}
+                        <li>
+                            <span><strong>{{ course.course_code }} - {{ course.course_name }}</strong></span>
+                            <a href="{% url 'manage_course' course.id %}" class="btn btn-sm btn-primary">Yönet</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Üzerinize atanmış bir ders bulunmamaktadır.</p>
+            {% endif %}
 
-    <hr>
+            <hr>
+            <div class="admin-link">
+                <a href="{% url 'admin:index' %}" class="btn btn-secondary">Admin Paneli (Bölüm Başkanı)</a>
+            </div>
+        </div>
+    </div>
 
-    {% if courses %}
-        <h2>Atanan Dersler ({{ courses.count }})</h2>
-        <ul>
-            {% for course in courses %}
-                <li>
-                    <div>
-                        <strong>{{ course.course_code }}</strong> - {{ course.course_name }}
-                    </div>
-                    <div>
-                        <a href="{% url 'manage_course' course.id %}" class="btn">Dersi Yönet &rarr;</a>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p style="color: #777;">Üzerinize atanmış bir ders bulunmamaktadır. Lütfen Bölüm Başkanı ile iletişime geçiniz.</p>
-    {% endif %}
-
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -71,39 +71,13 @@
     <hr>
 
     <div class="form-section">
-        <h3>Ders Syllabus (Dosya)</h3>
-
-        {% if course.syllabus %}
-            <p><strong>Mevcut Dosya:</strong>
-                <a href="{{ course.syllabus.url }}" target="_blank">
-                    {{ course.syllabus.name|cut:"course_syllabus/" }}
-                </a>
-            </p>
-            <p style="font-size: 0.9em; color: #555;">Yeni bir dosya yüklerseniz bu dosya otomatik olarak güncellenecektir.</p>
-        {% else %}
-            <p>Henüz bir syllabus dosyası yüklenmemiş.</p>
-        {% endif %}
-        
-        <br>
-
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            {{ syllabus_form.as_p }}
-            
-            <button type="submit" name="submit_syllabus">Syllabus Yükle/Güncelle</button>
-        </form>
-    </div>
-    <hr>
-
-    <div class="form-section">
         <h3>Not Girişi</h3>
         <p>Bu derse kayıtlı {{ students.count }} öğrenci bulunmaktadır.</p>
 
         {% if not components %}
             <p style="color: red; font-weight: bold;">Not girişi yapabilmek için lütfen önce "Değerlendirme Bileşeni" (Sınav, Proje vb.) ekleyin.</p>
         {% elif not students %}
-            <p style="color: orange;">Bu derse henüz kayıtlı öğrenci yok. (Bölüm Başkanı tarafından atama yapılmalıdır)</p>
+            <p style="color: orange;">Bu derse henüz kayıtlı öğrenci yok. (Admin panelinden atama yapmalısınız)</p>
         {% else %}
             <form method="POST">
                 {% csrf_token %}

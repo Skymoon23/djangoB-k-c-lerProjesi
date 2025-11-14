@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ALMS University</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .role-btn {
+            width: 200px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">ALMS University</a>
+        </div>
+    </nav>
+
+    <!-- Ortadaki Butonlar -->
+    <div class="main-container">
+        <a href="{% url 'login' %}" class="btn btn-primary role-btn">Headteacher</a>
+        <a href="{% url 'login' %}" class="btn btn-primary role-btn">Teacher</a>
+        <a href="{% url 'login' %}" class="btn btn-primary role-btn">Student</a>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
