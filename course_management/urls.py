@@ -18,4 +18,13 @@ urlpatterns = [
 
     # ders yönetim sayfası
     path('course/<int:course_id>/manage/', views.manage_course, name='manage_course'),
+
+        # --- Hoca Learning Outcome & Bileşen & Ağırlık & Not işlemleri ---
+    path('instructor/course/<int:course_id>/outcomes/add/', views.add_learning_outcome, name='add_learning_outcome'),
+    path('instructor/course/<int:course_id>/components/add/', views.add_evaluation_component, name='add_evaluation_component'),
+    path('instructor/component/<int:component_id>/weights/', views.manage_outcome_weights, name='manage_outcome_weights'),
+    path('instructor/component/<int:component_id>/grade/add/', views.add_grade, name='add_grade'),
+    
+    path('student/course/<int:course_id>/', views.student_course_detail, name='student_course_detail'),
+
 ]

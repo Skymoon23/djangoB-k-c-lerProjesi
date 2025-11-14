@@ -1,6 +1,15 @@
 from django import forms
-from .models import EvaluationComponent, LearningOutcome, Course, ProgramOutcome
+from .models import (
+    EvaluationComponent,
+    LearningOutcome,
+    Course,
+    ProgramOutcome,
+    # yeni model ve not modeli:
+    OutcomeWeight,
+    Grade,
+)
 from django.contrib.auth import get_user_model
+
 
 # user modelini al
 User = get_user_model()
@@ -120,3 +129,43 @@ class ProgramOutcomeForm(forms.ModelForm):
             'code': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
+
+
+
+
+
+
+
+
+
+
+
+
+class GradeForm(forms.ModelForm):
+    """
+    Hocanın bir değerlendirme bileşeni (Vize/Final) için
+    bir öğrencinin notunu girmesi için form.
+    """
+    class Meta:
+        model = Grade
+        fields = ['student', 'score']
+        labels = {
+            'student': 'Öğrenci',
+            'score': 'Not',
+        }
+        widgets = {
+            'student': forms.Select(attrs={'class': 'form-control'}),
+            'score': forms.NumberInput(attrs={'class': 'form-control', 'min': 0, 'max': 100}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        """
+        course parametresi alacağız ve öğrenci listesini
+        sadece o derse kayıtlı öğrencilerle sınırlayacağız.
+        """
+        course = kwargs.pop('course', None)
+        super().__init__(*args, **kwargs)
+
+        if course is not None:
+            # Sadece o derse kayıtlı öğrenciler görünsün
+            self.fields['student'].queryset = course.students.all().order_by('last_name', 'first_name')

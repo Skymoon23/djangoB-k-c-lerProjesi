@@ -138,3 +138,49 @@ class Student(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.student_number}"
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class OutcomeWeight(models.Model):
+    """
+    Bir EvaluationComponent'in (Vize, Final vb.)
+    hangi LearningOutcome ile ne kadar ilişkili olduğunu tutar (1-5 arası ağırlık).
+    """
+    component = models.ForeignKey(
+        EvaluationComponent,
+        on_delete=models.CASCADE,
+        related_name="outcome_weights",
+        verbose_name="Değerlendirme Bileşeni"
+    )
+    outcome = models.ForeignKey(
+        LearningOutcome,
+        on_delete=models.CASCADE,
+        related_name="outcome_weights",
+        verbose_name="Learning Outcome"
+    )
+
+    weight = models.IntegerField(
+        default=1,
+        choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')],
+        verbose_name="Ağırlık (1-5)"
+    )
+
+    class Meta:
+        unique_together = ('component', 'outcome')
+        verbose_name = "Outcome Ağırlığı"
+        verbose_name_plural = "Outcome Ağırlıkları"
+
+    def __str__(self):
+        return f"{self.component} ⇄ {self.outcome} (Ağırlık: {self.weight})"

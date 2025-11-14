@@ -19,7 +19,7 @@
             padding-top: 40px;
         }
         .dashboard-card {
-            width: 700px;
+            width: 900px;
             padding: 30px;
             border: 1px solid #ccc;
             border-radius: 10px;
@@ -35,15 +35,20 @@
             padding-left: 0;
         }
         li {
-            padding: 8px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 12px 0;
             border-bottom: 1px solid #eee;
         }
         .admin-link {
             margin-top: 20px;
             text-align: center;
+        }
+        .course-actions {
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+        .component-item {
+            margin-left: 25px;
+            font-size: 0.95rem;
         }
     </style>
 </head>
@@ -68,8 +73,47 @@
                 <ul>
                     {% for course in courses %}
                         <li>
-                            <span><strong>{{ course.course_code }} - {{ course.course_name }}</strong></span>
-                            <a href="{% url 'manage_course' course.id %}" class="btn btn-sm btn-primary">Yönet</a>
+                            <strong>{{ course.course_code }} - {{ course.course_name }}</strong>
+
+                            <!-- DERSİ YÖNET linki -->
+                            <div class="mt-2">
+                                <a href="{% url 'manage_course' course.id %}" 
+                                   class="btn btn-sm btn-primary">Dersi Yönet</a>
+
+                                <!-- LO EKLE ● Yeniden düzenlendi -->
+                                <a href="{% url 'add_learning_outcome' course.id %}" 
+                                   class="btn btn-sm btn-success ms-2">Learning Outcome Ekle</a>
+
+                                <!-- BİLEŞEN EKLE ● Yeniden düzenlendi -->
+                                <a href="{% url 'add_evaluation_component' course.id %}" 
+                                   class="btn btn-sm btn-warning ms-2">Bileşen (Vize/Final) Ekle</a>
+                            </div>
+
+                            <!-- BU DERSİN BİLEŞENLERİNİ LİSTELE -->
+                            {% if course.evaluation_components.all %}
+                                <div class="course-actions mt-3">
+                                    <strong>Bu dersin değerlendirme bileşenleri:</strong>
+                                    <ul>
+                                        {% for comp in course.evaluation_components.all %}
+                                            <li class="component-item">
+                                                {{ comp.name }} (%{{ comp.percentage }})
+
+                                                <!-- Ağırlık Yönetimi -->
+                                                <a href="{% url 'manage_outcome_weights' comp.id %}"
+                                                   class="btn btn-sm btn-outline-secondary ms-2">
+                                                   Outcome Ağırlıkları
+                                                </a>
+
+                                                <!-- Not Gir -->
+                                                <a href="{% url 'add_grade' comp.id %}"
+                                                   class="btn btn-sm btn-outline-dark ms-2">
+                                                   Not Gir
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>

@@ -5,10 +5,10 @@ from decimal import Decimal
 from django.contrib import messages
 
 # modeller
-from .models import Profile, Course, EvaluationComponent, LearningOutcome, Grade, User, ProgramOutcome
+from .models import Profile, Course, EvaluationComponent, LearningOutcome, OutcomeWeight, Grade, User, ProgramOutcome
 
 # formlar
-from .forms import EvaluationComponentForm, LearningOutcomeForm, CourseCreateForm, InstructorAssignForm, StudentAssignForm, SyllabusForm, ProgramOutcomeForm
+from .forms import EvaluationComponentForm, GradeForm,  LearningOutcomeForm, CourseCreateForm, InstructorAssignForm, StudentAssignForm, SyllabusForm, ProgramOutcomeForm
 
 # decoratorlarımız <-- roller ile kontrol
 from .decorators import user_is_instructor, user_is_student, user_is_department_head
@@ -327,3 +327,182 @@ def department_head_dashboard(request):
     }
 
     return render(request, 'course_management/department_head_dashboard.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@login_required
+@user_is_instructor
+def add_learning_outcome(request, course_id):
+    course = get_object_or_404(Course, id=course_id, instructors=request.user)
+
+    if request.method == 'POST':
+        form = LearningOutcomeForm(request.POST)
+        if form.is_valid():
+            lo = form.save(commit=False)
+            lo.course = course   # formda course alanı yok, burada bağlıyoruz
+            lo.save()
+            messages.success(request, "Öğrenim çıktısı başarıyla eklendi.")
+            return redirect('instructor_dashboard')
+    else:
+        form = LearningOutcomeForm()
+
+    context = {
+        'course': course,
+        'form': form,
+    }
+    return render(request, 'course_management/add_learning_outcome.html', context)
+
+
+
+@login_required
+@user_is_instructor
+def add_evaluation_component(request, course_id):
+    course = get_object_or_404(Course, id=course_id, instructors=request.user)
+
+    if request.method == 'POST':
+        form = EvaluationComponentForm(request.POST)
+        if form.is_valid():
+            comp = form.save(commit=False)
+            comp.course = course
+            comp.save()
+            messages.success(request, "Değerlendirme bileşeni başarıyla eklendi.")
+            return redirect('instructor_dashboard')
+    else:
+        form = EvaluationComponentForm()
+
+    context = {
+        'course': course,
+        'form': form,
+    }
+    return render(request, 'course_management/add_evaluation_component.html', context)
+
+
+@login_required
+@user_is_instructor
+def manage_outcome_weights(request, component_id):
+    component = get_object_or_404(
+        EvaluationComponent,
+        id=component_id,
+        course__instructors=request.user
+    )
+    course = component.course
+    outcomes = course.learning_outcomes.all()
+
+    if request.method == 'POST':
+        for outcome in outcomes:
+            field_name = f"weight_{outcome.id}"
+            value = request.POST.get(field_name)
+
+            if value:
+                value_int = int(value)
+                # varsa güncelle, yoksa oluştur
+                OutcomeWeight.objects.update_or_create(
+                    component=component,
+                    outcome=outcome,
+                    defaults={'weight': value_int}
+                )
+            else:
+                # hiç bir şey seçilmemişse kaydı silebilirsin (istersen)
+                OutcomeWeight.objects.filter(
+                    component=component,
+                    outcome=outcome
+                ).delete()
+
+        messages.success(request, "Outcome ağırlıkları başarıyla güncellendi.")
+        return redirect('instructor_dashboard')
+
+    # GET isteği: mevcut ağırlıkları çek
+    existing_weights = OutcomeWeight.objects.filter(component=component)
+    weight_map = {w.outcome_id: w.weight for w in existing_weights}
+
+    # Template'te kullanmak için her outcome + ağırlığı tek listede topla
+    rows = []
+    for outcome in outcomes:
+        rows.append({
+            "outcome": outcome,
+            "weight": weight_map.get(outcome.id)  # yoksa None
+        })
+
+    context = {
+        'component': component,
+        'course': course,
+        'rows': rows,     # 🔥 template buna göre çalışacak
+    }
+    return render(request, 'course_management/manage_outcome_weights.html', context)
+
+
+
+@login_required
+@user_is_instructor
+def add_grade(request, component_id):
+    component = get_object_or_404(
+        EvaluationComponent,
+        id=component_id,
+        course__instructors=request.user
+    )
+    course = component.course
+
+    if request.method == 'POST':
+        form = GradeForm(request.POST, course=course)
+        if form.is_valid():
+            grade = form.save(commit=False)
+            grade.component = component  # Hangi bileşenin notu olduğu
+            grade.save()
+            messages.success(request, "Öğrenci notu başarıyla kaydedildi.")
+            return redirect('instructor_dashboard')
+    else:
+        form = GradeForm(course=course)
+
+    context = {
+        'component': component,
+        'course': course,
+        'form': form,
+    }
+    return render(request, 'course_management/add_grade.html', context)
+
+
+@login_required
+@user_is_student
+def student_course_detail(request, course_id):
+    course = get_object_or_404(Course, id=course_id, students=request.user)
+
+    components = EvaluationComponent.objects.filter(course=course)
+    grades = Grade.objects.filter(student=request.user, component__in=components)
+
+    grade_map = {g.component_id: g.score for g in grades}
+
+    component_grade_list = []
+    for comp in components:
+        component_grade_list.append({
+            "name": comp.name,
+            "percentage": comp.percentage,
+            "score": grade_map.get(comp.id)
+        })
+
+    context = {
+        "course": course,
+        "component_grade_list": component_grade_list,
+    }
+
+    return render(request, "course_management/student_course_detail.html", context)
