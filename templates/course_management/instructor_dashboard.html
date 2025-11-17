@@ -87,44 +87,18 @@
                                 <!-- BİLEŞEN EKLE ● Yeniden düzenlendi -->
                                 <a href="{% url 'add_evaluation_component' course.id %}" 
                                    class="btn btn-sm btn-warning ms-2">Bileşen (Vize/Final) Ekle</a>
+                                
+                                <!-- OUTCOME AĞIRLIKLARI YÖNET -->
+                                <a href="{% url 'instructor_manage_course_component_outcomes' course.id %}" 
+                                   class="btn btn-sm btn-info ms-2">Outcome Ağırlıkları</a>
                             </div>
 
-                            <!-- BU DERSİN BİLEŞENLERİNİ LİSTELE -->
-                            {% if course.evaluation_components.all %}
-                                <div class="course-actions mt-3">
-                                    <strong>Bu dersin değerlendirme bileşenleri:</strong>
-                                    <ul>
-                                        {% for comp in course.evaluation_components.all %}
-                                            <li class="component-item">
-                                                {{ comp.name }} (%{{ comp.percentage }})
-
-                                                <!-- Ağırlık Yönetimi -->
-                                                <a href="{% url 'manage_outcome_weights' comp.id %}"
-                                                   class="btn btn-sm btn-outline-secondary ms-2">
-                                                   Outcome Ağırlıkları
-                                                </a>
-
-                                                <!-- Not Gir -->
-                                                <a href="{% url 'add_grade' comp.id %}"
-                                                   class="btn btn-sm btn-outline-dark ms-2">
-                                                   Not Gir
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>
             {% else %}
                 <p>Üzerinize atanmış bir ders bulunmamaktadır.</p>
             {% endif %}
-
-            <hr>
-            <div class="admin-link">
-                <a href="{% url 'admin:index' %}" class="btn btn-secondary">Admin Paneli (Bölüm Başkanı)</a>
-            </div>
         </div>
     </div>
 

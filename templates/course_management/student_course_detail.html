@@ -36,6 +36,66 @@
         </tbody>
     </table>
 
+    {% if learning_outcome_scores %}
+    <hr>
+    <h3>Learning Outcome Skorlarınız</h3>
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Learning Outcome</th>
+                <th>Skor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lo_data in learning_outcome_scores %}
+            <tr>
+                <td>
+                    <strong>LO #{{ lo_data.outcome.id }}:</strong><br>
+                    <small class="text-muted">{{ lo_data.outcome.description }}</small>
+                </td>
+                <td>
+                    {% if lo_data.score is not None %}
+                        {{ lo_data.score|floatformat:2 }}
+                    {% else %}
+                        <span class="text-muted">Hesaplanamadı</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if program_outcome_scores %}
+    <hr>
+    <h3>Program Outcome Skorlarınız</h3>
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Program Outcome</th>
+                <th>Skor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for po_data in program_outcome_scores %}
+            <tr>
+                <td>
+                    <strong>{{ po_data.program_outcome.code }}</strong><br>
+                    <small class="text-muted">{{ po_data.program_outcome.description }}</small>
+                </td>
+                <td>
+                    {% if po_data.score is not None %}
+                        {{ po_data.score|floatformat:2 }}
+                    {% else %}
+                        <span class="text-muted">Hesaplanamadı</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
     <a href="{% url 'student_dashboard' %}" class="btn btn-secondary mt-3">← Derslerime Dön</a>
 </div>
 

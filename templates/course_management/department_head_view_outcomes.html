@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Derslerin Learning Outcome ve Program Outcome İlişkilerini Görüntüle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f5f7fb;
+            min-height: 100vh;
+        }
+        .page-title {
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .card-main {
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            border: none;
+            margin-bottom: 30px;
+        }
+        .badge-course {
+            background: #e8f0ff;
+            color: #2f54eb;
+        }
+        .badge-component {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .badge-outcome {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .badge-po {
+            background: #d4edda;
+            color: #155724;
+        }
+        .weight-badge {
+            background: #f8d7da;
+            color: #721c24;
+            font-weight: bold;
+        }
+        .section-divider {
+            border-top: 2px solid #dee2e6;
+            margin: 30px 0;
+        }
+        .toggle-btn {
+            background-color: #eef2ff;
+            border: 1px solid #cfd6ff;
+            color: #2f54eb;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 4px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+        .toggle-btn:hover {
+            background-color: #dfe6ff;
+            color: #1d3fbf;
+        }
+        .toggle-btn .bi {
+            transition: transform 0.2s ease;
+        }
+        .toggle-btn[aria-expanded="true"] .bi {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'department_head_dashboard' %}">ALMS University – Bölüm Başkanı Paneli</a>
+        <div class="d-flex">
+            <a href="{% url 'department_head_dashboard' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left"></i> Dashboard'a Dön
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="card card-main">
+        <div class="card-body">
+            <h3 class="page-title mb-3">Derslerin Learning Outcome ve Program Outcome İlişkilerini Görüntüle</h3>
+            <p class="text-muted mb-4">
+                Tüm derslerin değerlendirme bileşenlerinin learning outcome'lara ve learning outcome'ların program outcome'lara etkilerini görüntüleyebilirsiniz.
+            </p>
+        </div>
+    </div>
+
+    {% for course_item in course_data %}
+    <div class="card">
+        <div class="card-header" id="heading{{ forloop.counter }}">
+            <h4 class="mb-0 d-flex align-items-center justify-content-between">
+                <span>
+                    <span class="badge badge-course">{{ course_item.course.course_code }}</span> 
+                    {{ course_item.course.course_name }}
+                </span>
+                <button class="toggle-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                    <span>Detayları Gör</span>
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </h4>
+        </div>
+        <div id="collapse{{ forloop.counter }}" class="collapse">
+            <div class="card-body">
+                <div class="section-divider"></div>
+                <h5 class="mb-3">Değerlendirme Bileşenleri → Learning Outcome İlişkileri</h5>
+                
+                {% if course_item.component_lo_data %}
+                    {% for comp_lo in course_item.component_lo_data %}
+                    <div class="mb-4 p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                        <h6 class="mb-2">
+                            <span class="badge badge-component">{{ comp_lo.component.name }}</span>
+                            (%{{ comp_lo.component.percentage }})
+                        </h6>
+                        
+                        {% if comp_lo.weights %}
+                            <ul class="list-unstyled ms-3">
+                                {% for weight in comp_lo.weights %}
+                                <li class="mb-2">
+                                    <span class="badge weight-badge">{{ weight.weight }}</span>
+                                    → <strong>LO #{{ weight.outcome.id }}:</strong> {{ weight.outcome.description|truncatewords:20 }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted small ms-3">Bu bileşen için learning outcome ilişkisi tanımlanmamış.</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Bu ders için değerlendirme bileşeni tanımlanmamış.</p>
+                {% endif %}
+
+            <div class="section-divider"></div>
+                <h5 class="mb-3">Learning Outcome → Program Outcome İlişkileri</h5>
+                
+                {% if course_item.lo_po_data %}
+                    {% for lo_po in course_item.lo_po_data %}
+                    <div class="mb-4 p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                        <h6 class="mb-2">
+                            <span class="badge badge-outcome">Learning Outcome #{{ lo_po.outcome.id }}</span>
+                        </h6>
+                        <p class="text-muted small mb-2">{{ lo_po.outcome.description|truncatewords:30 }}</p>
+                        
+                        {% if lo_po.weights %}
+                            <ul class="list-unstyled ms-3">
+                                {% for weight in lo_po.weights %}
+                                <li class="mb-2">
+                                    <span class="badge weight-badge">{{ weight.weight }}</span>
+                                    → <span class="badge badge-po">{{ weight.program_outcome.code }}</span>
+                                    {{ weight.program_outcome.description|truncatewords:15 }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted small ms-3">Bu learning outcome için program outcome ilişkisi tanımlanmamış.</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Bu ders için learning outcome tanımlanmamış.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card card-main">
+        <div class="card-body">
+            <p class="text-muted">Sistemde ders bulunmamaktadır.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

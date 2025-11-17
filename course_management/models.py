@@ -184,3 +184,36 @@ class OutcomeWeight(models.Model):
 
     def __str__(self):
         return f"{self.component} ⇄ {self.outcome} (Ağırlık: {self.weight})"
+
+
+class LearningOutcomeProgramOutcomeWeight(models.Model):
+    """
+    Bir LearningOutcome'un hangi ProgramOutcome ile 
+    ne kadar ilişkili olduğunu tutar (1-5 arası ağırlık).
+    """
+    learning_outcome = models.ForeignKey(
+        LearningOutcome,
+        on_delete=models.CASCADE,
+        related_name="program_outcome_weights",
+        verbose_name="Learning Outcome"
+    )
+    program_outcome = models.ForeignKey(
+        ProgramOutcome,
+        on_delete=models.CASCADE,
+        related_name="learning_outcome_weights",
+        verbose_name="Program Outcome"
+    )
+
+    weight = models.IntegerField(
+        default=1,
+        choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')],
+        verbose_name="Ağırlık (1-5)"
+    )
+
+    class Meta:
+        unique_together = ('learning_outcome', 'program_outcome')
+        verbose_name = "Learning Outcome - Program Outcome Ağırlığı"
+        verbose_name_plural = "Learning Outcome - Program Outcome Ağırlıkları"
+
+    def __str__(self):
+        return f"{self.learning_outcome} ⇄ {self.program_outcome} (Ağırlık: {self.weight})"

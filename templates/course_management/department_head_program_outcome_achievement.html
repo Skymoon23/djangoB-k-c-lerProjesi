@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Program Outcome'larının Öğrenilme Durumu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f5f7fb;
+            min-height: 100vh;
+        }
+        .page-title {
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .card-main {
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            border: none;
+            margin-bottom: 30px;
+        }
+        .badge-po {
+            background: #d4edda;
+            color: #155724;
+            font-size: 1.1em;
+        }
+        .score-badge {
+            font-size: 1.2em;
+            padding: 10px 20px;
+        }
+        .score-excellent {
+            background: #d4edda;
+            color: #155724;
+        }
+        .score-good {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .score-average {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .score-poor {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .toggle-btn {
+            background-color: #eef2ff;
+            border: 1px solid #cfd6ff;
+            color: #2f54eb;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 4px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+        .toggle-btn:hover {
+            background-color: #dfe6ff;
+            color: #1d3fbf;
+        }
+        .toggle-btn .bi {
+            transition: transform 0.2s ease;
+        }
+        .toggle-btn[aria-expanded="true"] .bi {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'department_head_dashboard' %}">ALMS University – Bölüm Başkanı Paneli</a>
+        <div class="d-flex">
+            <a href="{% url 'department_head_dashboard' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left"></i> Dashboard'a Dön
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="card card-main">
+        <div class="card-body">
+            <h3 class="page-title mb-3">Program Outcome'larının Öğrenilme Durumu</h3>
+            <p class="text-muted mb-4">
+                Tüm öğrencilerin program outcome'larını ne kadar öğrendiklerini görüntüleyebilirsiniz. 
+                Hesaplama, değerlendirme bileşenlerinin learning outcome'lara ve learning outcome'ların program outcome'lara 
+                ağırlıkları (1-5) kullanılarak yapılmaktadır.
+            </p>
+        </div>
+    </div>
+
+    {% for item in po_achievement_data %}
+    <div class="card card-main">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h4 class="mb-2">
+                        <span class="badge badge-po">{{ item.program_outcome.code }}</span>
+                    </h4>
+                    <p class="text-muted mb-0">{{ item.program_outcome.description }}</p>
+                </div>
+                <div class="text-end">
+                    {% if item.average_score >= 80 %}
+                        <span class="badge score-badge score-excellent">{{ item.average_score|floatformat:2 }}</span>
+                    {% elif item.average_score >= 70 %}
+                        <span class="badge score-badge score-good">{{ item.average_score|floatformat:2 }}</span>
+                    {% elif item.average_score >= 60 %}
+                        <span class="badge score-badge score-average">{{ item.average_score|floatformat:2 }}</span>
+                    {% else %}
+                        <span class="badge score-badge score-poor">{{ item.average_score|floatformat:2 }}</span>
+                    {% endif %}
+                    <p class="text-muted small mb-0 mt-1">Ortalama Skor</p>
+                </div>
+            </div>
+
+            <div class="text-start">
+                <button class="toggle-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#poCollapse{{ forloop.counter }}" aria-expanded="false" aria-controls="poCollapse{{ forloop.counter }}">
+                    <span>Detayları Gör</span>
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+
+            <div id="poCollapse{{ forloop.counter }}" class="collapse mt-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                            <h5 class="mb-1">{{ item.min_score|floatformat:2 }}</h5>
+                            <p class="text-muted small mb-0">En Düşük Skor</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                            <h5 class="mb-1">{{ item.max_score|floatformat:2 }}</h5>
+                            <p class="text-muted small mb-0">En Yüksek Skor</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                            <h5 class="mb-1">{{ item.student_count }}</h5>
+                            <p class="text-muted small mb-0">Değerlendirilen Öğrenci</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card card-main">
+        <div class="card-body">
+            <p class="text-muted">Sistemde program outcome'ı bulunmamaktadır.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

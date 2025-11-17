@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Learning Outcome - Program Outcome Ağırlıklarını Yönet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f5f7fb;
+            min-height: 100vh;
+        }
+        .page-title {
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .card-main {
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            border: none;
+            margin-bottom: 30px;
+        }
+        .table thead th {
+            background: #f1f4ff;
+            border-bottom: 2px solid #e0e4ff;
+        }
+        .badge-course {
+            background: #e8f0ff;
+            color: #2f54eb;
+        }
+        .badge-outcome {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .toggle-btn {
+            background-color: #eef2ff;
+            border: 1px solid #cfd6ff;
+            color: #2f54eb;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 4px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+        .toggle-btn:hover {
+            background-color: #dfe6ff;
+            color: #1d3fbf;
+        }
+        .toggle-btn .bi {
+            transition: transform 0.2s ease;
+        }
+        .toggle-btn[aria-expanded="true"] .bi {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'department_head_dashboard' %}">ALMS University – Bölüm Başkanı Paneli</a>
+        <div class="d-flex">
+            <a href="{% url 'department_head_dashboard' %}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left"></i> Dashboard'a Dön
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="card card-main">
+        <div class="card-body">
+            <h3 class="page-title mb-3">Learning Outcome - Program Outcome Ağırlıklarını Yönet</h3>
+            <p class="text-muted mb-4">
+                Her dersin learning outcome'larının hangi program outcome'ları ve ne kadar etkilediğini belirleyebilirsiniz. 
+                Her ilişki için 1-5 arası bir ağırlık seçin.
+            </p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    {% for course_item in course_data %}
+    <div class="card">
+        <div class="card-header" id="manageHeading{{ forloop.counter }}">
+            <h4 class="mb-0 d-flex align-items-center justify-content-between">
+                <span>
+                    <span class="badge badge-course">{{ course_item.course.course_code }}</span> 
+                    {{ course_item.course.course_name }}
+                </span>
+                <button class="toggle-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#manageCollapse{{ forloop.counter }}" aria-expanded="false" aria-controls="manageCollapse{{ forloop.counter }}">
+                    <span>Detayları Gör</span>
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </h4>
+        </div>
+        <div id="manageCollapse{{ forloop.counter }}" class="collapse">
+            <div class="card-body">
+                {% if course_item.outcome_data %}
+                    {% for outcome_item in course_item.outcome_data %}
+                    <div class="mb-4">
+                        <h5 class="mb-2">
+                            <span class="badge badge-outcome">Learning Outcome #{{ outcome_item.outcome.id }}</span>
+                        </h5>
+                        <p class="text-muted small mb-3">{{ outcome_item.outcome.description|truncatewords:30 }}</p>
+
+                        <form method="post" class="mt-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="outcome_id" value="{{ outcome_item.outcome.id }}">
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 20%;">Program Outcome</th>
+                                            <th style="width: 50%;">Açıklama</th>
+                                            <th style="width: 30%;">Ağırlık (1-5)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in outcome_item.po_rows %}
+                                        <tr>
+                                            <td><strong>{{ row.program_outcome.code }}</strong></td>
+                                            <td>{{ row.program_outcome.description|truncatewords:15 }}</td>
+                                            <td>
+                                                <select name="weight_{{ outcome_item.outcome.id }}_{{ row.program_outcome.id }}" class="form-select form-select-sm">
+                                                    <option value="" {% if not row.weight %}selected{% endif %}>Seçiniz</option>
+                                                    <option value="1" {% if row.weight == 1 %}selected{% endif %}>1</option>
+                                                    <option value="2" {% if row.weight == 2 %}selected{% endif %}>2</option>
+                                                    <option value="3" {% if row.weight == 3 %}selected{% endif %}>3</option>
+                                                    <option value="4" {% if row.weight == 4 %}selected{% endif %}>4</option>
+                                                    <option value="5" {% if row.weight == 5 %}selected{% endif %}>5</option>
+                                                </select>
+                                            </td>
+                                            </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="3" class="text-muted text-center">
+                                                Sistemde program outcome tanımlanmamış.
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {% if outcome_item.po_rows %}
+                            <div class="mt-2">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-check2-circle"></i> Kaydet
+                                </button>
+                            </div>
+                            {% endif %}
+                        </form>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">Bu ders için learning outcome tanımlanmamış.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card card-main">
+        <div class="card-body">
+            <p class="text-muted">Sistemde ders bulunmamaktadır.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

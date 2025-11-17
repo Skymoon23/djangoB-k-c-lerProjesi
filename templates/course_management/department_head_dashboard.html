@@ -26,8 +26,44 @@
         .form-section input[type="text"], .form-section select, .form-section textarea {
             width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;
         }
-        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px; font-size: 1em; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px; font-size: 1em; transition: background 0.2s ease; }
         button:hover { background-color: #0056b3; }
+        .po-action-form { display: inline; }
+        .po-action-btn {
+            border: none;
+            border-radius: 4px;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 70px;
+            height: 28px;
+        }
+        .po-delete-btn {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+        .po-delete-btn:hover { background-color: #c0392b; }
+        .po-edit-btn {
+            background-color: #f1c40f;
+            color: #2c3e50;
+        }
+        .po-edit-btn:hover { background-color: #d4ac0d; }
+        .program-outcome-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .program-outcome-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
 
         /* Mesaj stilleri */
         .messages { list-style-type: none; padding: 0; margin-bottom: 20px; }
@@ -119,6 +155,29 @@
     <hr>
 
     <div class="list-section">
+        <h2>Çıktı Yönetimi</h2>
+        <ul>
+            <li>
+                <a href="{% url 'department_head_manage_lo_po_weights' %}">
+                    Learning Outcome - Program Outcome Ağırlıklarını Yönet
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'department_head_view_outcomes' %}">
+                    Derslerin Learning Outcome ve Program Outcome İlişkilerini Görüntüle
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'department_head_program_outcome_achievement' %}">
+                    Program Outcome'larının Öğrenilme Durumunu Görüntüle
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <hr>
+
+    <div class="list-section">
         <h2>Tüm Dersler ({{ course_count }})</h2>
         <ul>
             {% for course in all_courses %}
@@ -144,8 +203,23 @@
         <h2>Program Çıktıları</h2>
         <ul>
             {% for po in all_program_outcomes %}
-                <li>
-                    <strong>{{ po.code }}:</strong> {{ po.description }}
+                <li class="program-outcome-item">
+                    <div>
+                        <strong>{{ po.code }}:</strong> {{ po.description }}
+                    </div>
+                    <div class="program-outcome-actions">
+                        <form method="GET" action="{% url 'edit_program_outcome' po.id %}" class="po-action-form">
+                            <button type="submit" class="po-action-btn po-edit-btn">
+                                Düzenle
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'delete_program_outcome' po.id %}" class="po-action-form">
+                            {% csrf_token %}
+                            <button type="submit" class="po-action-btn po-delete-btn">
+                                Sil
+                            </button>
+                        </form>
+                    </div>
                 </li>
             {% empty %}
                 <li>Sistemde kayıtlı program çıktısı bulunmamaktadır.</li>
@@ -157,7 +231,7 @@
         <h2>Öğretim Görevlileri ({{ instructor_count }})</h2>
         <ul>
             {% for instructor in all_instructors %}
-                <li>{{ instructor.get_full_name }} ({{ instructor.username }})</li>
+                <li>{{ instructor.get_full_name|default:instructor.username }}</li>
             {% empty %}
                 <li>Sistemde kayıtlı öğretim görevlisi bulunmamaktadır.</li>
             {% endfor %}
@@ -169,7 +243,7 @@
         <ul>
             {% for student in all_students %}
                 <li>
-                    <strong>{{ student.get_full_name }} ({{ student.username }})</strong>
+                    <strong>{{ student.get_full_name|default:student.username }}</strong>
                     
                     <div style="margin-top: 5px; font-size: 0.9em; color: #555;">
                         <strong>Kayıtlı Dersler:</strong>

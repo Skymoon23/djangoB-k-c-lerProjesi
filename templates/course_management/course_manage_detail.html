@@ -118,5 +118,48 @@
         {% endif %}
     </div>
 
+    <hr>
+
+    <div class="form-section">
+        <h3>Öğrencilerin Learning Outcome Skorları</h3>
+        <p>Her öğrencinin learning outcome'ları ne kadar öğrenebildiğini görebilirsiniz.</p>
+
+        {% if not components %}
+            <p style="color: red; font-weight: bold;">Learning outcome skorlarını hesaplayabilmek için önce değerlendirme bileşenleri ve outcome ağırlıkları tanımlanmalıdır.</p>
+        {% elif not students %}
+            <p style="color: orange;">Bu derse henüz kayıtlı öğrenci yok.</p>
+        {% elif not outcomes %}
+            <p style="color: orange;">Bu ders için learning outcome tanımlanmamış.</p>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Öğrenci</th>
+                        {% for outcome in outcomes %}
+                            <th>LO #{{ outcome.id }}<br><small style="color:#666;">{{ outcome.description|truncatewords:12 }}</small></th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student_lo in student_lo_scores %}
+                    <tr>
+                        <td><strong>{{ student_lo.student.get_full_name|default:student_lo.student.username }}</strong></td>
+                        {% for lo_data in student_lo.lo_scores %}
+                            <td>
+                                {% if lo_data.score is not None %}
+                                    {{ lo_data.score|floatformat:2 }}
+                                {% else %}
+                                    <span style="color: #999;">-</span>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+        {% endif %}
+    </div>
+
 </body>
 </html>
