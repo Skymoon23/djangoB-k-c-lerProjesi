@@ -423,6 +423,7 @@ def department_head_dashboard(request):
 
 @login_required
 @user_is_instructor
+# İlgili ders için yeni öğrenim çıktısı ekleme formu ve kaydı
 def add_learning_outcome(request, course_id):
     course = get_object_or_404(Course, id=course_id, instructors=request.user)
 
@@ -447,6 +448,7 @@ def add_learning_outcome(request, course_id):
 
 @login_required
 @user_is_instructor
+# Derse notlandırma bileşeni ekleyip eğitmen paneline döner
 def add_evaluation_component(request, course_id):
     course = get_object_or_404(Course, id=course_id, instructors=request.user)
 
@@ -470,6 +472,7 @@ def add_evaluation_component(request, course_id):
 
 @login_required
 @user_is_instructor
+# Tek bir bileşen için LO ağırlıklarını görüntüleyip güncelleme
 def manage_outcome_weights(request, component_id):
     component = get_object_or_404(
         EvaluationComponent,
@@ -525,6 +528,7 @@ def manage_outcome_weights(request, component_id):
 
 @login_required
 @user_is_instructor
+# Bir bileşen için öğrenci notu ekleme/güncelleme işlemi
 def add_grade(request, component_id):
     component = get_object_or_404(
         EvaluationComponent,
@@ -547,7 +551,7 @@ def add_grade(request, component_id):
             
             if not created:
                 grade.score = score
-                grade.save()
+            grade.save()
             
             messages.success(request, "Öğrenci notu başarıyla kaydedildi.")
             return redirect('instructor_dashboard')
@@ -564,6 +568,7 @@ def add_grade(request, component_id):
 
 @login_required
 @user_is_student
+# Öğrencinin seçili dersine ait not ve çıktı detaylarını gösterme
 def student_course_detail(request, course_id):
     course = get_object_or_404(Course, id=course_id, students=request.user)
 
@@ -654,7 +659,7 @@ def student_course_detail(request, course_id):
             program_outcome_scores.append({
                 'program_outcome': entry['program_outcome'],
                 'score': None
-            })
+        })
 
     context = {
         "course": course,
@@ -668,6 +673,7 @@ def student_course_detail(request, course_id):
 
 @login_required
 @user_is_instructor
+# Eğitmenin derslerindeki bileşen->LO ağırlıklarını yönetmesini sağlama
 def instructor_manage_component_outcomes(request, course_id=None):
     if course_id:
         courses = Course.objects.filter(id=course_id, instructors=request.user).prefetch_related('evaluation_components', 'learning_outcomes')
@@ -745,6 +751,7 @@ def instructor_manage_component_outcomes(request, course_id=None):
 
 @login_required
 @user_is_department_head
+# Bölüm başkanı LO->PO ağırlıklarını toplu biçimde düzenleme
 def department_head_manage_lo_po_weights(request):
     all_courses = Course.objects.all().prefetch_related('learning_outcomes')
     all_program_outcomes = ProgramOutcome.objects.all().order_by('code')
@@ -808,6 +815,7 @@ def department_head_manage_lo_po_weights(request):
 
 @login_required
 @user_is_department_head
+# Bölüm başkanı için LO ve PO ağırlıklarının okunabilir görünümü
 def department_head_view_outcomes(request):
     all_courses = Course.objects.all().prefetch_related('learning_outcomes', 'evaluation_components')
     all_program_outcomes = ProgramOutcome.objects.all().order_by('code')
@@ -848,7 +856,9 @@ def department_head_view_outcomes(request):
 
 @login_required
 @user_is_department_head
+# Tüm öğrenciler için program çıktısı başarı istatistiklerini hesaplama
 def department_head_program_outcome_achievement(request):
+    # Veriyi tek seferde toplayarak PO hesaplamasında sorgu sayısını azalt
     all_courses = Course.objects.all().prefetch_related(
         'learning_outcomes',
         'evaluation_components',
@@ -857,6 +867,7 @@ def department_head_program_outcome_achievement(request):
     all_program_outcomes = ProgramOutcome.objects.all().order_by('code')
     all_students = User.objects.filter(profile__role='student').prefetch_related('enrolled_courses', 'grades')
     
+    # Hızlı erişim için not, LO ağırlıkları ve LO->PO ağırlıkları sözlükleri
     all_grades = Grade.objects.select_related('student', 'component').filter(
         student__profile__role='student',
         score__isnull=False
@@ -874,13 +885,16 @@ def department_head_program_outcome_achievement(request):
     po_achievement_data = []
     
     for po in all_program_outcomes:
+        # Her PO için tüm öğrencilerin skorlarını topla
         student_po_scores = []
         
         for student in all_students:
+            # Bu öğrencinin ilgili PO puanını hesaplamak için ara toplamlar
             student_po_score = Decimal('0.0')
             student_po_weight = Decimal('0.0')
             
             for course in all_courses:
+                # Öğrenci bu derste değilse atla
                 if student not in course.students.all():
                     continue
                 
@@ -888,6 +902,7 @@ def department_head_program_outcome_achievement(request):
                 outcomes = list(course.learning_outcomes.all())
                 
                 for outcome in outcomes:
+                    # LO bu PO’ya katkı yapmıyorsa atla
                     lo_po_weight = lo_po_weight_map.get((outcome.id, po.id))
                     if not lo_po_weight:
                         continue
@@ -902,6 +917,7 @@ def department_head_program_outcome_achievement(request):
                         if grade_score is None:
                             continue
                         
+                        # Bileşen bu LO’ya katkı yapmıyorsa atla
                         comp_lo_weight = comp_lo_weight_map.get((component.id, outcome.id))
                         if not comp_lo_weight:
                             continue
@@ -915,6 +931,7 @@ def department_head_program_outcome_achievement(request):
                         student_po_score += lo_score * lo_weight_to_po
                         student_po_weight += lo_weight_to_po
             
+            # Öğrencinin en az bir katkısı varsa PO skorunu kaydet
             if student_po_weight > 0:
                 final_po_score = student_po_score / student_po_weight
                 student_po_scores.append(float(final_po_score))
@@ -946,6 +963,7 @@ def department_head_program_outcome_achievement(request):
 
 @login_required
 @user_is_department_head
+# Program outcome kaydını silme
 def delete_program_outcome(request, outcome_id):
     program_outcome = get_object_or_404(ProgramOutcome, id=outcome_id)
 
@@ -960,6 +978,7 @@ def delete_program_outcome(request, outcome_id):
 
 @login_required
 @user_is_department_head
+# Program outcome kaydını düzenleme
 def edit_program_outcome(request, outcome_id):
     program_outcome = get_object_or_404(ProgramOutcome, id=outcome_id)
 

@@ -205,7 +205,7 @@
             {% for po in all_program_outcomes %}
                 <li class="program-outcome-item">
                     <div>
-                        <strong>{{ po.code }}:</strong> {{ po.description }}
+                    <strong>{{ po.code }}:</strong> {{ po.description }}
                     </div>
                     <div class="program-outcome-actions">
                         <form method="GET" action="{% url 'edit_program_outcome' po.id %}" class="po-action-form">
