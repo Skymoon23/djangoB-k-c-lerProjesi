@@ -41,8 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'course_management',   # <-- app imiz burada, şu anlık tek app imiz var ama
-                           #     projeyi ilerlettikçe yeni app ler de ekleyeceğiz
+    'course_management',   # çekirdek domain app
+    'student',
+    'teacher',
+    'headteacher',
 ]
 
 MIDDLEWARE = [

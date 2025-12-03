@@ -23,10 +23,17 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
         h2 { 
             color: #333; 
-            text-align: center; 
-            margin-bottom: 25px; 
+            margin: 0;
+            flex: 1;
         }
 
         /* Hata mesajı stili */
@@ -73,18 +80,50 @@
         button:hover { 
             background-color: #0056b3; 
         }
+        
+        /* Geri butonu stili */
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.8em;
+            text-decoration: none;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .back-button:hover {
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
 
     <div class="login-container">
-        <h2>Sisteme Giriş Yap</h2>
+        <div class="header-container">
+            <h2>Sisteme Giriş Yap</h2>
+            <a href="{% url 'home' %}" class="back-button">← Ana Sayfa</a>
+        </div>
+        
+        {% if selected_role_display %}
+        <div style="background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; padding: 10px 15px; border-radius: 4px; margin-bottom: 20px; text-align: center;">
+            <strong>{{ selected_role_display }}</strong> olarak giriş yapıyorsunuz
+        </div>
+        {% endif %}
+
+        {% if messages %}
+            {% for message in messages %}
+                <p class="error-message">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
 
         {% if form.errors %}
           <p class="error-message">Kullanıcı adı veya şifre hatalı.</p>
         {% endif %}
         
-        <form method="post" action="{% url 'login' %}">
+        <form method="post" action="{% url 'login' %}{% if request.GET.role %}?role={{ request.GET.role }}{% endif %}">
           {% csrf_token %}
           
           {{ form.as_p }}

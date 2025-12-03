@@ -139,20 +139,6 @@ class Student(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.student_number}"
    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class OutcomeWeight(models.Model):
     """
     Bir EvaluationComponent'in (Vize, Final vb.)

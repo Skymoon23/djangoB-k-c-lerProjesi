@@ -28,15 +28,15 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">ALMS University</a>
+            <span class="navbar-brand">ALMS University</span>
         </div>
     </nav>
 
     <!-- Ortadaki Butonlar -->
     <div class="main-container">
-        <a href="{% url 'login' %}" class="btn btn-primary role-btn">Headteacher</a>
-        <a href="{% url 'login' %}" class="btn btn-primary role-btn">Teacher</a>
-        <a href="{% url 'login' %}" class="btn btn-primary role-btn">Student</a>
+        <a href="{% url 'login' %}?role=department_head" class="btn btn-primary role-btn">Headteacher</a>
+        <a href="{% url 'login' %}?role=instructor" class="btn btn-primary role-btn">Teacher</a>
+        <a href="{% url 'login' %}?role=student" class="btn btn-primary role-btn">Student</a>
     </div>
 
     <!-- Bootstrap JS -->
