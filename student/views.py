@@ -22,7 +22,7 @@ def student_dashboard(request):
 
         # Bileşen not listesi ve toplam skor hesaplama
         component_grade_list = [{"name": c.name, "percentage": c.percentage, "score": grade_map.get(c.id)} for c in components]
-        total_score = sum(Decimal(grade_map.get(c.id, 0)) * (Decimal(c.percentage) / Decimal("100.0")) for c in components if grade_map.get(c.id) is not None)
+        total_score = sum((Decimal(grade_map.get(c.id, 0)) * (Decimal(c.percentage) / Decimal("100.0")) for c in components if grade_map.get(c.id) is not None), Decimal("0.0"))
 
         # Learning outcome skorlarını hesaplar
         comp_lo_weight_map = {(w.component_id, w.outcome_id): w.weight for w in OutcomeWeight.objects.filter(component__in=components).select_related("component", "outcome")}
