@@ -75,7 +75,7 @@
 <body>
 
     <h1>Bölüm Başkanı Paneli</h1>
-    <p>Merhaba, {{ request.user.get_full_name }}. Sisteme hoş geldiniz.</p>
+    <p>Merhaba, {{ request.user.get_full_name }}Sisteme hoş geldiniz</p>
     <p>
         <form method="POST" action="{% url 'logout' %}" style="display: inline; margin: 0; padding: 0;">
             {% csrf_token %}
