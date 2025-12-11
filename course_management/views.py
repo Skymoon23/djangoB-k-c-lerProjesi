@@ -118,3 +118,112 @@ def dashboard_redirect(request):
         return redirect("department_head_dashboard")
     else:
         return redirect("login")
+
+
+import pandas as pd
+from django.contrib.auth.models import User
+from django.shortcuts import HttpResponse
+
+def import_students(request):
+    # Excel dosyasının yolu
+    file_path = 'students.xlsx'  # projenizin root klasöründe olduğunu varsayıyoruz
+
+    # Excel dosyasını oku
+    df = pd.read_excel(file_path)
+
+    # Her satır için kullanıcı oluştur
+    for index, row in df.iterrows():
+        username = row['username']
+        password = row['password']
+        first_name = row['first_name']
+        last_name = row['last_name']
+        student_number = row['student_number']
+
+        # Eğer kullanıcı zaten yoksa
+        if not User.objects.filter(username=username).exists():
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+            )
+            # student_number gibi extra alanlarınız varsa
+            # user.profile.student_number = student_number
+            # user.profile.save()
+
+    return HttpResponse("Öğrenciler başarıyla yüklendi!")
+
+
+import pandas as pd
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Student, Course, Grade   # modeller seninkiyse
+                                             # isimler farklıysa söyle düzenleyeyim
+
+@login_required
+def import_grades_from_excel(request):
+    if request.method == "POST" and request.FILES.get("excel_file"):
+
+        excel_file = request.FILES["excel_file"]
+
+        try:
+            df = pd.read_excel(excel_file)
+
+            required_columns = {"student_number", "course_code", "grade"}
+            if not required_columns.issubset(df.columns):
+                messages.error(request, "Excel dosyası yanlış formatta!")
+                return redirect("import_grades")
+
+            created_count = 0
+            updated_count = 0
+            errors = []
+
+            for _, row in df.iterrows():
+                student_no = str(row["student_number"]).strip()
+                course_code = str(row["course_code"]).strip()
+                grade_value = row["grade"]
+
+                # ---- Student kontrolü ----
+                try:
+                    student = Student.objects.get(student_number=student_no)
+                except Student.DoesNotExist:
+                    errors.append(f"Öğrenci bulunamadı: {student_no}")
+                    continue
+
+                # ---- Course kontrolü ----
+                try:
+                    course = Course.objects.get(course_code=course_code)
+                except Course.DoesNotExist:
+                    errors.append(f"Ders bulunamadı: {course_code}")
+                    continue
+
+                # ---- Not ekleme veya güncelleme ----
+                grade_obj, created = Grade.objects.update_or_create(
+                    student=student,
+                    course=course,
+                    defaults={"grade": grade_value}
+                )
+
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
+
+            messages.success(
+                request,
+                f"{created_count} yeni not eklendi, {updated_count} not güncellendi."
+            )
+
+            if errors:
+                messages.warning(request, f"Hatalı satırlar: {len(errors)}")
+                for e in errors:
+                    print("Hata:", e)
+
+            return redirect("import_grades")
+
+        except Exception as e:
+            messages.error(request, f"Hata oluştu: {str(e)}")
+            return redirect("import_grades")
+
+    return render(request, "import_grades.html")

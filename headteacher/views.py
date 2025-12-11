@@ -18,7 +18,7 @@ from course_management.models import (
 @user_is_department_head
 def department_head_dashboard(request):
     """Bölüm başkanının ana paneli - çoklu form işlemleri."""
-    # Formları başlatr
+    # Formları başlat
     course_form = CourseCreateForm()
     assign_form = InstructorAssignForm()
     student_assign_form = StudentAssignForm()
@@ -26,6 +26,7 @@ def department_head_dashboard(request):
 
     # POST işlemleri
     if request.method == "POST":
+        # ---------- 1) Yeni Ders Oluşturma ----------
         if "submit_course_create" in request.POST:
             course_form = CourseCreateForm(request.POST)
             if course_form.is_valid():
@@ -35,26 +36,41 @@ def department_head_dashboard(request):
 
             messages.error(request, "Ders eklenirken bir hata oluştu. Lütfen formu kontrol edin.")
 
+        # ---------- 2) Hoca Atama ----------
         elif "submit_instructor_assign" in request.POST:
             assign_form = InstructorAssignForm(request.POST)
             if assign_form.is_valid():
-                course, instructor = assign_form.cleaned_data["course"], assign_form.cleaned_data["instructor"]
+                course = assign_form.cleaned_data["course"]
+                instructor = assign_form.cleaned_data["instructor"]
                 course.instructors.add(instructor)
-                messages.success(request, f'"{instructor.get_full_name()}" hocası "{course.course_code}" dersine başarıyla atandı.')
+
+                messages.success(
+                    request,
+                    f'"{instructor.get_full_name()}" hocası "{course.course_code}" dersine başarıyla atandı.'
+                )
                 return redirect("department_head_dashboard")
 
             messages.error(request, "Hoca atanırken bir hata oluştu. Lütfen formu kontrol edin.")
 
+        # ---------- 3) Öğrenci Atama (Çoklu Checkbox Destekli) ----------
         elif "submit_student_assign" in request.POST:
             student_assign_form = StudentAssignForm(request.POST)
             if student_assign_form.is_valid():
-                course, student = student_assign_form.cleaned_data["course"], student_assign_form.cleaned_data["student"]
-                course.students.add(student)
-                messages.success(request, f'"{student.get_full_name()}" öğrencisi "{course.course_code}" dersine başarıyla atandı.')
+                course = student_assign_form.cleaned_data["course"]
+                students = student_assign_form.cleaned_data["students"]  # çoklu seçim
+
+                for student in students:
+                    course.students.add(student)
+
+                messages.success(
+                    request,
+                    f"Seçilen öğrenciler '{course.course_code}' dersine başarıyla atandı."
+                )
                 return redirect("department_head_dashboard")
 
-            messages.error(request, "Öğrenci atanırken bir hata oluştu. Lütfen formu kontrol edin.")
+            messages.error(request, "Öğrenciler atanırken bir hata oluştu. Lütfen formu kontrol edin.")
 
+        # ---------- 4) Program Çıktısı Ekleme ----------
         elif "submit_program_outcome" in request.POST:
             program_outcome_form = ProgramOutcomeForm(request.POST)
             if program_outcome_form.is_valid():
@@ -67,13 +83,21 @@ def department_head_dashboard(request):
     # Sistem verilerini alır
     all_courses = Course.objects.all().prefetch_related("instructors").order_by("course_code")
     all_instructors = User.objects.filter(profile__role="instructor").order_by("last_name", "first_name")
-    all_students = User.objects.filter(profile__role="student").prefetch_related("enrolled_courses").order_by("last_name", "first_name")
+    all_students = User.objects.filter(profile__role="student").prefetch_related("enrolled_courses").order_by(
+        "last_name", "first_name")
     all_program_outcomes = ProgramOutcome.objects.all()
-    
+
     return render(request, "headteacher/department_head_dashboard.html", {
-        "all_courses": all_courses, "all_instructors": all_instructors, "all_students": all_students,
-        "course_count": all_courses.count(), "instructor_count": all_instructors.count(), "student_count": all_students.count(),
-        "course_form": course_form, "assign_form": assign_form, "student_assign_form": student_assign_form, "program_outcome_form": program_outcome_form,
+        "all_courses": all_courses,
+        "all_instructors": all_instructors,
+        "all_students": all_students,
+        "course_count": all_courses.count(),
+        "instructor_count": all_instructors.count(),
+        "student_count": all_students.count(),
+        "course_form": course_form,
+        "assign_form": assign_form,
+        "student_assign_form": student_assign_form,
+        "program_outcome_form": program_outcome_form,
         "all_program_outcomes": all_program_outcomes,
     })
 

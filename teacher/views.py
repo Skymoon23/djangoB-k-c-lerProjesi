@@ -61,36 +61,109 @@ def manage_course(request, course_id):
             else:
                 messages.error(request, "Dosya yüklenirken bir hata oluştu. Lütfen geçerli bir dosya seçin.")
 
+
         elif "submit_grades" in request.POST:
+
+            # form üzerinden gelen notları kaydet
+
             try:
+
                 for key, value in request.POST.items():
+
                     if not key.startswith("grade_"):
                         continue
 
                     parts = key.split("_")
+
                     if len(parts) != 3:
                         continue
 
                     _, student_id, component_id = parts
+
                     score_value = value.strip() if value else None
 
                     if score_value:
+
                         try:
+
                             score_decimal = Decimal(score_value)
+
                             if not (0 <= score_decimal <= 100):
                                 continue
+
                         except (ValueError, InvalidOperation):
+
                             continue
+
                     else:
+
                         score_decimal = None
 
                     grade, _ = Grade.objects.get_or_create(student_id=student_id, component_id=component_id)
+
                     grade.score = score_decimal
+
                     grade.save()
 
                 messages.success(request, "Notlar başarıyla kaydedildi.")
-            except (ValueError, Exception) as e:
+
+
+            except Exception as e:
+
                 messages.error(request, f"Notları kaydederken bir hata oluştu: {e}")
+
+            return redirect("manage_course", course_id=course.id)
+
+        elif "submit_excel_grades" in request.POST:
+
+            uploaded_file = request.FILES.get("grades_file")
+
+            if not uploaded_file:
+                messages.error(request, "Lütfen bir Excel dosyası yükleyin.")
+
+                return redirect("manage_course", course_id=course.id)
+
+            import openpyxl
+
+            try:
+
+                workbook = openpyxl.load_workbook(uploaded_file)
+
+                sheet = workbook.active
+
+                for row in sheet.iter_rows(min_row=2, values_only=True):
+
+                    student_number, username, component_name, score = row
+
+                    if not (student_number or username) or not component_name:
+                        continue
+
+                    student = None
+                    if student_number:
+                        student = course.students.filter(student_number=student_number).first()
+
+                        if not student and username:
+                            student = course.students.filter(username=username).first()
+
+                    component = EvaluationComponent.objects.filter(course=course, name=component_name).first()
+
+                    if student and component:
+                        Grade.objects.update_or_create(
+
+                            student=student,
+
+                            component=component,
+
+                            defaults={"score": score}
+
+                        )
+
+                messages.success(request, "Excel dosyasından notlar başarıyla yüklendi.")
+
+
+            except Exception as e:
+
+                messages.error(request, f"Excel işleme hatası: {e}")
 
             return redirect("manage_course", course_id=course.id)
 
