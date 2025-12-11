@@ -184,7 +184,7 @@ def manage_outcome_weights(request, component_id):
         return redirect("instructor_dashboard")
 
     weight_map = {w.outcome_id: w.weight for w in OutcomeWeight.objects.filter(component=component)}
-    return render(request, "teacher/manage_outcome_weights.html", {
+    return render(request, "teacher/instructor_manage_outcomes.html", {
         "component": component, "course": course,
         "rows": [{"outcome": o, "weight": weight_map.get(o.id)} for o in outcomes],
     })
