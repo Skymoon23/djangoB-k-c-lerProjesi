@@ -215,7 +215,7 @@ def add_grade(request, component_id):
 
 @login_required
 @user_is_instructor
-def instructor_manage_component_outcomes(request, course_id=None):
+def manage_component_weights(request, course_id=None):
     """Tüm derslerin veya belirli bir dersin component-outcome ağırlıklarını yönetir."""
     courses = Course.objects.filter(id=course_id, instructors=request.user).prefetch_related("evaluation_components", "learning_outcomes") if course_id else Course.objects.filter(instructors=request.user).prefetch_related("evaluation_components", "learning_outcomes")
 
@@ -253,6 +253,6 @@ def instructor_manage_component_outcomes(request, course_id=None):
             return JsonResponse({'success': True, 'message': 'Ağırlıklar başarıyla güncellendi.'})
 
         messages.success(request, "Ağırlıklar başarıyla güncellendi.")
-        return redirect("instructor_manage_course_component_outcomes", course_id=course_id) if course_id else redirect("instructor_manage_component_outcomes")
+        return redirect("manage_course_component_weights", course_id=course_id) if course_id else redirect("manage_component_weights")
 
     return render(request, "teacher/instructor_manage_outcomes.html", {"course_data": course_data})

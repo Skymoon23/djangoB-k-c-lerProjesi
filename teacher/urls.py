@@ -27,13 +27,13 @@ urlpatterns = [
     ),
     path(
         "manage-component-outcomes/",
-        views.instructor_manage_component_outcomes,
-        name="instructor_manage_component_outcomes",
+        views.manage_component_weights,
+        name="manage_component_weights",
     ),
     path(
         "course/<int:course_id>/manage-component-outcomes/",
-        views.instructor_manage_component_outcomes,
-        name="instructor_manage_course_component_outcomes",
+        views.manage_component_weights,
+        name="manage_course_component_weights",
     ),
 ]
 
