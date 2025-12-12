@@ -170,3 +170,6 @@ class GradeForm(forms.ModelForm):
         if course is not None:
             # Sadece o derse kayıtlı öğrenciler görünsün
             self.fields['student'].queryset = course.students.all().order_by('last_name', 'first_name')
+
+class GradeUploadForm(forms.Form):
+    file = forms.FileField(label="Excel Dosyası")

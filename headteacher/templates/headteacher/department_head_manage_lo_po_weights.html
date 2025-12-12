@@ -63,7 +63,7 @@
         <a class="navbar-brand" href="{% url 'department_head_dashboard' %}">ALMS University – Bölüm Başkanı Paneli</a>
         <div class="d-flex">
             <a href="{% url 'department_head_dashboard' %}" class="btn btn-outline-light btn-sm">
-                <i class="bi bi-arrow-left"></i> Dashboard'a Dön
+                <i class="bi bi-arrow-left"></i> Panele Dön
             </a>
         </div>
     </div>
@@ -74,7 +74,7 @@
         <div class="card-body">
             <h3 class="page-title mb-3">Learning Outcome - Program Outcome Ağırlıklarını Yönet</h3>
             <p class="text-muted mb-4">
-                Her dersin learning outcome'larının hangi program outcome'ları ve ne kadar etkilediğini belirleyebilirsiniz. 
+                Her dersin learning outcome'larının hangi program outcome'ları ve ne kadar etkilediğini belirleyebilirsiniz.
                 Her ilişki için 1-5 arası bir ağırlık seçin.
             </p>
 
@@ -94,7 +94,7 @@
         <div class="card-header" id="manageHeading{{ forloop.counter }}">
             <h4 class="mb-0 d-flex align-items-center justify-content-between">
                 <span>
-                    <span class="badge badge-course">{{ course_item.course.course_code }}</span> 
+                    <span class="badge badge-course">{{ course_item.course.course_code }}</span>
                     {{ course_item.course.course_name }}
                 </span>
                 <button class="toggle-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#manageCollapse{{ forloop.counter }}" aria-expanded="false" aria-controls="manageCollapse{{ forloop.counter }}">
@@ -116,7 +116,7 @@
                         <form method="post" class="mt-3 weight-form" data-outcome-id="{{ outcome_item.outcome.id }}">
                             {% csrf_token %}
                             <input type="hidden" name="outcome_id" value="{{ outcome_item.outcome.id }}">
-                            
+
                             <div class="table-responsive">
                                 <table class="table table-sm align-middle">
                                     <thead>
@@ -185,21 +185,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Tüm form submit'lerini yakala
     const forms = document.querySelectorAll('.weight-form');
-    
+
     forms.forEach(function(form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault(); // Sayfa yenilenmesini engelle
-            
+
             const formData = new FormData(form);
             const submitButton = form.querySelector('button[type="submit"]');
             const statusSpan = form.querySelector('.save-status');
             const originalButtonText = submitButton.innerHTML;
-            
+
             // Butonu devre dışı bırak ve yükleniyor göster
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Kaydediliyor...';
             statusSpan.style.display = 'none';
-            
+
             // AJAX isteği gönder
             fetch(form.action || window.location.href, {
                 method: 'POST',
@@ -215,11 +215,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     statusSpan.textContent = '✓ ' + data.message;
                     statusSpan.style.color = '#28a745';
                     statusSpan.style.display = 'inline';
-                    
+
                     // Butonu eski haline getir
                     submitButton.disabled = false;
                     submitButton.innerHTML = originalButtonText;
-                    
+
                     // 3 saniye sonra mesajı gizle
                     setTimeout(function() {
                         statusSpan.style.display = 'none';
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 statusSpan.textContent = '✗ ' + (error.message || 'Kaydetme sırasında bir hata oluştu');
                 statusSpan.style.color = '#dc3545';
                 statusSpan.style.display = 'inline';
-                
+
                 // Butonu eski haline getir
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
@@ -244,4 +244,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-

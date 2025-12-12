@@ -5,6 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from course_management.decorators import user_is_instructor
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model
+User = get_user_model()
+import pandas as pd
 from course_management.forms import (
     EvaluationComponentForm, GradeForm, LearningOutcomeForm, SyllabusForm,
 )
@@ -111,59 +115,6 @@ def manage_course(request, course_id):
             except Exception as e:
 
                 messages.error(request, f"Notları kaydederken bir hata oluştu: {e}")
-
-            return redirect("manage_course", course_id=course.id)
-
-        elif "submit_excel_grades" in request.POST:
-
-            uploaded_file = request.FILES.get("grades_file")
-
-            if not uploaded_file:
-                messages.error(request, "Lütfen bir Excel dosyası yükleyin.")
-
-                return redirect("manage_course", course_id=course.id)
-
-            import openpyxl
-
-            try:
-
-                workbook = openpyxl.load_workbook(uploaded_file)
-
-                sheet = workbook.active
-
-                for row in sheet.iter_rows(min_row=2, values_only=True):
-
-                    student_number, username, component_name, score = row
-
-                    if not (student_number or username) or not component_name:
-                        continue
-
-                    student = None
-                    if student_number:
-                        student = course.students.filter(student_number=student_number).first()
-
-                        if not student and username:
-                            student = course.students.filter(username=username).first()
-
-                    component = EvaluationComponent.objects.filter(course=course, name=component_name).first()
-
-                    if student and component:
-                        Grade.objects.update_or_create(
-
-                            student=student,
-
-                            component=component,
-
-                            defaults={"score": score}
-
-                        )
-
-                messages.success(request, "Excel dosyasından notlar başarıyla yüklendi.")
-
-
-            except Exception as e:
-
-                messages.error(request, f"Excel işleme hatası: {e}")
 
             return redirect("manage_course", course_id=course.id)
 
@@ -288,7 +239,7 @@ def add_grade(request, component_id):
 
 @login_required
 @user_is_instructor
-def instructor_manage_component_outcomes(request, course_id=None):
+def manage_component_weights(request, course_id=None):
     """Tüm derslerin veya belirli bir dersin component-outcome ağırlıklarını yönetir."""
     courses = Course.objects.filter(id=course_id, instructors=request.user).prefetch_related("evaluation_components", "learning_outcomes") if course_id else Course.objects.filter(instructors=request.user).prefetch_related("evaluation_components", "learning_outcomes")
 
@@ -329,3 +280,86 @@ def instructor_manage_component_outcomes(request, course_id=None):
         return redirect("instructor_manage_course_component_outcomes", course_id=course_id) if course_id else redirect("instructor_manage_component_outcomes")
 
     return render(request, "teacher/instructor_manage_outcomes.html", {"course_data": course_data})
+
+
+@login_required
+@user_is_instructor # Bölüm başkanının yapacağı bir işlem varsayıyorum, gerekiyorsa yetkiyi kontrol edin
+def upload_grades(request):
+    """Excel dosyası yükleyerek notları sisteme toplu kaydetme/güncelleme."""
+    # Sizin form tanımınız GradeUploadForm() olduğu varsayılmıştır.
+    # Bu formun sadece bir FileField içerdiği varsayılmıştır.
+    from course_management.forms import GradeUploadForm
+
+
+    if request.method == "POST":
+        form = GradeUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = request.FILES["file"]
+
+            # Not: Excel dosyasını okumak için pd.read_excel kullanıyoruz.
+            # Yüklediğiniz örnek dosya CSV idi, eğer CSV yüklüyorsanız burayı pd.read_csv olarak değiştirin.
+            try:
+                df = pd.read_excel(file)
+            except Exception as e:
+                messages.error(request, f"Dosya okunamadı veya formatı hatalı: {e}")
+                return redirect("upload_grades")
+
+            kayit_sayisi = 0
+            eslesmeyen_ogrenciler = []
+
+            # DataFrame içindeki her satırı (öğrenci/not kaydı) döngüye alıyoruz
+            for index, row in df.iterrows():
+                # Alanların boş olup olmadığını kontrol ediyoruz
+                if not row.get('username') or not row.get('component_name') or row.get('score') is None:
+                    messages.warning(request, f"{index + 2}. satırda eksik veri var ve atlandı.")
+                    continue
+
+                try:
+                    # Eşleştirme anahtarı olarak username'i kullanıyoruz (Tavsiye edilen yol)
+                    student_username = str(row['username']).strip()
+                    component_name = str(row['component_name']).strip()
+                    score = float(row['score'])
+
+                    # 1. Kullanıcı Adı ile öğrenciyi bul (User Modelini Kullanarak)
+                    # Not: User modelinin username alanı benzersizdir ve güvenilir bir eşleştirme sağlar.
+                    student_user = User.objects.get(username=student_username)
+
+                    # 2. Not bileşenini bul (Vize, Final, Ödev vb.)
+                    component = EvaluationComponent.objects.get(name=component_name)
+
+                    # 3. Notu kaydet veya güncelle (Zaten varsa üzerine yazar)
+                    Grade.objects.update_or_create(
+                        student=student_user,
+                        component=component,
+                        defaults={'score': score}
+                    )
+
+                    kayit_sayisi += 1
+
+                except User.DoesNotExist:
+                    # Kullanıcı adı veritabanında bulunamazsa
+                    eslesmeyen_ogrenciler.append(student_username)
+                except EvaluationComponent.DoesNotExist:
+                    # Excel'deki not bileşeni adı (vize1, final vb.) sistemde tanımlı değilse
+                    messages.warning(request, f"'{component_name}' adında Not Bileşeni bulunamadı ve not işlenemedi.")
+                except ValueError:
+                    # Not (score) alanı sayıya çevrilemezse
+                    messages.error(request, f"Hata: {student_username} kullanıcısının notu sayısal değil.")
+                except Exception as e:
+                    # Diğer tüm hatalar
+                    messages.error(request, f"Beklenmedik bir hata oluştu: {e}")
+
+            # Eşleşmeyen öğrencileri toplu halde raporla
+            if eslesmeyen_ogrenciler:
+                messages.warning(request,
+                                 f"Aşağıdaki {len(eslesmeyen_ogrenciler)} kullanıcı adına ait öğrenci sistemde bulunamadı ve notları işlenmedi: "
+                                 f"{', '.join(eslesmeyen_ogrenciler[:10])}{' ve daha fazlası...' if len(eslesmeyen_ogrenciler) > 10 else ''}"
+                                 )
+
+            messages.success(request, f"Başarıyla {kayit_sayisi} not sisteme işlendi.")
+            return redirect("upload_grades")
+    else:
+        # Formun yüklenmesi
+        form = GradeUploadForm()
+
+    return render(request, "teacher/upload_grades.html", {"form": form})

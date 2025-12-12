@@ -104,7 +104,7 @@ def department_head_dashboard(request):
 
 @login_required
 @user_is_department_head
-def department_head_manage_lo_po_weights(request):
+def manage_lo_po_weights(request):
     """Learning Outcome - Program Outcome ağırlıklarını yönetir."""
     all_courses = Course.objects.all().prefetch_related("learning_outcomes")
     all_program_outcomes = ProgramOutcome.objects.all().order_by("code")
@@ -149,7 +149,7 @@ def department_head_manage_lo_po_weights(request):
 
 @login_required
 @user_is_department_head
-def department_head_view_outcomes(request):
+def view_outcomes(request):
     """Tüm derslerin learning outcome ve program outcome ilişkilerini görüntüler."""
     all_courses = Course.objects.all().prefetch_related("learning_outcomes", "evaluation_components")
     all_program_outcomes = ProgramOutcome.objects.all().order_by("code")
@@ -171,7 +171,7 @@ def department_head_view_outcomes(request):
 
 @login_required
 @user_is_department_head
-def department_head_program_outcome_achievement(request):
+def po_achievement(request):
     """Program outcome'ların öğrenilme durumunu gösterir - istatistikler hesaplar."""
     all_courses = Course.objects.all().prefetch_related("learning_outcomes", "evaluation_components", "students")
     all_program_outcomes = ProgramOutcome.objects.all().order_by("code")

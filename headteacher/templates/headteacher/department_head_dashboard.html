@@ -158,17 +158,17 @@
         <h2>Çıktı Yönetimi</h2>
         <ul>
             <li>
-                <a href="{% url 'department_head_manage_lo_po_weights' %}">
+                <a href="{% url 'manage_lo_po_weights' %}">
                     Learning Outcome - Program Outcome Ağırlıklarını Yönet
                 </a>
             </li>
             <li>
-                <a href="{% url 'department_head_view_outcomes' %}">
+                <a href="{% url 'view_outcomes' %}">
                     Derslerin Learning Outcome ve Program Outcome İlişkilerini Görüntüle
                 </a>
             </li>
             <li>
-                <a href="{% url 'department_head_program_outcome_achievement' %}">
+                <a href="{% url 'po_achievement' %}">
                     Program Outcome'larının Öğrenilme Durumunu Görüntüle
                 </a>
             </li>
@@ -183,7 +183,7 @@
             {% for course in all_courses %}
                 <li>
                     <strong>{{ course.course_code }}</strong> - {{ course.course_name }}
-                    
+
                     <div style="margin-top: 5px; font-size: 0.9em; color: #555;">
                         <strong>Atanan Hocalar:</strong>
                         {% for instructor in course.instructors.all %}
@@ -244,7 +244,7 @@
             {% for student in all_students %}
                 <li>
                     <strong>{{ student.get_full_name|default:student.username }}</strong>
-                    
+
                     <div style="margin-top: 5px; font-size: 0.9em; color: #555;">
                         <strong>Kayıtlı Dersler:</strong>
                         {% for course in student.enrolled_courses.all %}
@@ -262,4 +262,3 @@
 
 </body>
 </html>
-
