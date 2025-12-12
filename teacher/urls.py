@@ -41,4 +41,13 @@ urlpatterns = [
         views.upload_grades,
         name='upload_grades'  # Bu ismi, 'redirect' fonksiyonunda kullandık.
     ),
+
+    
+
+   path("course/<int:course_id>/", views.course_home, name="course_home"),
+   path("course/<int:course_id>/outcomes/", views.course_outcomes, name="course_lo_add"),
+   path("course/<int:course_id>/components/", views.course_components, name="course_eval_add"),
+   path("course/<int:course_id>/weights/", views.course_weights, name="course_weights"),
+   path("course/<int:course_id>/csv-upload/", views.instructor_csv_upload_placeholder, name="instructor_csv_upload_placeholder"),
+
 ]
