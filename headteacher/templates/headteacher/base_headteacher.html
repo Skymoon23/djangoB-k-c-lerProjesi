@@ -6,11 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Bölüm Başkanı Paneli{% endblock %}</title>
 
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
   <style>
-    body { background: #f5f7fb; min-height: 100vh; }
+    body {
+      background: #f5f7fb;
+      min-height: 100vh;
+      margin: 0;
+    }
 
     .layout {
       display: grid;
@@ -18,6 +23,7 @@
       min-height: 100vh;
     }
 
+    /* ===== SIDEBAR ===== */
     .sidebar {
       background: #0b2a4a;
       color: #fff;
@@ -25,7 +31,7 @@
       position: relative;
     }
 
-    .sidebar .brand {
+    .brand {
       font-weight: 800;
       margin-bottom: 16px;
       display: flex;
@@ -33,68 +39,68 @@
       align-items: center;
     }
 
-    .sidebar .brand a {
+    .brand a {
       color: #fff;
       text-decoration: none;
     }
 
-    .sidebar .nav-link {
+    .nav-link {
       color: rgba(255,255,255,.85);
       border-radius: 10px;
       padding: 10px 12px;
       margin-bottom: 4px;
-      text-decoration: none;
       display: block;
-      position: relative;
+      text-decoration: none;
+      cursor: pointer;
     }
 
-    .sidebar .nav-link:hover {
+    .nav-link:hover {
       background: rgba(255,255,255,.12);
       color: #fff;
     }
 
-    .sidebar .nav-link.active {
+    .nav-link.active {
       background: rgba(255,255,255,.20);
       color: #fff;
     }
 
-    /* ===== ÇIKTI YÖNETİMİ CLICK SUBMENU ===== */
+    hr {
+      border-color: rgba(255,255,255,.25);
+      margin: 10px 0;
+    }
+
+    /* ===== ÇIKTI YÖNETİMİ (CLICK MENU) ===== */
     .pc-submenu {
       position: relative;
     }
 
     .pc-submenu-panel {
       display: none;
-      position: absolute;
-      top: 0;
-      left: 100%;
-      margin-left: 10px;
-      min-width: 230px;
-      background: #0b2a4a;
-      border-radius: 12px;
-      padding: 8px;
-      box-shadow: 0 10px 25px rgba(0,0,0,.25);
-      z-index: 9999;
+      margin-left: 12px;
+      margin-top: 6px;
     }
 
     .pc-submenu.open .pc-submenu-panel {
       display: block;
     }
 
+    .pc-submenu-panel a {
+      font-size: 0.95rem;
+      padding: 8px 10px;
+    }
+
     .pc-caret {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      opacity: .8;
+      float: right;
+      transition: transform .2s ease;
     }
 
+    .pc-submenu.open .pc-caret {
+      transform: rotate(90deg);
+    }
+
+    /* ===== CONTENT ===== */
     .content {
-      padding: 22px;
-    }
-
-    hr {
-      border-color: rgba(255,255,255,.18);
+      padding: 24px;
     }
   </style>
 
@@ -106,15 +112,70 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
+
     <div class="brand">
       <a href="{% url 'department_head_dashboard' %}">ALMS – Head Panel</a>
       <form method="POST" action="{% url 'logout' %}" style="margin:0;">
         {% csrf_token %}
-        <button type="submit" class="btn btn-sm btn-outline-light">Çıkış</button>
+        <button class="btn btn-sm btn-outline-light">Çıkış</button>
       </form>
     </div>
 
-    {% include "headteacher/partials/sidebar.html" %}
+    {% with current=request.resolver_match.url_name %}
+    <nav>
+
+      <a href="{% url 'department_head_dashboard' %}"
+         class="nav-link {% if current == 'department_head_dashboard' %}active{% endif %}">
+        Dashboard
+      </a>
+
+      <a href="{% url 'department_head_quick_actions' %}"
+         class="nav-link {% if current == 'department_head_quick_actions' %}active{% endif %}">
+        Hızlı İşlemler
+      </a>
+
+      <a href="{% url 'department_head_create_program_outcome' %}"
+         class="nav-link {% if current == 'department_head_create_program_outcome' %}active{% endif %}">
+        Yeni Program Çıktısı Ekle
+      </a>
+
+      <!-- ÇIKTI YÖNETİMİ -->
+      <div class="pc-submenu">
+        <div id="toggleOutcomes" class="nav-link">
+          Çıktı Yönetimi
+          <span class="pc-caret">›</span>
+        </div>
+
+        <div class="pc-submenu-panel">
+          <a href="{% url 'manage_lo_po_weights' %}" class="nav-link">
+            LO–PO Ağırlıkları
+          </a>
+          <a href="{% url 'view_outcomes' %}" class="nav-link">
+            LO / PO İlişkileri
+          </a>
+          <a href="{% url 'po_achievement' %}" class="nav-link">
+            PO Öğrenilme Durumu
+          </a>
+        </div>
+      </div>
+
+      <hr>
+
+      <a href="{% url 'department_head_courses' %}" class="nav-link">
+        Tüm Dersler
+      </a>
+      <a href="{% url 'department_head_program_outcomes' %}" class="nav-link">
+        Program Çıktıları
+      </a>
+      <a href="{% url 'department_head_instructors' %}" class="nav-link">
+        Öğretim Görevlileri
+      </a>
+      <a href="{% url 'department_head_students' %}" class="nav-link">
+        Öğrenciler
+      </a>
+
+    </nav>
+    {% endwith %}
   </aside>
 
   <!-- CONTENT -->
@@ -124,14 +185,22 @@
 
 </div>
 
+<!-- JS -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const toggle = document.getElementById("toggleOutcomes");
   const wrapper = toggle.closest(".pc-submenu");
+  const links = wrapper.querySelectorAll(".pc-submenu-panel a");
 
   toggle.addEventListener("click", function (e) {
     e.preventDefault();
     wrapper.classList.toggle("open");
+  });
+
+  links.forEach(link => {
+    link.addEventListener("click", function () {
+      wrapper.classList.remove("open");
+    });
   });
 
   document.addEventListener("click", function (e) {
@@ -142,6 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
