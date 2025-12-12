@@ -67,13 +67,14 @@ def student_dashboard(request):
 @user_is_student
 def student_course_detail(request, course_id):
     """Öğrencinin belirli bir derse ait detaylı not ve çıktı bilgilerini gösterir."""
+    section = request.GET.get("section", "grades")  # ✅ YENİ
+
     course = get_object_or_404(Course, id=course_id, students=request.user)
     components = EvaluationComponent.objects.filter(course=course)
     grades = Grade.objects.filter(student=request.user, component__in=components)
     outcomes = course.learning_outcomes.all()
     grade_map = {g.component_id: g.score for g in grades}
 
-    # Bileşen not listesi
     component_grade_list = [{"name": c.name, "percentage": c.percentage, "score": grade_map.get(c.id)} for c in components]
 
     # Learning outcome skorlarını hesaplar
@@ -133,4 +134,5 @@ def student_course_detail(request, course_id):
         "component_grade_list": component_grade_list,
         "learning_outcome_scores": learning_outcome_scores,
         "program_outcome_scores": program_outcome_scores,
+        "section": section,  # ✅ YENİ
     })

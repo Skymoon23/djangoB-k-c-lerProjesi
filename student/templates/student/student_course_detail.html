@@ -1,105 +1,154 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>{{ course.course_code }} Detay</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>{{ course.course_code }} Detay</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
-<div class="container mt-4">
-    <h2>{{ course.course_code }} - {{ course.course_name }}</h2>
-    <p>Derse ait değerlendirme bileşenleri ve notlarınız:</p>
+<div class="container-fluid mt-4">
+  <div class="row">
 
-    <table class="table table-bordered mt-3">
-        <thead>
+    <!-- ===== SIDEBAR ===== -->
+    <div class="col-md-3 col-lg-2">
+      <div class="list-group">
+
+        <div class="list-group-item fw-bold">
+          {{ course.course_code }}
+        </div>
+
+        <a class="list-group-item list-group-item-action {% if section == 'grades' %}active{% endif %}"
+           href="{% url 'student_course_detail' course.id %}?section=grades">
+          Değerlendirme & Notlar
+        </a>
+
+        <a class="list-group-item list-group-item-action {% if section == 'lo' %}active{% endif %}"
+           href="{% url 'student_course_detail' course.id %}?section=lo">
+          Learning Outcome
+        </a>
+
+        <a class="list-group-item list-group-item-action {% if section == 'po' %}active{% endif %}"
+           href="{% url 'student_course_detail' course.id %}?section=po">
+          Program Outcome
+        </a>
+
+        <a class="list-group-item list-group-item-action"
+           href="{% url 'student_dashboard' %}">
+          ← Derslerime Dön
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ===== CONTENT ===== -->
+    <div class="col-md-9 col-lg-10">
+
+      <h2 class="mb-1">{{ course.course_code }} - {{ course.course_name }}</h2>
+
+      <!-- ===== 1) GRADES ===== -->
+      {% if section == "grades" %}
+        <p>Derse ait değerlendirme bileşenleri ve notlarınız:</p>
+
+        <table class="table table-bordered mt-3">
+          <thead>
             <tr>
-                <th>Bileşen</th>
-                <th>Yüzde</th>
-                <th>Not</th>
+              <th>Bileşen</th>
+              <th>Yüzde</th>
+              <th>Not</th>
             </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
             {% for item in component_grade_list %}
             <tr>
-                <td>{{ item.name }}</td>
-                <td>%{{ item.percentage }}</td>
-                <td>
-                    {% if item.score %}
-                        {{ item.score }}
-                    {% else %}
-                        (N/A)
-                    {% endif %}
-                </td>
+              <td>{{ item.name }}</td>
+              <td>%{{ item.percentage }}</td>
+              <td>
+                {% if item.score %}
+                  {{ item.score }}
+                {% else %}
+                  (N/A)
+                {% endif %}
+              </td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
+          </tbody>
+        </table>
+      {% endif %}
 
-    {% if learning_outcome_scores %}
-    <hr>
-    <h3>Learning Outcome Skorlarınız</h3>
-    <table class="table table-bordered mt-3">
-        <thead>
+      <!-- ===== 2) LEARNING OUTCOME ===== -->
+      {% if section == "lo" %}
+        <h3>Learning Outcome Skorlarınız</h3>
+
+        {% if learning_outcome_scores %}
+        <table class="table table-bordered mt-3">
+          <thead>
             <tr>
-                <th>Learning Outcome</th>
-                <th>Skor</th>
+              <th>Learning Outcome</th>
+              <th>Skor</th>
             </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
             {% for lo_data in learning_outcome_scores %}
             <tr>
-                <td>
-                    <strong>LO #{{ lo_data.outcome.id }}:</strong><br>
-                    <small class="text-muted">{{ lo_data.outcome.description }}</small>
-                </td>
-                <td>
-                    {% if lo_data.score is not None %}
-                        {{ lo_data.score|floatformat:2 }}
-                    {% else %}
-                        <span class="text-muted">Hesaplanamadı</span>
-                    {% endif %}
-                </td>
+              <td>
+                <strong>LO #{{ lo_data.outcome.id }}:</strong><br>
+                <small class="text-muted">{{ lo_data.outcome.description }}</small>
+              </td>
+              <td>
+                {% if lo_data.score is not None %}
+                  {{ lo_data.score|floatformat:2 }}
+                {% else %}
+                  <span class="text-muted">Hesaplanamadı</span>
+                {% endif %}
+              </td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
+          </tbody>
+        </table>
+        {% else %}
+          <p class="text-muted mt-3">Learning Outcome verisi bulunamadı.</p>
+        {% endif %}
+      {% endif %}
 
-    {% if program_outcome_scores %}
-    <hr>
-    <h3>Program Outcome Skorlarınız</h3>
-    <table class="table table-bordered mt-3">
-        <thead>
+      <!-- ===== 3) PROGRAM OUTCOME ===== -->
+      {% if section == "po" %}
+        <h3>Program Outcome Skorlarınız</h3>
+
+        {% if program_outcome_scores %}
+        <table class="table table-bordered mt-3">
+          <thead>
             <tr>
-                <th>Program Outcome</th>
-                <th>Skor</th>
+              <th>Program Outcome</th>
+              <th>Skor</th>
             </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
             {% for po_data in program_outcome_scores %}
             <tr>
-                <td>
-                    <strong>{{ po_data.program_outcome.code }}</strong><br>
-                    <small class="text-muted">{{ po_data.program_outcome.description }}</small>
-                </td>
-                <td>
-                    {% if po_data.score is not None %}
-                        {{ po_data.score|floatformat:2 }}
-                    {% else %}
-                        <span class="text-muted">Hesaplanamadı</span>
-                    {% endif %}
-                </td>
+              <td>
+                <strong>{{ po_data.program_outcome.code }}</strong><br>
+                <small class="text-muted">{{ po_data.program_outcome.description }}</small>
+              </td>
+              <td>
+                {% if po_data.score is not None %}
+                  {{ po_data.score|floatformat:2 }}
+                {% else %}
+                  <span class="text-muted">Hesaplanamadı</span>
+                {% endif %}
+              </td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
+          </tbody>
+        </table>
+        {% else %}
+          <p class="text-muted mt-3">Program Outcome verisi bulunamadı.</p>
+        {% endif %}
+      {% endif %}
 
-    <a href="{% url 'student_dashboard' %}" class="btn btn-secondary mt-3">← Derslerime Dön</a>
+    </div>
+  </div>
 </div>
 
 </body>
 </html>
-
-
