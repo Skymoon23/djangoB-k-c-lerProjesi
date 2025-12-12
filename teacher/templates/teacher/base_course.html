@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Ders{% endblock %}</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body { background:#f5f6fa; }
+    .wrap { max-width: 1200px; margin: 22px auto; padding: 0 14px; }
+    .shell { display:flex; gap: 16px; }
+
+    .side {
+      width: 270px;
+      background:#fff;
+      border: 1px solid #e9e9e9;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.06);
+      padding: 14px;
+      height: fit-content;
+      position: sticky;
+      top: 16px;
+    }
+    .main {
+      flex: 1;
+      background:#fff;
+      border: 1px solid #e9e9e9;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.06);
+      padding: 18px;
+      min-height: 70vh;
+    }
+
+    .course-head { margin-bottom: 10px; }
+    .course-code {
+      display:inline-block; padding: 6px 10px; border-radius: 999px;
+      background:#e8f0ff; color:#2f54eb; font-weight: 800; font-size: 12px;
+      letter-spacing:.03em;
+    }
+    .course-name { font-weight: 800; margin-top: 8px; }
+
+    .navbtn{
+      display:block;
+      padding: 10px 12px;
+      border-radius: 12px;
+      color:#222;
+      text-decoration:none;
+      border: 1px solid transparent;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+    .navbtn:hover{ background:#f6f8ff; text-decoration:none; color:#222; }
+    .navbtn.active{ background:#eef3ff; border-color:#d8e3ff; color:#1b4ddb; }
+
+    @media (max-width: 992px){
+      .shell{ flex-direction: column; }
+      .side{ width: 100%; position: static; }
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="mb-3">
+      <a href="{% url 'instructor_dashboard' %}">&larr; Derslerime geri dön</a>
+    </div>
+
+    <div class="shell">
+      <aside class="side">
+        <div class="course-head">
+          <span class="course-code">{{ course.course_code }}</span>
+          <div class="course-name">{{ course.course_name }}</div>
+        </div>
+
+        <!-- active sınıfını view'dan göndereceğiz -->
+        <a class="navbtn {% if active_tab == 'manage' %}active{% endif %}" href="{% url 'course_home' course.id %}">
+          Dersi Yönet
+        </a>
+
+        <a class="navbtn {% if active_tab == 'lo' %}active{% endif %}" href="{% url 'course_lo_add' course.id %}">
+          Learning Outcome Ekle
+        </a>
+
+        <a class="navbtn {% if active_tab == 'eval' %}active{% endif %}" href="{% url 'course_eval_add' course.id %}">
+          Bileşen (Vize/Final) Ekle
+        </a>
+
+        <a class="navbtn {% if active_tab == 'weights' %}active{% endif %}" href="{% url 'course_weights' course.id %}">
+          Outcome Ağırlıkları
+        </a>
+      </aside>
+
+      <main class="main">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

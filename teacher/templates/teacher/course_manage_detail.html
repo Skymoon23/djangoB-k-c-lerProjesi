@@ -1,169 +1,159 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ders Yönetimi: {{ course.course_name }}</title>
+{% extends "teacher/base_course.html" %}
 
-    <style>
-        body { font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 1200px; margin: auto; }
-        h1, h2, h3 { color: #333; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
-        table { width:100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        form { background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
-        input[type="text"], input[type="number"], textarea, select { width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        textarea { width: 98%; }
-        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px; }
-        button:hover { background-color: #0056b3; }
-        ul, ol { padding-left: 20px; }
-        .form-section { margin-bottom: 30px; }
-    </style>
-</head>
-<body>
+{% block title %}Dersi Yönet: {{ course.course_code }}{% endblock %}
 
-    <h1>{{ course.course_code }} - {{ course.course_name }}</h1>
-    <p><a href="{% url 'instructor_dashboard' %}">&larr; Derslerime Geri Dön</a></p>
+{% block extra_head %}
+<style>
+  /* eski sayfandaki css’ten gerekli olanları burada tutuyoruz */
+  h1 { display:none; } /* başlık base’de var gibi düşün */
+  hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+  table { width:100%; border-collapse: collapse; margin-bottom: 20px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  th { background-color: #f4f4f4; }
+  form { background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 12px; }
+  button { background-color: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 10px; }
+  button:hover { background-color: #0056b3; }
+  ul, ol { padding-left: 20px; }
+  .form-section { margin-bottom: 30px; }
 
-    <hr>
+  .grade-actions{ display:flex; gap:12px; align-items:center; margin-top: 12px; }
+  .csv-hint { color:#666; font-size: 12px; margin-top: 6px; }
+</style>
+{% endblock %}
 
-    <!-- Değerlendirme Bileşenleri -->
-    <div class="form-section">
-        <h3>Değerlendirme Bileşenleri (Sınavlar, Yüzdeler)</h3>
-        <ul>
-            {% for component in components %}
-                <li>{{ component.name }}: %{{ component.percentage }}</li>
-            {% empty %}
-                <li>Henüz bir değerlendirme bileşeni eklenmemiş.</li>
+{% block content %}
+
+  <!-- Değerlendirme Bileşenleri -->
+  <div class="form-section">
+    <h3>Değerlendirme Bileşenleri (Sınavlar, Yüzdeler)</h3>
+    <ul>
+      {% for component in components %}
+        <li>{{ component.name }}: %{{ component.percentage }}</li>
+      {% empty %}
+        <li>Henüz bir değerlendirme bileşeni eklenmemiş.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <hr>
+
+  <!-- Öğrenim Çıktıları -->
+  <div class="form-section">
+    <h3>Öğrenim Çıktıları</h3>
+    <ol>
+      {% for outcome in outcomes %}
+        <li>{{ outcome.description }}</li>
+      {% empty %}
+        <li>Henüz bir öğrenim çıktısı eklenmemiş.</li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <hr>
+
+  <!-- Not Girişi -->
+  <div class="form-section">
+    <h3>Not Girişi</h3>
+    <p>Bu derse kayıtlı {{ students.count }} öğrenci bulunmaktadır.</p>
+
+    {% if not components %}
+      <p style="color: red; font-weight: bold;">
+        Not girişi yapabilmek için lütfen önce değerlendirme bileşenleri tanımlanmış olmalı.
+      </p>
+    {% elif not students %}
+      <p style="color: orange;">Bu derse henüz kayıtlı öğrenci yok.</p>
+    {% else %}
+      <form method="POST">
+        {% csrf_token %}
+
+        <table>
+          <thead>
+            <tr>
+              <th>Öğrenci</th>
+              {% for component in components %}
+                <th>{{ component.name }} (%{{ component.percentage }})</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in student_grade_rows %}
+              <tr>
+                <td>{{ row.student_object.get_full_name }} ({{ row.student_object.username }})</td>
+                {% for grade_info in row.grades_list %}
+                  <td>
+                    <input
+                      type="number"
+                      name="grade_{{ row.student_object.id }}_{{ grade_info.component_id }}"
+                      value="{% if grade_info.score is not None %}{{ grade_info.score|floatformat:2 }}{% endif %}"
+                      min="0" max="100" step="0.01"
+                      style="width: 90px;"
+                    >
+                  </td>
+                {% endfor %}
+              </tr>
             {% endfor %}
-        </ul>
+          </tbody>
+        </table>
 
-        <form method="POST">
-            {% csrf_token %}
-            <h4>Yeni Bileşen Ekle</h4>
-            {{ eval_form.as_p }}
-            <button type="submit" name="submit_evaluation">Sınav/Bileşen Ekle</button>
-        </form>
-    </div>
+        <div class="grade-actions">
+          <button type="submit" name="submit_grades">Tüm Notları Kaydet</button>
 
-    <hr>
+          <a href="{% url 'instructor_csv_upload_placeholder' course.id %}">
+            <button type="button">CSV ile Not Yükle</button>
+          </a>
+        </div>
 
-    <!-- Öğrenim Çıktıları -->
-    <div class="form-section">
-        <h3>Öğrenim Çıktıları</h3>
-        <ol>
+        <div class="csv-hint">(isterseniz csv dosyası da ekleyebilirsiniz)</div>
+      </form>
+    {% endif %}
+  </div>
+
+  <hr>
+
+  <!-- LO Skorları -->
+  <div class="form-section">
+    <h3>Öğrencilerin Learning Outcome Skorları</h3>
+    <p>Her öğrencinin learning outcome'ları ne kadar öğrenebildiğini görebilirsiniz.</p>
+
+    {% if not components %}
+      <p style="color: red; font-weight: bold;">
+        Learning outcome skorlarını hesaplayabilmek için önce değerlendirme bileşenleri ve outcome ağırlıkları tanımlanmalıdır.
+      </p>
+    {% elif not students %}
+      <p style="color: orange;">Bu derse henüz kayıtlı öğrenci yok.</p>
+    {% elif not outcomes %}
+      <p style="color: orange;">Bu ders için learning outcome tanımlanmamış.</p>
+    {% else %}
+      <table>
+        <thead>
+          <tr>
+            <th>Öğrenci</th>
             {% for outcome in outcomes %}
-                <li>{{ outcome.description }}</li>
-            {% empty %}
-                <li>Henüz bir öğrenim çıktısı eklenmemiş.</li>
+              <th>
+                LO #{{ outcome.id }}<br>
+                <small style="color:#666;">{{ outcome.description|truncatewords:12 }}</small>
+              </th>
             {% endfor %}
-        </ol>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student_lo in student_lo_scores %}
+            <tr>
+              <td><strong>{{ student_lo.student.get_full_name|default:student_lo.student.username }}</strong></td>
+              {% for lo_data in student_lo.lo_scores %}
+                <td>
+                  {% if lo_data.score is not None %}
+                    {{ lo_data.score|floatformat:2 }}
+                  {% else %}
+                    <span style="color: #999;">-</span>
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
 
-        <form method="POST">
-            {% csrf_token %}
-            <h4>Yeni Öğrenim Çıktısı Ekle</h4>
-            {{ outcome_form.as_p }}
-            <button type="submit" name="submit_outcome">Öğrenim Çıktısı Ekle</button>
-        </form>
-    </div>
-
-    <hr>
-
-    <!-- Not Girişi -->
-    <div class="form-section">
-        <h3>Not Girişi</h3>
-        <p>Bu derse kayıtlı {{ students.count }} öğrenci bulunmaktadır.</p>
-
-        {% if not components %}
-            <p style="color: red; font-weight: bold;">Not girişi yapabilmek için lütfen önce "Değerlendirme Bileşeni" (Sınav, Proje vb.) ekleyin.</p>
-        {% elif not students %}
-            <p style="color: orange;">Bu derse henüz kayıtlı öğrenci yok. (Admin panelinden atama yapmalısınız)</p>
-        {% else %}
-            <form method="POST">
-                {% csrf_token %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Öğrenci</th>
-                            {% for component in components %}
-                                <th>{{ component.name }} (%{{ component.percentage }})</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in student_grade_rows %}
-                        <tr>
-                            <td>{{ row.student_object.get_full_name }} ({{ row.student_object.username }})</td>
-
-                            {% for grade_info in row.grades_list %}
-                                <td>
-                                    <input
-                                        type="number"
-                                        name="grade_{{ row.student_object.id }}_{{ grade_info.component_id }}"
-                                        value="{% if grade_info.score is not None %}{{ grade_info.score|floatformat:2 }}{% endif %}"
-                                        min="0"
-                                        max="100"
-                                        step="0.01"
-                                        style="width: 80px;"
-                                    >
-                                </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                <br>
-                <button type="submit" name="submit_grades">Tüm Notları Kaydet</button>
-            </form>
-        {% endif %}
-    </div>
-
-    <hr>
-
-    <!-- Learning Outcome Skorları -->
-    <div class="form-section">
-        <h3>Öğrencilerin Learning Outcome Skorları</h3>
-        <p>Her öğrencinin learning outcome'ları ne kadar öğrenebildiğini görebilirsiniz.</p>
-
-        {% if not components %}
-            <p style="color: red; font-weight: bold;">Learning outcome skorlarını hesaplayabilmek için önce değerlendirme bileşenleri ve outcome ağırlıkları tanımlanmalıdır.</p>
-        {% elif not students %}
-            <p style="color: orange;">Bu derse henüz kayıtlı öğrenci yok.</p>
-        {% elif not outcomes %}
-            <p style="color: orange;">Bu ders için learning outcome tanımlanmamış.</p>
-        {% else %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Öğrenci</th>
-                        {% for outcome in outcomes %}
-                            <th>LO #{{ outcome.id }}<br><small style="color:#666;">{{ outcome.description|truncatewords:12 }}</small></th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for student_lo in student_lo_scores %}
-                    <tr>
-                        <td><strong>{{ student_lo.student.get_full_name|default:student_lo.student.username }}</strong></td>
-                        {% for lo_data in student_lo.lo_scores %}
-                            <td>
-                                {% if lo_data.score is not None %}
-                                    {{ lo_data.score|floatformat:2 }}
-                                {% else %}
-                                    <span style="color: #999;">-</span>
-                                {% endif %}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
-    </div>
-
-</body>
-</html>
+{% endblock %}
