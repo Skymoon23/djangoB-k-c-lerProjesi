@@ -79,27 +79,28 @@ class InstructorAssignForm(forms.Form):
 
 
 class StudentAssignForm(forms.Form):
-    """bölüm başkanının bir derse öğrenci ataması için form"""
+    """Bölüm başkanının bir derse çoklu öğrenci ataması için form"""
 
-    # tüm dersleri listeleyen bir dropdown
     course = forms.ModelChoiceField(
         queryset=Course.objects.all().order_by('course_code'),
         label="Ders Seçin",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
 
-    # sadece student rolündeki kullanıcıları listeleyen bir dropdown
-    student = forms.ModelChoiceField(
+    students = forms.ModelMultipleChoiceField(
         queryset=User.objects.filter(profile__role='student').order_by('last_name', 'first_name'),
-        label="Öğrenci Seçin",
-        widget=forms.Select(attrs={'class': 'form-control'})
+        label="Öğrenciler",
+        widget=forms.CheckboxSelectMultiple()
     )
 
     def __init__(self, *args, **kwargs):
-        """dropdownlarda daha okunaklı isimler göster"""
         super().__init__(*args, **kwargs)
-        self.fields['course'].label_from_instance = lambda obj: f"{obj.course_code} - {obj.course_name}"
-        self.fields['student'].label_from_instance = lambda obj: obj.get_full_name() or obj.username
+        self.fields['course'].label_from_instance = (
+            lambda obj: f"{obj.course_code} - {obj.course_name}"
+        )
+        self.fields['students'].label_from_instance = (
+            lambda obj: obj.get_full_name() or obj.username
+        )
 
 
 class SyllabusForm(forms.ModelForm):
@@ -169,3 +170,6 @@ class GradeForm(forms.ModelForm):
         if course is not None:
             # Sadece o derse kayıtlı öğrenciler görünsün
             self.fields['student'].queryset = course.students.all().order_by('last_name', 'first_name')
+
+class GradeUploadForm(forms.Form):
+    file = forms.FileField(label="Excel Dosyası")

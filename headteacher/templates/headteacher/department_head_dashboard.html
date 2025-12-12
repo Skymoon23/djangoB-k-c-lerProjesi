@@ -183,7 +183,7 @@
             {% for course in all_courses %}
                 <li>
                     <strong>{{ course.course_code }}</strong> - {{ course.course_name }}
-                    
+
                     <div style="margin-top: 5px; font-size: 0.9em; color: #555;">
                         <strong>Atanan Hocalar:</strong>
                         {% for instructor in course.instructors.all %}
@@ -244,7 +244,7 @@
             {% for student in all_students %}
                 <li>
                     <strong>{{ student.get_full_name|default:student.username }}</strong>
-                    
+
                     <div style="margin-top: 5px; font-size: 0.9em; color: #555;">
                         <strong>Kayıtlı Dersler:</strong>
                         {% for course in student.enrolled_courses.all %}
@@ -262,4 +262,3 @@
 
 </body>
 </html>
-

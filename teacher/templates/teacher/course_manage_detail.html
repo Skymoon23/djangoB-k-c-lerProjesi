@@ -30,6 +30,7 @@
 
     <hr>
 
+    <!-- Değerlendirme Bileşenleri -->
     <div class="form-section">
         <h3>Değerlendirme Bileşenleri (Sınavlar, Yüzdeler)</h3>
         <ul>
@@ -50,6 +51,7 @@
 
     <hr>
 
+    <!-- Öğrenim Çıktıları -->
     <div class="form-section">
         <h3>Öğrenim Çıktıları</h3>
         <ol>
@@ -70,6 +72,7 @@
 
     <hr>
 
+    <!-- Not Girişi -->
     <div class="form-section">
         <h3>Not Girişi</h3>
         <p>Bu derse kayıtlı {{ students.count }} öğrenci bulunmaktadır.</p>
@@ -112,6 +115,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
                 <br>
                 <button type="submit" name="submit_grades">Tüm Notları Kaydet</button>
             </form>
@@ -120,6 +124,7 @@
 
     <hr>
 
+    <!-- Learning Outcome Skorları -->
     <div class="form-section">
         <h3>Öğrencilerin Learning Outcome Skorları</h3>
         <p>Her öğrencinin learning outcome'ları ne kadar öğrenebildiğini görebilirsiniz.</p>
@@ -157,11 +162,8 @@
                     {% endfor %}
                 </tbody>
             </table>
-            
         {% endif %}
     </div>
 
 </body>
 </html>
-
-

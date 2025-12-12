@@ -34,6 +34,12 @@ urlpatterns = [
         "course/<int:course_id>/manage-component-outcomes/",
         views.manage_component_weights,
         name="manage_course_component_weights",
+
+    ),
+    path(
+        'upload-grades/',
+        views.upload_grades,
+        name='upload_grades'  # Bu ismi, 'redirect' fonksiyonunda kullandık.
     ),
 ]
 
