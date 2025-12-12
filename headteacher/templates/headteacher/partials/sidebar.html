@@ -1,0 +1,60 @@
+{% with current=request.resolver_match.url_name %}
+<nav class="d-grid gap-1">
+
+  <a href="{% url 'department_head_dashboard' %}"
+     class="nav-link {% if current == 'department_head_dashboard' %}active{% endif %}">
+    Dashboard
+  </a>
+
+  <a href="{% url 'department_head_quick_actions' %}"
+     class="nav-link {% if current == 'department_head_quick_actions' %}active{% endif %}">
+    Hızlı İşlemler
+  </a>
+
+  <a href="{% url 'department_head_create_program_outcome' %}"
+     class="nav-link {% if current == 'department_head_create_program_outcome' %}active{% endif %}">
+    Yeni Program Çıktısı Ekle
+  </a>
+
+  <!-- ÇIKTI YÖNETİMİ (CLICK İLE AÇILAN) -->
+  <div class="pc-submenu">
+    <a href="javascript:void(0)"
+       class="nav-link {% if current in 'manage_lo_po_weights view_outcomes po_achievement' %}active{% endif %}"
+       id="toggleOutcomes">
+      Çıktı Yönetimi
+      <span class="pc-caret">›</span>
+    </a>
+
+    <div class="pc-submenu-panel">
+      <a href="{% url 'manage_lo_po_weights' %}" class="nav-link">
+        LO–PO Ağırlıkları
+      </a>
+      <a href="{% url 'view_outcomes' %}" class="nav-link">
+        LO / PO İlişkileri
+      </a>
+      <a href="{% url 'po_achievement' %}" class="nav-link">
+        PO Öğrenilme Durumu
+      </a>
+    </div>
+  </div>
+
+  <hr />
+
+  <a href="{% url 'department_head_courses' %}" class="nav-link">
+    Tüm Dersler
+  </a>
+
+  <a href="{% url 'department_head_program_outcomes' %}" class="nav-link">
+    Program Çıktıları
+  </a>
+
+  <a href="{% url 'department_head_instructors' %}" class="nav-link">
+    Öğretim Görevlileri
+  </a>
+
+  <a href="{% url 'department_head_students' %}" class="nav-link">
+    Öğrenciler
+  </a>
+
+</nav>
+{% endwith %}

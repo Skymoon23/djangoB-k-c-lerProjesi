@@ -1,0 +1,35 @@
+{% extends "headteacher/base_headteacher.html" %}
+{% block title %}Program Çıktıları{% endblock %}
+
+{% block content %}
+  <h2 class="mb-4">Program Çıktıları</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <ul class="list-group list-group-flush">
+        {% for po in all_program_outcomes %}
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div>
+              <strong>{{ po.code }}:</strong> {{ po.description }}
+            </div>
+
+            <div class="d-flex gap-2">
+              <a class="btn btn-sm btn-warning" href="{% url 'edit_program_outcome' po.id %}">
+                Düzenle
+              </a>
+
+              <form method="POST" action="{% url 'delete_program_outcome' po.id %}" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger">
+                  Sil
+                </button>
+              </form>
+            </div>
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Sistemde kayıtlı program çıktısı bulunmamaktadır.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

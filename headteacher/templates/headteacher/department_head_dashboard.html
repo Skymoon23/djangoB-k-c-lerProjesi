@@ -1,264 +1,70 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bölüm Başkanı Paneli</title>
-    <style>
-        body { font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 1200px; margin: auto; }
-        h1, h2, h3 { color: #333; }
-        .summary-box { display: flex; justify-content: space-around; background-color: #f4f4f4; padding: 20px; border-radius: 5px; margin-bottom: 30px; }
-        .summary-item { text-align: center; }
-        .summary-item h2 { margin: 0 0 5px 0; }
-        .summary-item p { margin: 0; font-size: 1.2em; color: #555; }
-        .list-section { margin-bottom: 30px; }
-        ul { list-style-type: none; padding-left: 0; }
-        li { background-color: #f9f9f9; border: 1px solid #ddd; padding: 10px 15px; margin-bottom: 8px; border-radius: 4px; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 30px 0; }
-        
-        /* Form stilleri */
-        .form-container { display: flex; flex-wrap: wrap; /* Esnekliği artırmak için wrap eklendi */ gap: 30px; }
-        .form-section { flex: 1; min-width: 300px; background-color: #fcfcfc; border: 1px solid #eee; padding: 20px; border-radius: 5px; }
-        .form-section form p { margin-bottom: 15px; }
-        .form-section label { display: block; font-weight: bold; margin-bottom: 5px; }
-        .form-section input[type="text"], .form-section select, .form-section textarea {
-            width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;
-        }
-        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 4px; font-size: 1em; transition: background 0.2s ease; }
-        button:hover { background-color: #0056b3; }
-        .po-action-form { display: inline; }
-        .po-action-btn {
-            border: none;
-            border-radius: 4px;
-            padding: 4px 12px;
-            font-size: 0.78rem;
-            line-height: 1;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            text-align: center;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 70px;
-            height: 28px;
-        }
-        .po-delete-btn {
-            background-color: #e74c3c;
-            color: #fff;
-        }
-        .po-delete-btn:hover { background-color: #c0392b; }
-        .po-edit-btn {
-            background-color: #f1c40f;
-            color: #2c3e50;
-        }
-        .po-edit-btn:hover { background-color: #d4ac0d; }
-        .program-outcome-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .program-outcome-actions {
-            margin-left: auto;
-            display: flex;
-            gap: 8px;
-        }
+{% extends "headteacher/base_headteacher.html" %}
 
-        /* Mesaj stilleri */
-        .messages { list-style-type: none; padding: 0; margin-bottom: 20px; }
-        .messages li { padding: 10px; border-radius: 5px; }
-        .messages li.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .messages li.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    </style>
-</head>
-<body>
+{% block title %}Bölüm Başkanı Dashboard{% endblock %}
 
-    <h1>Bölüm Başkanı Paneli</h1>
-    <p>Merhaba, {{ request.user.get_full_name }}Sisteme hoş geldiniz</p>
-    <p>
-        <form method="POST" action="{% url 'logout' %}" style="display: inline; margin: 0; padding: 0;">
-            {% csrf_token %}
-            <button type="submit" style="background: none; border: none; color: #007bff; text-decoration: underline; cursor: pointer; padding: 0; font-family: inherit; font-size: inherit;">
-                [Çıkış Yap]
-            </button>
-        </form>
-    </p>
+{% block extra_head %}
+<style>
+  .summary-box {
+    display: flex;
+    justify-content: space-around;
+    gap: 16px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .summary-item {
+    text-align: center;
+    min-width: 180px;
+  }
+  .summary-item h2 {
+    margin: 0 0 6px 0;
+    font-weight: 800;
+  }
+  .summary-item p {
+    margin: 0;
+    font-size: 1.05em;
+    color: #555;
+  }
+</style>
+{% endblock %}
 
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+{% block content %}
 
-    <hr>
-    <h2>Sistem Özeti</h2>
-    <div class="summary-box">
-        <div class="summary-item">
-            <h2>{{ course_count }}</h2>
-            <p>Toplam Ders</p>
-        </div>
-        <div class="summary-item">
-            <h2>{{ instructor_count }}</h2>
-            <p>Toplam Öğretim Görevlisi</p>
-        </div>
-        <div class="summary-item">
-            <h2>{{ student_count }}</h2>
-            <p>Toplam Öğrenci</p>
-        </div>
+  <h1 class="mb-2">Bölüm Başkanı Paneli</h1>
+  <p class="text-muted mb-4">
+    Merhaba, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong> — sisteme hoş geldiniz.
+  </p>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <h2 class="h5 mb-3">Sistem Özeti</h2>
+  <div class="summary-box">
+    <div class="summary-item">
+      <h2>{{ course_count }}</h2>
+      <p>Toplam Ders</p>
     </div>
-
-    <hr>
-
-    <h2>Hızlı İşlemler</h2>
-    <div class="form-container">
-        <div class="form-section">
-            <h3>Yeni Ders Ekle</h3>
-            <form method="POST">
-                {% csrf_token %}
-                {{ course_form.as_p }}
-                <button type="submit" name="submit_course_create">Dersi Kaydet</button>
-            </form>
-        </div>
-
-        <div class="form-section">
-            <h3>Derse Hoca Ata</h3>
-            <form method="POST">
-                {% csrf_token %}
-                {{ assign_form.as_p }}
-                <button type="submit" name="submit_instructor_assign">Hocayı Ata</button>
-            </form>
-        </div>
-
-        <div class="form-section">
-            <h3>Derse Öğrenci Ata</h3>
-            <form method="POST">
-                {% csrf_token %}
-                {{ student_assign_form.as_p }}
-                <button type="submit" name="submit_student_assign">Öğrenciyi Ata</button>
-            </form>
-        </div>
-
-        <div class="form-section">
-            <h3>Yeni Program Çıktısı Ekle</h3>
-            <form method="POST">
-                {% csrf_token %}
-                {{ program_outcome_form.as_p }}
-                <button type="submit" name="submit_program_outcome">Program Çıktısı Ekle</button>
-            </form>
-        </div>
-
+    <div class="summary-item">
+      <h2>{{ instructor_count }}</h2>
+      <p>Toplam Öğretim Görevlisi</p>
     </div>
-
-    <hr>
-
-    <div class="list-section">
-        <h2>Çıktı Yönetimi</h2>
-        <ul>
-            <li>
-                <a href="{% url 'manage_lo_po_weights' %}">
-                    Learning Outcome - Program Outcome Ağırlıklarını Yönet
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'view_outcomes' %}">
-                    Derslerin Learning Outcome ve Program Outcome İlişkilerini Görüntüle
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'po_achievement' %}">
-                    Program Outcome'larının Öğrenilme Durumunu Görüntüle
-                </a>
-            </li>
-        </ul>
+    <div class="summary-item">
+      <h2>{{ student_count }}</h2>
+      <p>Toplam Öğrenci</p>
     </div>
+  </div>
 
-    <hr>
+  <!-- Sağ içerik alanı şimdilik boş: sidebar'dan sayfalara gidilecek -->
+  <div class="text-muted">
+    Soldaki menüden bir işlem seç.
+  </div>
 
-    <div class="list-section">
-        <h2>Tüm Dersler ({{ course_count }})</h2>
-        <ul>
-            {% for course in all_courses %}
-                <li>
-                    <strong>{{ course.course_code }}</strong> - {{ course.course_name }}
-
-                    <div style="margin-top: 5px; font-size: 0.9em; color: #555;">
-                        <strong>Atanan Hocalar:</strong>
-                        {% for instructor in course.instructors.all %}
-                            {{ instructor.get_full_name|default:instructor.username }}{% if not forloop.last %}, {% endif %}
-                        {% empty %}
-                            (Henüz hoca atanmamış)
-                        {% endfor %}
-                    </div>
-                </li>
-            {% empty %}
-                <li>Sistemde kayıtlı ders bulunmamaktadır.</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="list-section">
-        <h2>Program Çıktıları</h2>
-        <ul>
-            {% for po in all_program_outcomes %}
-                <li class="program-outcome-item">
-                    <div>
-                    <strong>{{ po.code }}:</strong> {{ po.description }}
-                    </div>
-                    <div class="program-outcome-actions">
-                        <form method="GET" action="{% url 'edit_program_outcome' po.id %}" class="po-action-form">
-                            <button type="submit" class="po-action-btn po-edit-btn">
-                                Düzenle
-                            </button>
-                        </form>
-                        <form method="POST" action="{% url 'delete_program_outcome' po.id %}" class="po-action-form">
-                            {% csrf_token %}
-                            <button type="submit" class="po-action-btn po-delete-btn">
-                                Sil
-                            </button>
-                        </form>
-                    </div>
-                </li>
-            {% empty %}
-                <li>Sistemde kayıtlı program çıktısı bulunmamaktadır.</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="list-section">
-        <h2>Öğretim Görevlileri ({{ instructor_count }})</h2>
-        <ul>
-            {% for instructor in all_instructors %}
-                <li>{{ instructor.get_full_name|default:instructor.username }}</li>
-            {% empty %}
-                <li>Sistemde kayıtlı öğretim görevlisi bulunmamaktadır.</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="list-section">
-        <h2>Öğrenciler ({{ student_count }})</h2>
-        <ul>
-            {% for student in all_students %}
-                <li>
-                    <strong>{{ student.get_full_name|default:student.username }}</strong>
-
-                    <div style="margin-top: 5px; font-size: 0.9em; color: #555;">
-                        <strong>Kayıtlı Dersler:</strong>
-                        {% for course in student.enrolled_courses.all %}
-                            {{ course.course_code }}{% if not forloop.last %}, {% endif %}
-                        {% empty %}
-                            (Henüz bir derse kayıtlı değil)
-                        {% endfor %}
-                    </div>
-                </li>
-            {% empty %}
-                <li>Sistemde kayıtlı öğrenci bulunmamaktadır.</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-</body>
-</html>
+{% endblock %}

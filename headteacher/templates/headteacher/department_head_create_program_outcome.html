@@ -1,0 +1,18 @@
+{% extends "headteacher/base_headteacher.html" %}
+{% block title %}Yeni Program Çıktısı{% endblock %}
+
+{% block content %}
+  <h2 class="mb-4">Yeni Program Çıktısı Ekle</h2>
+
+  <div class="card shadow-sm" style="max-width: 800px;">
+    <div class="card-body">
+      <form method="POST">
+        {% csrf_token %}
+        {{ program_outcome_form.as_p }}
+        <button type="submit" name="submit_program_outcome" class="btn btn-primary">
+          Program Çıktısı Ekle
+        </button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

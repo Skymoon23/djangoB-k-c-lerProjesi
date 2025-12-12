@@ -1,0 +1,53 @@
+{% extends "headteacher/base_headteacher.html" %}
+{% block title %}Hızlı İşlemler{% endblock %}
+
+{% block content %}
+  <h2 class="mb-4">Hızlı İşlemler</h2>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="mb-3">Yeni Ders Ekle</h5>
+          <form method="POST">
+            {% csrf_token %}
+            {{ course_form.as_p }}
+            <button type="submit" name="submit_course_create" class="btn btn-primary w-100">
+              Dersi Kaydet
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="mb-3">Derse Hoca Ata</h5>
+          <form method="POST">
+            {% csrf_token %}
+            {{ assign_form.as_p }}
+            <button type="submit" name="submit_instructor_assign" class="btn btn-primary w-100">
+              Hocayı Ata
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="mb-3">Derse Öğrenci Ata</h5>
+          <form method="POST">
+            {% csrf_token %}
+            {{ student_assign_form.as_p }}
+            <button type="submit" name="submit_student_assign" class="btn btn-primary w-100">
+              Öğrenciyi Ata
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

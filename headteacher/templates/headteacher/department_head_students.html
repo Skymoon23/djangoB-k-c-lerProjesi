@@ -1,0 +1,28 @@
+{% extends "headteacher/base_headteacher.html" %}
+{% block title %}Öğrenciler{% endblock %}
+
+{% block content %}
+  <h2 class="mb-4">Öğrenciler ({{ student_count }})</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <ul class="list-group list-group-flush">
+        {% for student in all_students %}
+          <li class="list-group-item">
+            <strong>{{ student.get_full_name|default:student.username }}</strong>
+            <div class="mt-2 small text-muted">
+              <strong>Kayıtlı Dersler:</strong>
+              {% for course in student.enrolled_courses.all %}
+                {{ course.course_code }}{% if not forloop.last %}, {% endif %}
+              {% empty %}
+                (Henüz bir derse kayıtlı değil)
+              {% endfor %}
+            </div>
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Sistemde kayıtlı öğrenci bulunmamaktadır.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

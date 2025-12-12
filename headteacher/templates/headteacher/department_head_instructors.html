@@ -1,0 +1,20 @@
+{% extends "headteacher/base_headteacher.html" %}
+{% block title %}Öğretim Görevlileri{% endblock %}
+
+{% block content %}
+  <h2 class="mb-4">Öğretim Görevlileri ({{ instructor_count }})</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <ul class="list-group list-group-flush">
+        {% for instructor in all_instructors %}
+          <li class="list-group-item">
+            {{ instructor.get_full_name|default:instructor.username }}
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Sistemde kayıtlı öğretim görevlisi bulunmamaktadır.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "headteacher/base_headteacher.html" %}
+{% block title %}Tüm Dersler{% endblock %}
+
+{% block content %}
+  <h2 class="mb-4">Tüm Dersler ({{ course_count }})</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <ul class="list-group list-group-flush">
+        {% for course in all_courses %}
+          <li class="list-group-item">
+            <strong>{{ course.course_code }}</strong> - {{ course.course_name }}
+            <div class="mt-2 small text-muted">
+              <strong>Atanan Hocalar:</strong>
+              {% for instructor in course.instructors.all %}
+                {{ instructor.get_full_name|default:instructor.username }}{% if not forloop.last %}, {% endif %}
+              {% empty %}
+                (Henüz hoca atanmamış)
+              {% endfor %}
+            </div>
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Sistemde kayıtlı ders bulunmamaktadır.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

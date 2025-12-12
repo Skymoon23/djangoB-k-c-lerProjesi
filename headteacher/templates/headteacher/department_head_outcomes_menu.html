@@ -1,0 +1,53 @@
+{% extends "headteacher/base_headteacher.html" %}
+{% block title %}Çıktı Yönetimi{% endblock %}
+
+{% block content %}
+  <h2 class="mb-4">Çıktı Yönetimi</h2>
+  <p class="text-muted">
+    Aşağıdaki ekranlardan devam edebilirsiniz.
+  </p>
+
+  <div class="row g-4 mt-2">
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="mb-2">LO–PO Ağırlıkları</h5>
+          <p class="text-muted small">
+            Learning Outcome → Program Outcome ağırlıklarını 1–5 arası belirleyin.
+          </p>
+          <a class="btn btn-primary w-100" href="{% url 'manage_lo_po_weights' %}">
+            Aç
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="mb-2">LO/PO İlişkileri</h5>
+          <p class="text-muted small">
+            Ders bileşenleri → LO ve LO → PO ilişkilerini görüntüleyin.
+          </p>
+          <a class="btn btn-primary w-100" href="{% url 'view_outcomes' %}">
+            Aç
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="mb-2">PO Öğrenilme Durumu</h5>
+          <p class="text-muted small">
+            Program outcome’ların öğrenci skor özetlerini görüntüleyin.
+          </p>
+          <a class="btn btn-primary w-100" href="{% url 'po_achievement' %}">
+            Aç
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

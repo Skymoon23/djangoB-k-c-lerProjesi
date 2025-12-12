@@ -42,6 +42,3 @@ urlpatterns = [
         name='upload_grades'  # Bu ismi, 'redirect' fonksiyonunda kullandık.
     ),
 ]
-
-
-conf
