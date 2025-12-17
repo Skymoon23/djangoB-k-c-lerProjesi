@@ -37,7 +37,7 @@ urlpatterns = [
 
     ),
     path(
-        'upload-grades/',
+        'course/<int:course_id>/upload-grades/',
         views.upload_grades,
         name='upload_grades'  # Bu ismi, 'redirect' fonksiyonunda kullandık.
     ),
