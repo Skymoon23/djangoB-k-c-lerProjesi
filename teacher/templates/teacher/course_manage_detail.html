@@ -98,7 +98,7 @@
         <div class="grade-actions">
           <button type="submit" name="submit_grades">Tüm Notları Kaydet</button>
 
-          <a href="{% url 'instructor_csv_upload_placeholder' course.id %}">
+          <a href="{% url 'upload_grades' course.id %}">
             <button type="button">CSV ile Not Yükle</button>
           </a>
         </div>

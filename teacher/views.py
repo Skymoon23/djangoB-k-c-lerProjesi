@@ -320,7 +320,7 @@ def manage_component_weights(request, course_id=None):
 
 @login_required
 @user_is_instructor # Bölüm başkanının yapacağı bir işlem varsayıyorum, gerekiyorsa yetkiyi kontrol edin
-def upload_grades(request):
+def upload_grades(request, course_id):
     """Excel dosyası yükleyerek notları sisteme toplu kaydetme/güncelleme."""
     # Sizin form tanımınız GradeUploadForm() olduğu varsayılmıştır.
     # Bu formun sadece bir FileField içerdiği varsayılmıştır.
