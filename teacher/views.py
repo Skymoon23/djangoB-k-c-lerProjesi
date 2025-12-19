@@ -326,6 +326,7 @@ def upload_grades(request, course_id):
     # Bu formun sadece bir FileField içerdiği varsayılmıştır.
     from course_management.forms import GradeUploadForm
 
+    course = get_object_or_404(Course, id=course_id, instructors=request.user)
 
     if request.method == "POST":
         form = GradeUploadForm(request.POST, request.FILES)
@@ -338,7 +339,7 @@ def upload_grades(request, course_id):
                 df = pd.read_excel(file)
             except Exception as e:
                 messages.error(request, f"Dosya okunamadı veya formatı hatalı: {e}")
-                return redirect("upload_grades")
+                return redirect("upload_grades", course_id=course.id)
 
             kayit_sayisi = 0
             eslesmeyen_ogrenciler = []
@@ -393,12 +394,12 @@ def upload_grades(request, course_id):
                                  )
 
             messages.success(request, f"Başarıyla {kayit_sayisi} not sisteme işlendi.")
-            return redirect("upload_grades")
+            return redirect("upload_grades", course_id=course.id)
     else:
         # Formun yüklenmesi
         form = GradeUploadForm()
 
-    return render(request, "teacher/upload_grades.html", {"form": form})
+    return render(request, "teacher/upload_grades.html", {"form": form, "course": course })
 
 def instructor_csv_upload_placeholder(request, course_id):
     return render(request, "teacher/csv_upload_placeholder.html", {"course_id": course_id})
