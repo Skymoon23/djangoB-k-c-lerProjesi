@@ -6,21 +6,52 @@
     <title>Toplu Not Yükleme Sayfası</title>
 
     <style>
-        /* Bu stiller, attığınız 'course_manage_detail.html' dosyasındaki stillere benzer şekilde ayarlanmıştır. */
-        body { font-family: sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: auto; background-color: #f8f8f8; }
-        h1, h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        body { 
+            font-family: sans-serif; 
+            line-height: 1.6; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: auto; 
+            background-color: #f8f8f8; 
+        }
+        h1, h2 { 
+            color: #333; 
+            border-bottom: 2px solid #eee; 
+            padding-bottom: 10px; 
+        }
         p { color: #555; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        hr { border: 0; border-top: 1px solid #ddd; margin: 20px 0; }
+        a { text-decoration: none; }
+        hr { 
+            border: 0; 
+            border-top: 1px solid #ddd; 
+            margin: 20px 0; 
+        }
 
-        /* Form Stilleri */
-        form { background-color: #ffffff; border: 1px solid #ddd; padding: 20px; margin-top: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .form-label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
-        /* input[type="file"] yerine aşağıdaki stil, form alanını daha iyi gösterir */
-        input[type="file"] { border: 1px solid #ccc; padding: 10px; border-radius: 4px; display: block; width: 100%; box-sizing: border-box; }
+        form { 
+            background-color: #ffffff; 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            margin-top: 20px; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+        }
+        .form-label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+            color: #333; 
+        }
+        input[type="file"] { 
+            border: 1px solid #ccc; 
+            padding: 10px; 
+            border-radius: 4px; 
+            display: block; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+
         .btn-primary {
-            background-color: #28a745; /* Yeşil renk */
+            background-color: #28a745;
             color: white;
             border: none;
             padding: 10px 15px;
@@ -30,25 +61,44 @@
         }
         .btn-primary:hover { background-color: #218838; }
 
-        /* Geri Dön Buton Stili */
-        .btn-secondary {
-            background-color: #6c757d; /* Gri renk */
+        /* 🔵 yeni geri dön butonu */
+        .btn-back {
+            background-color: #007bff;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 6px 10px;
+            font-size: 14px;
             border-radius: 4px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
             margin-bottom: 20px;
         }
-        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-back:hover {
+            background-color: #0056b3;
+        }
 
-        /* Mesaj Stilleri (Başarı/Hata) */
-        .alert { padding: 10px; margin-bottom: 15px; border-radius: 4px; border: 1px solid transparent; }
-        .alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
-        .alert-warning { color: #856404; background-color: #fff3cd; border-color: #ffeeba; }
-        .alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }
+        .alert { 
+            padding: 10px; 
+            margin-bottom: 15px; 
+            border-radius: 4px; 
+            border: 1px solid transparent; 
+        }
+        .alert-success { 
+            color: #155724; 
+            background-color: #d4edda; 
+            border-color: #c3e6cb; 
+        }
+        .alert-warning { 
+            color: #856404; 
+            background-color: #fff3cd; 
+            border-color: #ffeeba; 
+        }
+        .alert-danger { 
+            color: #721c24; 
+            background-color: #f8d7da; 
+            border-color: #f5c6cb; 
+        }
     </style>
 </head>
 <body>
@@ -58,11 +108,11 @@
         <p>Bölüm Başkanı/Yönetici paneli.</p>
         <hr>
 
-        <a href="{% url 'instructor_dashboard' %}" class="btn-secondary">
-            &larr; Derslerime Geri Dön
+        <!-- 🔵 yeni buton -->
+        <a href="{% url 'manage_course' course.id %}" class="btn-back">
+            &larr; Dersi Yönet Sayfasına Geri Dön
         </a>
 
-        {# Django'nun messages çerçevesini kullanarak hata ve başarı mesajlarını gösterelim #}
         {% if messages %}
             <ul class="list-unstyled">
             {% for message in messages %}
@@ -74,22 +124,36 @@
         {% endif %}
 
         <h2>Not Dosyası Yükleme</h2>
-        <p>Lütfen öğrencilerin **username** (veya kullanıyorsanız student_number), **component_name** (Vize1, Final gibi) ve **score** sütunlarını içeren dosyayı yükleyiniz. Dosya formatı **.xlsx** veya **.csv** olmalıdır.</p>
+        <p>
+            Lütfen öğrencilerin 
+            <strong>username</strong>,
+            <strong>component_name</strong> 
+            ve 
+            <strong>score</strong>
+            sütunlarını içeren dosyayı yükleyiniz. 
+            Format: <strong>.xlsx</strong> veya <strong>.csv</strong>
+        </p>
 
-        {# DOSYA YÜKLEME FORMU #}
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
             <div class="mb-3">
-                <label for="{{ form.file.id_for_label }}" class="form-label">Not Dosyasını Seçin:</label>
+                <label for="{{ form.file.id_for_label }}" class="form-label">
+                    Not Dosyasını Seçin:
+                </label>
+
                 {{ form.file }}
 
                 {% if form.file.errors %}
-                    <div class="alert alert-danger mt-2">{{ form.file.errors }}</div>
+                    <div class="alert alert-danger mt-2">
+                        {{ form.file.errors }}
+                    </div>
                 {% endif %}
             </div>
 
-            <button type="submit" class="btn-primary">Notları Yükle ve Kaydet</button>
+            <button type="submit" class="btn-primary">
+                Notları Yükle ve Kaydet
+            </button>
         </form>
 
     </div>
