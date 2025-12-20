@@ -3,6 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from course_management.forms import LearningOutcomeForm
+
 
 from course_management.decorators import user_is_department_head
 from course_management.forms import (
@@ -357,3 +359,42 @@ def edit_program_outcome(request, outcome_id):
         "form": form,
         "program_outcome": program_outcome
     })
+
+# =========================
+# LO EDIT
+# =========================
+@login_required
+@user_is_department_head
+def edit_learning_outcome(request, outcome_id):
+    outcome = get_object_or_404(LearningOutcome, id=outcome_id)
+
+    if request.method == "POST":
+        form = LearningOutcomeForm(request.POST, instance=outcome)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Learning outcome güncellendi.")
+            return redirect("manage_lo_po_weights")
+        messages.error(request, "Form hatalı.")
+    else:
+        form = LearningOutcomeForm(instance=outcome)
+
+    return render(request, "headteacher/edit_learning_outcome.html", {
+        "form": form,
+        "outcome": outcome,
+    })
+
+# =========================
+# LO DELETE
+# =========================
+@login_required
+@user_is_department_head
+def delete_learning_outcome(request, outcome_id):
+    outcome = get_object_or_404(LearningOutcome, id=outcome_id)
+
+    if request.method == "POST":
+        outcome.delete()
+        messages.success(request, "Learning outcome silindi.")
+    else:
+        messages.error(request, "Silme işlemi POST ile yapılmalı.")
+
+    return redirect("manage_lo_po_weights")
