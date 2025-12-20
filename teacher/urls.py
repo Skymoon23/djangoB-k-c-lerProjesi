@@ -52,6 +52,19 @@ urlpatterns = [
         views.delete_component,
         name="delete_component",
     ),
+
+    # LEARNING OUTCOME edit/delete
+path(
+    "course/<int:course_id>/outcomes/<int:outcome_id>/edit/",
+    views.edit_outcome,
+    name="edit_outcome",
+),
+path(
+    "course/<int:course_id>/outcomes/<int:outcome_id>/delete/",
+    views.delete_outcome,
+    name="delete_outcome",
+),
+
     
 
    path("course/<int:course_id>/", views.course_home, name="course_home"),

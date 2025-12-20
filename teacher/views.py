@@ -502,3 +502,39 @@ def delete_component(request, course_id, component_id):
 
     # GET ile gelinirse direkt derse geri gönder (ayrı confirm sayfası istemiyorsan)
     return redirect("course_home", course_id=course.id)
+
+@login_required
+@user_is_instructor
+def edit_outcome(request, course_id, outcome_id):
+    course = get_object_or_404(Course, id=course_id, instructors=request.user)
+    outcome = get_object_or_404(LearningOutcome, id=outcome_id, course=course)
+
+    if request.method == "POST":
+        form = LearningOutcomeForm(request.POST, instance=outcome)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Learning outcome güncellendi.")
+            return redirect("course_home", course_id=course.id)
+    else:
+        form = LearningOutcomeForm(instance=outcome)
+
+    return render(
+        request,
+        "teacher/add_learning_outcome.html",
+        {"course": course, "form": form, "outcome": outcome},
+    )
+
+
+@login_required
+@user_is_instructor
+def delete_outcome(request, course_id, outcome_id):
+    course = get_object_or_404(Course, id=course_id, instructors=request.user)
+    outcome = get_object_or_404(LearningOutcome, id=outcome_id, course=course)
+
+    if request.method == "POST":
+        name = outcome.description[:40]
+        outcome.delete()
+        messages.success(request, f"Outcome silindi: {name}")
+        return redirect("course_home", course_id=course.id)
+
+    return redirect("course_home", course_id=course.id)

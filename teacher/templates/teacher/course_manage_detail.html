@@ -9,7 +9,7 @@
   table { width:100%; border-collapse: collapse; margin-bottom: 20px; }
   th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
   th { background-color: #f4f4f4; }
-  form { background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 12px; }
+  form { border-radius: 12px; }
   ul, ol { padding-left: 20px; }
   .form-section { margin-bottom: 30px; }
 
@@ -21,20 +21,20 @@
   }
   .csv-hint { color:#666; font-size: 12px; margin-top: 6px; }
 
-  .component-list {
+  .component-list, .outcome-list {
     list-style: none;
     padding-left: 0;
     margin: 0;
   }
-  .component-item {
+  .component-item, .outcome-item {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 8px;
   }
-  .component-name {
+  .component-name, .outcome-name {
     font-weight: 400;
-    width: 180px;
+    width: 300px;
   }
 
   .btn-small-solid {
@@ -47,17 +47,16 @@
   }
   .btn-green { background-color: #28a745; }
   .btn-green:hover { background-color: #218838; }
-
   .btn-red { background-color: #dc3545; }
   .btn-red:hover { background-color: #b02a37; }
 
+  .outcome-item form,
   .component-item form {
-  background: none !important;
-  border: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 </style>
 {% endblock %}
 
@@ -75,18 +74,12 @@
             {{ component.name }}: %{{ component.percentage }}
           </span>
 
-          <!-- Düzenle -->
           <a href="{% url 'edit_component' course.id component.id %}">
-            <button type="button"
-                    class="btn-small-solid btn-green">
-              Düzenle
-            </button>
+            <button type="button" class="btn-small-solid btn-green">Düzenle</button>
           </a>
 
-          <!-- Sil -->
           <form method="POST"
-                action="{% url 'delete_component' course.id component.id %}"
-                style="margin:0;">
+                action="{% url 'delete_component' course.id component.id %}">
             {% csrf_token %}
             <button type="submit"
                     class="btn-small-solid btn-red"
@@ -107,13 +100,34 @@
   <!-- Öğrenim Çıktıları -->
   <div class="form-section">
     <h3>Öğrenim Çıktıları</h3>
-    <ol>
+
+    <ul class="outcome-list">
       {% for outcome in outcomes %}
-        <li>{{ outcome.description }}</li>
+        <li class="outcome-item">
+
+          <span class="outcome-name">
+            {{ outcome.description }}
+          </span>
+
+          <a href="{% url 'edit_outcome' course.id outcome.id %}">
+            <button type="button" class="btn-small-solid btn-green">Düzenle</button>
+          </a>
+
+          <form method="POST"
+                action="{% url 'delete_outcome' course.id outcome.id %}">
+            {% csrf_token %}
+            <button type="submit"
+                    class="btn-small-solid btn-red"
+                    onclick="return confirm('Silinsin mi?');">
+              Sil
+            </button>
+          </form>
+
+        </li>
       {% empty %}
         <li>Henüz bir öğrenim çıktısı eklenmemiş.</li>
       {% endfor %}
-    </ol>
+    </ul>
   </div>
 
   <hr>
@@ -222,6 +236,5 @@
       </table>
     {% endif %}
   </div>
-
 
 {% endblock %}
