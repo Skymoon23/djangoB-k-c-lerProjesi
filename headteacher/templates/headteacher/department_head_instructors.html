@@ -7,14 +7,54 @@
   <div class="card shadow-sm">
     <div class="card-body">
       <ul class="list-group list-group-flush">
+
         {% for instructor in all_instructors %}
           <li class="list-group-item">
-            {{ instructor.get_full_name|default:instructor.username }}
+
+            <div class="d-flex justify-content-between align-items-start">
+
+              {# SOL: isim + dersler #}
+              <div>
+                <strong>{{ instructor.get_full_name|default:instructor.username }}</strong>
+
+                {% with courses=instructor.courses_taught.all %}
+                  {% if courses %}
+                    <ul class="mt-2 mb-0">
+                      {% for course in courses %}
+                        <li>
+                          <span class="text-muted">
+                            {{ course.course_code }} – {{ course.course_name }}
+                          </span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <p class="text-muted small mt-2 mb-0">
+                      Atanmış ders bulunmuyor.
+                    </p>
+                  {% endif %}
+                {% endwith %}
+              </div>
+
+              {# SAĞ: tam burada buton var #}
+              <div>
+                <a href="{% url 'edit_instructor_courses' instructor.id %}"
+                   class="btn btn-sm btn-outline-primary">
+                  Dersleri Düzenle
+                </a>
+              </div>
+
+            </div>
+
           </li>
         {% empty %}
-          <li class="list-group-item text-muted">Sistemde kayıtlı öğretim görevlisi bulunmamaktadır.</li>
+          <li class="list-group-item text-muted">
+            Sistemde kayıtlı öğretim görevlisi bulunmamaktadır.
+          </li>
         {% endfor %}
+
       </ul>
     </div>
   </div>
+
 {% endblock %}

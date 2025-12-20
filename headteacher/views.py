@@ -8,7 +8,7 @@ from course_management.forms import LearningOutcomeForm
 
 from course_management.decorators import user_is_department_head
 from course_management.forms import (
-    CourseCreateForm, InstructorAssignForm, ProgramOutcomeForm, StudentAssignForm,
+    CourseCreateForm, InstructorAssignForm, ProgramOutcomeForm, StudentAssignForm,InstructorCourseEditForm,
 )
 from course_management.models import (
     Course, Grade, LearningOutcome, LearningOutcomeProgramOutcomeWeight,
@@ -144,6 +144,58 @@ def department_head_instructors(request):
         "all_instructors": all_instructors,
         "instructor_count": all_instructors.count(),
     })
+
+@login_required
+@user_is_department_head
+def edit_instructor_courses(request, instructor_id):
+    instructor = get_object_or_404(
+        User,
+        id=instructor_id,
+        profile__role="instructor"
+    )
+
+    # Tüm dersler
+    all_courses = Course.objects.all().order_by("course_code")
+
+    # Şu anda hocaya atanmış dersler
+    current_courses = instructor.courses_taught.all()
+
+    # Hoca’da olmayan, atanabilir dersler
+    available_courses = all_courses.exclude(
+        id__in=current_courses.values_list("id", flat=True)
+    )
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        course_id = request.POST.get("course_id")
+
+        if course_id:
+            course = get_object_or_404(Course, id=course_id)
+
+            if action == "remove":
+                instructor.courses_taught.remove(course)
+                messages.success(
+                    request,
+                    f"{course.course_code} dersi öğretim görevlisinden kaldırıldı."
+                )
+
+            elif action == "add":
+                instructor.courses_taught.add(course)
+                messages.success(
+                    request,
+                    f"{course.course_code} dersi öğretim görevlisine atandı."
+                )
+
+        # PRG pattern: aynı sayfaya geri dön
+        return redirect("edit_instructor_courses", instructor_id=instructor.id)
+
+    return render(request, "headteacher/edit_instructor_courses.html", {
+        "instructor": instructor,
+        "current_courses": current_courses,
+        "available_courses": available_courses,
+    })
+
+
 
 
 @login_required
@@ -398,3 +450,4 @@ def delete_learning_outcome(request, outcome_id):
         messages.error(request, "Silme işlemi POST ile yapılmalı.")
 
     return redirect("manage_lo_po_weights")
+

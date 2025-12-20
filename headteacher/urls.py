@@ -27,4 +27,10 @@ urlpatterns = [
     path("program-outcome-achievement/", views.po_achievement, name="po_achievement"),
 
 
+    path(
+    "instructors/<int:instructor_id>/edit/",
+    views.edit_instructor_courses,
+    name="edit_instructor_courses"
+),
+
 ]

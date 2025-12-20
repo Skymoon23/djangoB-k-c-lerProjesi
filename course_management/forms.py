@@ -173,3 +173,27 @@ class GradeForm(forms.ModelForm):
 
 class GradeUploadForm(forms.Form):
     file = forms.FileField(label="Excel Dosyası")
+
+
+class InstructorCourseEditForm(forms.Form):
+    """
+    Bölüm başkanının, bir hocanın verdiği dersleri
+    topluca düzenlemesi için form.
+    """
+    courses = forms.ModelMultipleChoiceField(
+        queryset=Course.objects.all().order_by('course_code'),
+        required=False,
+        label="Verdiği Dersler",
+        widget=forms.CheckboxSelectMultiple
+    )
+
+    def __init__(self, *args, **kwargs):
+        instructor = kwargs.pop("instructor", None)
+        super().__init__(*args, **kwargs)
+        # Listeyi daha okunabilir yap
+        self.fields["courses"].label_from_instance = (
+            lambda obj: f"{obj.course_code} – {obj.course_name}"
+        )
+        # Eğer instructor verilmişse başlangıçta onun derslerini işaretle
+        if instructor is not None:
+            self.fields["courses"].initial = instructor.courses_taught.all()
