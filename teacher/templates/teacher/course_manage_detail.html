@@ -57,6 +57,20 @@
     padding: 0 !important;
     margin: 0 !important;
   }
+
+  .btn-red-big {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-red-big:hover {
+  background-color: #b02a37;
+}
+
 </style>
 {% endblock %}
 
@@ -177,11 +191,17 @@
         </table>
 
         <div class="grade-actions">
-          <button type="submit" name="submit_grades">Tüm Notları Kaydet</button>
+          <button type="submit" name="submit_grades" class="btn-red-big">
+  Tüm Notları Kaydet
+</button>
+
 
           <a href="{% url 'upload_grades' course.id %}">
-            <button type="button">CSV ile Not Yükle</button>
-          </a>
+  <button type="button" class="btn-red-big">
+    CSV ile Not Yükle
+  </button>
+</a>
+
         </div>
 
         <div class="csv-hint">(isterseniz csv dosyası da ekleyebilirsiniz)</div>
