@@ -4,20 +4,60 @@
 
 {% block extra_head %}
 <style>
-  /* eski sayfandaki css’ten gerekli olanları burada tutuyoruz */
-  h1 { display:none; } /* başlık base’de var gibi düşün */
+  h1 { display:none; }
   hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
   table { width:100%; border-collapse: collapse; margin-bottom: 20px; }
   th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
   th { background-color: #f4f4f4; }
   form { background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 12px; }
-  button { background-color: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 10px; }
-  button:hover { background-color: #0056b3; }
   ul, ol { padding-left: 20px; }
   .form-section { margin-bottom: 30px; }
 
-  .grade-actions{ display:flex; gap:12px; align-items:center; margin-top: 12px; }
+  .grade-actions{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-top: 12px;
+  }
   .csv-hint { color:#666; font-size: 12px; margin-top: 6px; }
+
+  .component-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+  .component-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .component-name {
+    font-weight: 400;
+    width: 180px;
+  }
+
+  .btn-small-solid {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-green { background-color: #28a745; }
+  .btn-green:hover { background-color: #218838; }
+
+  .btn-red { background-color: #dc3545; }
+  .btn-red:hover { background-color: #b02a37; }
+
+  .component-item form {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 </style>
 {% endblock %}
 
@@ -26,9 +66,36 @@
   <!-- Değerlendirme Bileşenleri -->
   <div class="form-section">
     <h3>Değerlendirme Bileşenleri (Sınavlar, Yüzdeler)</h3>
-    <ul>
+
+    <ul class="component-list">
       {% for component in components %}
-        <li>{{ component.name }}: %{{ component.percentage }}</li>
+        <li class="component-item">
+
+          <span class="component-name">
+            {{ component.name }}: %{{ component.percentage }}
+          </span>
+
+          <!-- Düzenle -->
+          <a href="{% url 'edit_component' course.id component.id %}">
+            <button type="button"
+                    class="btn-small-solid btn-green">
+              Düzenle
+            </button>
+          </a>
+
+          <!-- Sil -->
+          <form method="POST"
+                action="{% url 'delete_component' course.id component.id %}"
+                style="margin:0;">
+            {% csrf_token %}
+            <button type="submit"
+                    class="btn-small-solid btn-red"
+                    onclick="return confirm('Silinsin mi?');">
+              Sil
+            </button>
+          </form>
+
+        </li>
       {% empty %}
         <li>Henüz bir değerlendirme bileşeni eklenmemiş.</li>
       {% endfor %}
@@ -155,5 +222,6 @@
       </table>
     {% endif %}
   </div>
+
 
 {% endblock %}

@@ -458,3 +458,47 @@ def course_components(request, course_id):
 @user_is_instructor
 def course_weights(request, course_id):
     return manage_component_weights(request, course_id=course_id)
+
+@login_required
+@user_is_instructor
+def edit_component(request, course_id, component_id):
+    """Mevcut değerlendirme bileşenini (vize/final vs.) düzenleme."""
+    course = get_object_or_404(Course, id=course_id, instructors=request.user)
+    component = get_object_or_404(EvaluationComponent, id=component_id, course=course)
+
+    if request.method == "POST":
+        form = EvaluationComponentForm(request.POST, instance=component)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Değerlendirme bileşeni güncellendi.")
+            return redirect("course_home", course_id=course.id)
+    else:
+        form = EvaluationComponentForm(instance=component)
+
+    return render(
+        request,
+        "teacher/add_evaluation_component.html",  # yeni template açmak istemezsen mevcut form sayfasını kullanıyoruz
+        {
+            "course": course,
+            "form": form,
+            "component": component,
+            "active_tab": "eval",
+        },
+    )
+
+
+@login_required
+@user_is_instructor
+def delete_component(request, course_id, component_id):
+    """Değerlendirme bileşenini siler."""
+    course = get_object_or_404(Course, id=course_id, instructors=request.user)
+    component = get_object_or_404(EvaluationComponent, id=component_id, course=course)
+
+    if request.method == "POST":
+        name = component.name
+        component.delete()
+        messages.success(request, f"'{name}' bileşeni silindi.")
+        return redirect("course_home", course_id=course.id)
+
+    # GET ile gelinirse direkt derse geri gönder (ayrı confirm sayfası istemiyorsan)
+    return redirect("course_home", course_id=course.id)

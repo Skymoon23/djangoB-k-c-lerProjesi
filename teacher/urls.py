@@ -42,6 +42,16 @@ urlpatterns = [
         name='upload_grades'  # Bu ismi, 'redirect' fonksiyonunda kullandık.
     ),
 
+    path(
+        "course/<int:course_id>/components/<int:component_id>/edit/",
+        views.edit_component,
+        name="edit_component",
+    ),
+    path(
+        "course/<int:course_id>/components/<int:component_id>/delete/",
+        views.delete_component,
+        name="delete_component",
+    ),
     
 
    path("course/<int:course_id>/", views.course_home, name="course_home"),
