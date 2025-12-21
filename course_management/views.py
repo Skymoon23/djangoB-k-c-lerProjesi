@@ -4,6 +4,7 @@ from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
+
 from .models import Profile
 
 
@@ -227,3 +228,4 @@ def import_grades_from_excel(request):
             return redirect("import_grades")
 
     return render(request, "import_grades.html")
+

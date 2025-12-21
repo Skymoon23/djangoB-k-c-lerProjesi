@@ -3,10 +3,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from course_management.forms import LearningOutcomeForm
+
 
 from course_management.decorators import user_is_department_head
 from course_management.forms import (
-    CourseCreateForm, InstructorAssignForm, ProgramOutcomeForm, StudentAssignForm,
+    CourseCreateForm, InstructorAssignForm, ProgramOutcomeForm, StudentAssignForm,InstructorCourseEditForm,
 )
 from course_management.models import (
     Course, Grade, LearningOutcome, LearningOutcomeProgramOutcomeWeight,
@@ -142,6 +144,58 @@ def department_head_instructors(request):
         "all_instructors": all_instructors,
         "instructor_count": all_instructors.count(),
     })
+
+@login_required
+@user_is_department_head
+def edit_instructor_courses(request, instructor_id):
+    instructor = get_object_or_404(
+        User,
+        id=instructor_id,
+        profile__role="instructor"
+    )
+
+    # Tüm dersler
+    all_courses = Course.objects.all().order_by("course_code")
+
+    # Şu anda hocaya atanmış dersler
+    current_courses = instructor.courses_taught.all()
+
+    # Hoca’da olmayan, atanabilir dersler
+    available_courses = all_courses.exclude(
+        id__in=current_courses.values_list("id", flat=True)
+    )
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        course_id = request.POST.get("course_id")
+
+        if course_id:
+            course = get_object_or_404(Course, id=course_id)
+
+            if action == "remove":
+                instructor.courses_taught.remove(course)
+                messages.success(
+                    request,
+                    f"{course.course_code} dersi öğretim görevlisinden kaldırıldı."
+                )
+
+            elif action == "add":
+                instructor.courses_taught.add(course)
+                messages.success(
+                    request,
+                    f"{course.course_code} dersi öğretim görevlisine atandı."
+                )
+
+        # PRG pattern: aynı sayfaya geri dön
+        return redirect("edit_instructor_courses", instructor_id=instructor.id)
+
+    return render(request, "headteacher/edit_instructor_courses.html", {
+        "instructor": instructor,
+        "current_courses": current_courses,
+        "available_courses": available_courses,
+    })
+
+
 
 
 @login_required
@@ -357,3 +411,109 @@ def edit_program_outcome(request, outcome_id):
         "form": form,
         "program_outcome": program_outcome
     })
+
+# =========================
+# LO EDIT
+# =========================
+@login_required
+@user_is_department_head
+def edit_learning_outcome(request, outcome_id):
+    outcome = get_object_or_404(LearningOutcome, id=outcome_id)
+
+    if request.method == "POST":
+        form = LearningOutcomeForm(request.POST, instance=outcome)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Learning outcome güncellendi.")
+            return redirect("manage_lo_po_weights")
+        messages.error(request, "Form hatalı.")
+    else:
+        form = LearningOutcomeForm(instance=outcome)
+
+    return render(request, "headteacher/edit_learning_outcome.html", {
+        "form": form,
+        "outcome": outcome,
+    })
+
+# =========================
+# LO DELETE
+# =========================
+@login_required
+@user_is_department_head
+def delete_learning_outcome(request, outcome_id):
+    outcome = get_object_or_404(LearningOutcome, id=outcome_id)
+
+    if request.method == "POST":
+        outcome.delete()
+        messages.success(request, "Learning outcome silindi.")
+    else:
+        messages.error(request, "Silme işlemi POST ile yapılmalı.")
+
+    return redirect("manage_lo_po_weights")
+
+@login_required
+@user_is_department_head
+def edit_student_courses(request, student_id):
+    # Sadece öğrenci rolündeki kullanıcılar
+    student = get_object_or_404(
+        User,
+        id=student_id,
+        profile__role="student"
+    )
+
+    all_courses = Course.objects.all().order_by("course_code")
+
+    # Öğrencinin şu an kayıtlı olduğu dersler
+    current_courses = student.enrolled_courses.all()
+
+    # Hâlâ kayıt olabileceği (henüz kayıtlı olmadığı) dersler
+    available_courses = all_courses.exclude(
+        id__in=current_courses.values_list("id", flat=True)
+    )
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        course_id = request.POST.get("course_id")
+
+        if course_id:
+            course = get_object_or_404(Course, id=course_id)
+
+            if action == "remove":
+                student.enrolled_courses.remove(course)
+                messages.success(
+                    request,
+                    f"{course.course_code} dersi öğrencinin kayıtlarından kaldırıldı."
+                )
+
+            elif action == "add":
+                student.enrolled_courses.add(course)
+                messages.success(
+                    request,
+                    f"{course.course_code} dersi öğrenciye eklendi."
+                )
+
+        return redirect("edit_student_courses", student_id=student.id)
+
+    return render(request, "headteacher/edit_student_courses.html", {
+        "student": student,
+        "current_courses": current_courses,
+        "available_courses": available_courses,
+    })
+
+@login_required
+@user_is_department_head
+def delete_student(request, student_id):
+    student = get_object_or_404(
+        User,
+        id=student_id,
+        profile__role="student"
+    )
+
+    if request.method == "POST":
+        full_name = student.get_full_name() or student.username
+        student.delete()
+        messages.success(request, f'"{full_name}" adlı öğrenci sistemden silindi.')
+    else:
+        messages.error(request, "Öğrenci silme isteği geçersiz.")
+
+    return redirect("department_head_students")
