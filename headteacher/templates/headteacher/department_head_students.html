@@ -9,18 +9,44 @@
       <ul class="list-group list-group-flush">
         {% for student in all_students %}
           <li class="list-group-item">
-            <strong>{{ student.get_full_name|default:student.username }}</strong>
-            <div class="mt-2 small text-muted">
-              <strong>Kayıtlı Dersler:</strong>
-              {% for course in student.enrolled_courses.all %}
-                {{ course.course_code }}{% if not forloop.last %}, {% endif %}
-              {% empty %}
-                (Henüz bir derse kayıtlı değil)
-              {% endfor %}
+            <div class="d-flex justify-content-between align-items-start">
+
+              {# SOL: isim + dersler #}
+              <div>
+                <strong>{{ student.get_full_name|default:student.username }}</strong>
+                <div class="mt-2 small text-muted">
+                  <strong>Kayıtlı Dersler:</strong>
+                  {% for course in student.enrolled_courses.all %}
+                    {{ course.course_code }}{% if not forloop.last %}, {% endif %}
+                  {% empty %}
+                    (Henüz bir derse kayıtlı değil)
+                  {% endfor %}
+                </div>
+              </div>
+
+              {# SAĞ: Düzenle + Sil butonları #}
+              <div class="d-flex flex-column gap-2">
+                <a href="{% url 'edit_student_courses' student.id %}"
+                   class="btn btn-sm btn-outline-primary">
+                  Dersleri Düzenle
+                </a>
+
+                <form method="post"
+                      action="{% url 'delete_student' student.id %}"
+                      onsubmit="return confirm('Bu öğrenciyi silmek istediğine emin misin?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    Öğrenciyi Sil
+                  </button>
+                </form>
+              </div>
+
             </div>
           </li>
         {% empty %}
-          <li class="list-group-item text-muted">Sistemde kayıtlı öğrenci bulunmamaktadır.</li>
+          <li class="list-group-item text-muted">
+            Sistemde kayıtlı öğrenci bulunmamaktadır.
+          </li>
         {% endfor %}
       </ul>
     </div>

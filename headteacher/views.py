@@ -451,3 +451,69 @@ def delete_learning_outcome(request, outcome_id):
 
     return redirect("manage_lo_po_weights")
 
+@login_required
+@user_is_department_head
+def edit_student_courses(request, student_id):
+    # Sadece öğrenci rolündeki kullanıcılar
+    student = get_object_or_404(
+        User,
+        id=student_id,
+        profile__role="student"
+    )
+
+    all_courses = Course.objects.all().order_by("course_code")
+
+    # Öğrencinin şu an kayıtlı olduğu dersler
+    current_courses = student.enrolled_courses.all()
+
+    # Hâlâ kayıt olabileceği (henüz kayıtlı olmadığı) dersler
+    available_courses = all_courses.exclude(
+        id__in=current_courses.values_list("id", flat=True)
+    )
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        course_id = request.POST.get("course_id")
+
+        if course_id:
+            course = get_object_or_404(Course, id=course_id)
+
+            if action == "remove":
+                student.enrolled_courses.remove(course)
+                messages.success(
+                    request,
+                    f"{course.course_code} dersi öğrencinin kayıtlarından kaldırıldı."
+                )
+
+            elif action == "add":
+                student.enrolled_courses.add(course)
+                messages.success(
+                    request,
+                    f"{course.course_code} dersi öğrenciye eklendi."
+                )
+
+        return redirect("edit_student_courses", student_id=student.id)
+
+    return render(request, "headteacher/edit_student_courses.html", {
+        "student": student,
+        "current_courses": current_courses,
+        "available_courses": available_courses,
+    })
+
+@login_required
+@user_is_department_head
+def delete_student(request, student_id):
+    student = get_object_or_404(
+        User,
+        id=student_id,
+        profile__role="student"
+    )
+
+    if request.method == "POST":
+        full_name = student.get_full_name() or student.username
+        student.delete()
+        messages.success(request, f'"{full_name}" adlı öğrenci sistemden silindi.')
+    else:
+        messages.error(request, "Öğrenci silme isteği geçersiz.")
+
+    return redirect("department_head_students")

@@ -33,4 +33,15 @@ urlpatterns = [
     name="edit_instructor_courses"
 ),
 
+
+path(
+    "students/<int:student_id>/edit/",
+    views.edit_student_courses,
+    name="edit_student_courses",
+),
+path(
+    "students/<int:student_id>/delete/",
+    views.delete_student,
+    name="delete_student",
+),
 ]
