@@ -2,52 +2,59 @@
 {% block title %}Hızlı İşlemler{% endblock %}
 
 {% block content %}
-  <h2 class="mb-4">Hızlı İşlemler</h2>
+<div class="container-fluid">
 
-  <div class="row g-4">
-    <div class="col-lg-4">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="mb-3">Yeni Ders Ekle</h5>
-          <form method="POST">
-            {% csrf_token %}
-            {{ course_form.as_p }}
-            <button type="submit" name="submit_course_create" class="btn btn-primary w-100">
-              Dersi Kaydet
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+  <div class="mb-4">
+    <h2 class="fw-bold">Hızlı İşlemler</h2>
+    <p class="text-muted mb-0">Yeni ders oluştur ve öğretim görevlisi/öğrenci ata</p>
+  </div>
 
-    <div class="col-lg-4">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="mb-3">Derse Hoca Ata</h5>
-          <form method="POST">
-            {% csrf_token %}
-            {{ assign_form.as_p }}
-            <button type="submit" name="submit_instructor_assign" class="btn btn-primary w-100">
-              Hocayı Ata
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
 
-    <div class="col-lg-4">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="mb-3">Derse Öğrenci Ata</h5>
-          <form method="POST">
-            {% csrf_token %}
-            {{ student_assign_form.as_p }}
-            <button type="submit" name="submit_student_assign" class="btn btn-primary w-100">
-              Öğrenciyi Ata
-            </button>
-          </form>
+      <h5 class="fw-semibold mb-4">📘 Yeni Ders Oluştur ve Ata</h5>
+
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            {{ form.course_code.label_tag }}
+            {{ form.course_code }}
+            {{ form.course_code.errors }}
+          </div>
+
+          <div class="col-md-6">
+            {{ form.course_name.label_tag }}
+            {{ form.course_name }}
+            {{ form.course_name.errors }}
+          </div>
         </div>
-      </div>
+
+        <div class="mb-3">
+          {{ form.instructor.label_tag }}
+          {{ form.instructor }}
+          {{ form.instructor.errors }}
+        </div>
+
+        <div class="mb-4">
+          {{ form.students.label_tag }}
+          <div class="border rounded p-3 bg-light">
+            {{ form.students }}
+          </div>
+          {{ form.students.errors }}
+        </div>
+
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary px-4">
+             Kaydet
+          </button>
+        </div>
+
+      </form>
     </div>
   </div>
+
+</div>
 {% endblock %}

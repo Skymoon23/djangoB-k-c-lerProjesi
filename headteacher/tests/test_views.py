@@ -53,72 +53,14 @@ class DepartmentHeadDashboardTest(TestCase):
     def test_department_head_dashboard_without_login(self):
         """Login olmadan dashboard erişim testi"""
         response = self.client.get(reverse('department_head_dashboard'))
-        self.assertEqual(response.status_code, 302)  # Login'e redirect
-    
-    def test_create_course(self):
-        """Ders oluşturma testi"""
-        self.client.login(username='head', password='testpass123')
-        response = self.client.post(
-            reverse('department_head_dashboard'),
-            {
-                'submit_course_create': '1',
-                'course_code': 'CSE311',
-                'course_name': 'Software Engineering'
-            }
-        )
-        self.assertEqual(response.status_code, 302)  # Redirect
-        self.assertTrue(
-            Course.objects.filter(
-                course_code='CSE311',
-                course_name='Software Engineering'
-            ).exists()
-        )
-    
-    def test_assign_instructor(self):
-        """Hoca atama testi"""
-        course = Course.objects.create(
-            course_code='CSE311',
-            course_name='Software Engineering'
-        )
-        
-        self.client.login(username='head', password='testpass123')
-        response = self.client.post(
-            reverse('department_head_dashboard'),
-            {
-                'submit_instructor_assign': '1',
-                'course': course.id,
-                'instructor': self.instructor.id
-            }
-        )
-        self.assertEqual(response.status_code, 302)  # Redirect
-        self.assertIn(self.instructor, course.instructors.all())
-    
-    def test_assign_student(self):
-        """Öğrenci atama testi"""
-        course = Course.objects.create(
-            course_code='CSE311',
-            course_name='Software Engineering'
-        )
-        
-        self.client.login(username='head', password='testpass123')
-        response = self.client.post(
-            reverse('department_head_dashboard'),
-            {
-                'submit_student_assign': '1',
-                'course': course.id,
-                'student': self.student.id
-            }
-        )
-        self.assertEqual(response.status_code, 302)  # Redirect
-        self.assertIn(self.student, course.students.all())
-    
+        self.assertEqual(response.status_code, 302)  # Login'e redirect   
+           
     def test_create_program_outcome(self):
         """Program outcome oluşturma testi"""
         self.client.login(username='head', password='testpass123')
         response = self.client.post(
-            reverse('department_head_dashboard'),
+            reverse('department_head_create_program_outcome'),
             {
-                'submit_program_outcome': '1',
                 'code': 'PO-1',
                 'description': 'Test program outcome'
             }

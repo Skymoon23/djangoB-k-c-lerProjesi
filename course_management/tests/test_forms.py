@@ -1,110 +1,48 @@
-from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import TestCase
 from course_management.forms import (
-    CourseCreateForm, InstructorAssignForm, StudentAssignForm,
-    ProgramOutcomeForm, EvaluationComponentForm, LearningOutcomeForm,
+    CourseCreateForm, ProgramOutcomeForm, EvaluationComponentForm, LearningOutcomeForm,
     GradeForm
 )
-from course_management.models import (
-    Profile, Course, EvaluationComponent, LearningOutcome
-)
-
+from course_management.models import EvaluationComponent
+from course_management.models import Profile, Course
 
 class CourseCreateFormTest(TestCase):
-    """CourseCreateForm testleri"""
-    
-    def test_course_create_form_valid(self):
-        """Geçerli course oluşturma formu"""
-        form_data = {
-            'course_code': 'CSE311',
-            'course_name': 'Software Engineering'
+    def setUp(self):
+        # instructor ve öğrenciler oluşturalım (profil rolleri ile)
+        self.instructor = User.objects.create_user(username='ins', password='pw')
+        profile, _ = Profile.objects.get_or_create(user=self.instructor)
+        profile.role = 'instructor'; profile.save()
+
+        self.s1 = User.objects.create_user(username='s1', password='pw')
+        profile, _ = Profile.objects.get_or_create(user=self.s1)
+        profile.role = 'student'; profile.save()
+
+        self.s2 = User.objects.create_user(username='s2', password='pw')
+        profile, _ = Profile.objects.get_or_create(user=self.s2)
+        profile.role = 'student'; profile.save()
+
+    def test_save_assign_instructor_and_students(self):
+        data = {
+            'course_code': 'CSE999',
+            'course_name': 'Test Ders',
+            'instructor': self.instructor.id,
+            'students': [self.s1.id, self.s2.id],
         }
-        form = CourseCreateForm(data=form_data)
-        self.assertTrue(form.is_valid())
-    
-    def test_course_create_form_save(self):
-        """Form kaydetme testi"""
-        form_data = {
-            'course_code': 'CSE311',
-            'course_name': 'Software Engineering'
-        }
-        form = CourseCreateForm(data=form_data)
+        form = CourseCreateForm(data)
         self.assertTrue(form.is_valid())
         course = form.save()
-        self.assertEqual(course.course_code, 'CSE311')
-        self.assertEqual(course.course_name, 'Software Engineering')
+        self.assertIsNotNone(course.pk)
+        self.assertIn(self.instructor, course.instructors.all())
+        self.assertSetEqual(set(course.students.values_list('id', flat=True)), {self.s1.id, self.s2.id})
 
+    def test_duplicate_course_code_validation(self):
+        Course.objects.create(course_code='CSE100', course_name='Mevcut')
+        form = CourseCreateForm({'course_code': 'CSE100', 'course_name': 'Yeni'})
+        self.assertFalse(form.is_valid())
+        self.assertIn('course_code', form.errors)
+        self.assertIn('Bu ders kodu ile zaten bir ders mevcut.', form.errors['course_code'])
 
-class InstructorAssignFormTest(TestCase):
-    """InstructorAssignForm testleri"""
-    
-    def setUp(self):
-        self.course = Course.objects.create(
-            course_code='CSE311',
-            course_name='Software Engineering'
-        )
-        self.instructor = User.objects.create_user(
-            username='instructor',
-            password='testpass123',
-            first_name='Instructor',
-            last_name='User'
-        )
-        profile, _ = Profile.objects.get_or_create(user=self.instructor)
-        profile.role = 'instructor'
-        profile.save()
-    
-    def test_instructor_assign_form_valid(self):
-        """Geçerli instructor atama formu"""
-        form_data = {
-            'course': self.course.id,
-            'instructor': self.instructor.id
-        }
-        form = InstructorAssignForm(data=form_data)
-        self.assertTrue(form.is_valid())
-    
-    def test_instructor_assign_form_only_instructors(self):
-        """Form sadece instructor rolündeki kullanıcıları gösterir"""
-        student = User.objects.create_user(
-            username='student',
-            password='testpass123'
-        )
-        profile, _ = Profile.objects.get_or_create(user=student)
-        profile.role = 'student'
-        profile.save()
-        
-        form = InstructorAssignForm()
-        instructor_ids = [instructor.id for instructor in form.fields['instructor'].queryset]
-        self.assertIn(self.instructor.id, instructor_ids)
-        self.assertNotIn(student.id, instructor_ids)
-
-
-class StudentAssignFormTest(TestCase):
-    """StudentAssignForm testleri"""
-    
-    def setUp(self):
-        self.course = Course.objects.create(
-            course_code='CSE311',
-            course_name='Software Engineering'
-        )
-        self.student = User.objects.create_user(
-            username='student',
-            password='testpass123',
-            first_name='Student',
-            last_name='User'
-        )
-        profile, _ = Profile.objects.get_or_create(user=self.student)
-        profile.role = 'student'
-        profile.save()
-    
-    def test_student_assign_form_valid(self):
-        """Geçerli student atama formu"""
-        form_data = {
-            'course': self.course.id,
-            'student': self.student.id
-        }
-        form = StudentAssignForm(data=form_data)
-        self.assertTrue(form.is_valid())
 
 
 class ProgramOutcomeFormTest(TestCase):
@@ -154,7 +92,6 @@ class EvaluationComponentFormTest(TestCase):
 
 class LearningOutcomeFormTest(TestCase):
     """LearningOutcomeForm testleri"""
-    
     def setUp(self):
         self.course = Course.objects.create(
             course_code='CSE311',
@@ -172,7 +109,6 @@ class LearningOutcomeFormTest(TestCase):
 
 class GradeFormTest(TestCase):
     """GradeForm testleri"""
-    
     def setUp(self):
         self.course = Course.objects.create(
             course_code='CSE311',

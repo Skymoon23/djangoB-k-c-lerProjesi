@@ -8,7 +8,7 @@ from course_management.forms import LearningOutcomeForm
 
 from course_management.decorators import user_is_department_head
 from course_management.forms import (
-    CourseCreateForm, InstructorAssignForm, ProgramOutcomeForm, StudentAssignForm,InstructorCourseEditForm,
+    CourseCreateForm, ProgramOutcomeForm,InstructorCourseEditForm,
 )
 from course_management.models import (
     Course, Grade, LearningOutcome, LearningOutcomeProgramOutcomeWeight,
@@ -38,50 +38,20 @@ def department_head_dashboard(request):
 
 
 # =========================
-# HIZLI İŞLEMLER (3 FORM)
+# DERS EKLEME + ATAMA
 # =========================
 @login_required
 @user_is_department_head
 def department_head_quick_actions(request):
-    course_form = CourseCreateForm()
-    assign_form = InstructorAssignForm()
-    student_assign_form = StudentAssignForm()
-
-    if request.method == "POST":
-        if "submit_course_create" in request.POST:
-            course_form = CourseCreateForm(request.POST)
-            if course_form.is_valid():
-                course_form.save()
-                messages.success(request, "Yeni ders başarıyla eklendi.")
-                return redirect("department_head_quick_actions")
-            messages.error(request, "Ders eklenirken bir hata oluştu.")
-
-        elif "submit_instructor_assign" in request.POST:
-            assign_form = InstructorAssignForm(request.POST)
-            if assign_form.is_valid():
-                course = assign_form.cleaned_data["course"]
-                instructor = assign_form.cleaned_data["instructor"]
-                course.instructors.add(instructor)
-                messages.success(request, f'"{instructor.get_full_name()}" hocası "{course.course_code}" dersine atandı.')
-                return redirect("department_head_quick_actions")
-            messages.error(request, "Hoca atanırken bir hata oluştu.")
-
-        elif "submit_student_assign" in request.POST:
-            student_assign_form = StudentAssignForm(request.POST)
-            if student_assign_form.is_valid():
-                course = student_assign_form.cleaned_data["course"]
-                students = student_assign_form.cleaned_data["students"]
-                for student in students:
-                    course.students.add(student)
-                messages.success(request, f"Seçilen öğrenciler '{course.course_code}' dersine atandı.")
-                return redirect("department_head_quick_actions")
-            messages.error(request, "Öğrenciler atanırken bir hata oluştu.")
-
-    return render(request, "headteacher/department_head_quick_actions.html", {
-        "course_form": course_form,
-        "assign_form": assign_form,
-        "student_assign_form": student_assign_form,
-    })
+     if request.method == 'POST':
+        form = CourseCreateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Ders oluşturuldu ve atamalar kaydedildi.")
+            return redirect('department_head_quick_actions')
+     else:
+        form = CourseCreateForm()
+     return render(request, 'headteacher/department_head_quick_actions.html', {'form': form})
 
 
 # =========================
@@ -99,6 +69,8 @@ def department_head_create_program_outcome(request):
             messages.success(request, "Yeni program çıktısı başarıyla eklendi.")
             return redirect("department_head_create_program_outcome")
         messages.error(request, "Program çıktısı eklenirken bir hata oluştu.")
+    else:
+        program_outcome_form = ProgramOutcomeForm()
 
     return render(request, "headteacher/department_head_create_program_outcome.html", {
         "program_outcome_form": program_outcome_form,

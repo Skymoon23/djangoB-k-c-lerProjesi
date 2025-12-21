@@ -156,7 +156,7 @@ class TeacherViewsTest(TestCase):
     def test_manage_component_weights(self):
         self.client.login(username="instructor", password="testpass123")
         response = self.client.post(
-            reverse("manage_component_weights"),
+            reverse("manage_course_component_weights", args=[self.course.id]),
             {
                 "component_id": self.component.id,
                 f"weight_{self.component.id}_{self.outcome.id}": 4

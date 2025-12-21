@@ -40,67 +40,71 @@ class LearningOutcomeForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
-
 class CourseCreateForm(forms.ModelForm):
-    """bölüm başkanının yeni ders oluşturması için form"""
+    """Bölüm başkanının ders + hoca + öğrenci ataması birlikte yapılması için birleşik form"""
+
+    instructor = forms.ModelChoiceField(
+        queryset=User.objects.filter(profile__role='instructor')
+        .order_by('last_name', 'first_name'),
+        required=False,
+        label="Öğretim Görevlisi",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    students = forms.ModelMultipleChoiceField(
+        queryset=User.objects.filter(profile__role='student')
+        .order_by('last_name', 'first_name'),
+        required=False,
+        label="Öğrenciler",
+        widget=forms.CheckboxSelectMultiple()
+    )
 
     class Meta:
         model = Course
-        # sadece bu iki alanla ders oluşturulsun
         fields = ['course_code', 'course_name']
         labels = {
             'course_code': 'Ders Kodu (örn: CSE311)',
             'course_name': 'Ders Adı (örn: Yazılım Mühendisliği)',
         }
 
-
-class InstructorAssignForm(forms.Form):
-    """bölüm başkanının bir derse hoca ataması için form"""
-
-    # tüm dersleri listeleyen bir dropdown
-    course = forms.ModelChoiceField(
-        queryset=Course.objects.all().order_by('course_code'),
-        label="Ders Seçin",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
-    # sadece instructor rolündeki kullanıcıları listeleyen bir dropdown
-    instructor = forms.ModelChoiceField(
-        queryset=User.objects.filter(profile__role='instructor').order_by('last_name', 'first_name'),
-        label="Öğretim Görevlisi Seçin",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
-    def __init__(self, *args, **kwargs):
-        """dropdownlarda daha okunaklı isimler göster"""
-        super().__init__(*args, **kwargs)
-        self.fields['course'].label_from_instance = lambda obj: f"{obj.course_code} - {obj.course_name}"
-        self.fields['instructor'].label_from_instance = lambda obj: obj.get_full_name() or obj.username
-
-
-class StudentAssignForm(forms.Form):
-    """Bölüm başkanının bir derse çoklu öğrenci ataması için form"""
-
-    course = forms.ModelChoiceField(
-        queryset=Course.objects.all().order_by('course_code'),
-        label="Ders Seçin",
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
-    students = forms.ModelMultipleChoiceField(
-        queryset=User.objects.filter(profile__role='student').order_by('last_name', 'first_name'),
-        label="Öğrenciler",
-        widget=forms.CheckboxSelectMultiple()
-    )
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['course'].label_from_instance = (
-            lambda obj: f"{obj.course_code} - {obj.course_name}"
+
+        self.fields['instructor'].label_from_instance = (
+            lambda obj: obj.get_full_name() or obj.username
         )
         self.fields['students'].label_from_instance = (
             lambda obj: obj.get_full_name() or obj.username
         )
+
+    def clean_course_code(self):
+        """Aynı ders kodu tekrar eklenmesin"""
+        course_code = self.cleaned_data['course_code'].strip().upper()
+
+        if Course.objects.filter(course_code=course_code).exists():
+            raise forms.ValidationError(
+                "Bu ders kodu ile zaten bir ders mevcut."
+            )
+
+        return course_code
+    
+    def save(self, commit=True):
+        course = super().save(commit=False)
+
+        instructor = self.cleaned_data.get('instructor')
+        students = self.cleaned_data.get('students')
+
+        if commit:
+           course.save()
+
+        if instructor:
+            course.instructors.add(instructor)
+
+        if students:
+            course.students.set(students)
+
+        return course
+
 
 
 class SyllabusForm(forms.ModelForm):
@@ -130,16 +134,6 @@ class ProgramOutcomeForm(forms.ModelForm):
             'code': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
-
-
-
-
-
-
-
-
-
-
 
 
 class GradeForm(forms.ModelForm):
