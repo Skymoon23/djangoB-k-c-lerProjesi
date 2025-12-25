@@ -4,11 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from course_management.forms import LearningOutcomeForm
+from django.db import transaction
 
 
 from course_management.decorators import user_is_department_head
 from course_management.forms import (
-    CourseCreateForm, ProgramOutcomeForm,InstructorCourseEditForm,
+    CourseCreateForm, ProgramOutcomeForm
 )
 from course_management.models import (
     Course, Grade, LearningOutcome, LearningOutcomeProgramOutcomeWeight,
@@ -44,11 +45,12 @@ def department_head_dashboard(request):
 @user_is_department_head
 def department_head_quick_actions(request):
      if request.method == 'POST':
-        form = CourseCreateForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Ders oluşturuldu ve atamalar kaydedildi.")
-            return redirect('department_head_quick_actions')
+         form = CourseCreateForm(request.POST)
+         if form.is_valid():
+             with transaction.atomic():
+                 form.save()
+             messages.success(request, "Ders oluşturuldu ve atamalar kaydedildi.")
+             return redirect('department_head_quick_actions')
      else:
         form = CourseCreateForm()
      return render(request, 'headteacher/department_head_quick_actions.html', {'form': form})
@@ -144,19 +146,13 @@ def edit_instructor_courses(request, instructor_id):
         if course_id:
             course = get_object_or_404(Course, id=course_id)
 
-            if action == "remove":
-                instructor.courses_taught.remove(course)
-                messages.success(
-                    request,
-                    f"{course.course_code} dersi öğretim görevlisinden kaldırıldı."
-                )
-
-            elif action == "add":
-                instructor.courses_taught.add(course)
-                messages.success(
-                    request,
-                    f"{course.course_code} dersi öğretim görevlisine atandı."
-                )
+            with transaction.atomic():
+                if action == "remove":
+                    instructor.courses_taught.remove(course)
+                    messages.success(request, f"{course.course_code} dersi öğretim görevlisinden kaldırıldı.")
+                elif action == "add":
+                    instructor.courses_taught.add(course)
+                    messages.success(request, f"{course.course_code} dersi öğretim görevlisine atandı.")
 
         # PRG pattern: aynı sayfaya geri dön
         return redirect("edit_instructor_courses", instructor_id=instructor.id)
@@ -166,7 +162,6 @@ def edit_instructor_courses(request, instructor_id):
         "current_courses": current_courses,
         "available_courses": available_courses,
     })
-
 
 
 
@@ -209,19 +204,20 @@ def manage_lo_po_weights(request):
     if request.method == "POST":
         outcome = get_object_or_404(LearningOutcome, id=request.POST.get("outcome_id"))
 
-        for po in all_program_outcomes:
-            value = request.POST.get(f"weight_{outcome.id}_{po.id}")
-            if value:
-                LearningOutcomeProgramOutcomeWeight.objects.update_or_create(
-                    learning_outcome=outcome,
-                    program_outcome=po,
-                    defaults={"weight": int(value)}
-                )
-            else:
-                LearningOutcomeProgramOutcomeWeight.objects.filter(
-                    learning_outcome=outcome,
-                    program_outcome=po
-                ).delete()
+        with transaction.atomic():
+            for po in all_program_outcomes:
+                value = request.POST.get(f"weight_{outcome.id}_{po.id}")
+                if value:
+                    LearningOutcomeProgramOutcomeWeight.objects.update_or_create(
+                        learning_outcome=outcome,
+                        program_outcome=po,
+                        defaults={"weight": int(value)}
+                    )
+                else:
+                    LearningOutcomeProgramOutcomeWeight.objects.filter(
+                        learning_outcome=outcome,
+                        program_outcome=po
+                    ).delete()
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": True, "message": "Ağırlıklar başarıyla güncellendi."})
@@ -356,10 +352,10 @@ def delete_program_outcome(request, outcome_id):
     program_outcome = get_object_or_404(ProgramOutcome, id=outcome_id)
 
     if request.method == "POST":
-        program_outcome.delete()
+        with transaction.atomic():
+            program_outcome.delete()
+
         messages.success(request, f'"{program_outcome.code}" program outcome\'ı başarıyla silindi.')
-    else:
-        messages.error(request, "Program outcome silme isteği başarısız oldu.")
 
     return redirect("department_head_program_outcomes")
 
@@ -413,13 +409,13 @@ def edit_learning_outcome(request, outcome_id):
 @login_required
 @user_is_department_head
 def delete_learning_outcome(request, outcome_id):
-    outcome = get_object_or_404(LearningOutcome, id=outcome_id)
+    learning_outcome = get_object_or_404(LearningOutcome, id=outcome_id)
 
     if request.method == "POST":
-        outcome.delete()
+        with transaction.atomic():
+            learning_outcome.delete()
+
         messages.success(request, "Learning outcome silindi.")
-    else:
-        messages.error(request, "Silme işlemi POST ile yapılmalı.")
 
     return redirect("manage_lo_po_weights")
 
@@ -450,17 +446,15 @@ def edit_student_courses(request, student_id):
         if course_id:
             course = get_object_or_404(Course, id=course_id)
 
-            if action == "remove":
-                student.enrolled_courses.remove(course)
-                messages.success(
-                    request,
+            with transaction.atomic():
+                if action == "remove":
+                    student.enrolled_courses.remove(course)
+                    messages.success(request,
                     f"{course.course_code} dersi öğrencinin kayıtlarından kaldırıldı."
                 )
-
-            elif action == "add":
-                student.enrolled_courses.add(course)
-                messages.success(
-                    request,
+                elif action == "add":
+                      student.enrolled_courses.add(course)
+                      messages.success(  request,
                     f"{course.course_code} dersi öğrenciye eklendi."
                 )
 
@@ -482,8 +476,9 @@ def delete_student(request, student_id):
     )
 
     if request.method == "POST":
-        full_name = student.get_full_name() or student.username
-        student.delete()
+        with transaction.atomic():
+            full_name = student.get_full_name() or student.username
+            student.delete()
         messages.success(request, f'"{full_name}" adlı öğrenci sistemden silindi.')
     else:
         messages.error(request, "Öğrenci silme isteği geçersiz.")
