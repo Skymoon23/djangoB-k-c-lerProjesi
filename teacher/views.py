@@ -399,7 +399,8 @@ def upload_grades(request, course_id):
         # Formun yüklenmesi
         form = GradeUploadForm()
 
-    return render(request, "teacher/upload_grades.html", {"form": form, "course": course })
+    return render(request, "teacher/upload_grades.html", {"form": form, "course": course})
+
 
 def instructor_csv_upload_placeholder(request, course_id):
     return render(request, "teacher/csv_upload_placeholder.html", {"course_id": course_id})

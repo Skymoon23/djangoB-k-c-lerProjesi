@@ -63,7 +63,7 @@ ROOT_URLCONF = 'CSE311PROJECTT.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],         #   <-- template ayarı
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],        #   <-- template ayarı
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -140,3 +140,6 @@ STATIC_URL = 'static/'
 # yüklenecek medya dosyaları için ayarlar
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # djangoda hazır gelen şifre sistemi
+                                                                  # şifremi unuttum yapabilmek için olan mail ayarı
