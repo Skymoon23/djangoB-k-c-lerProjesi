@@ -109,6 +109,34 @@
     </ul>
   </div>
 
+    <div class="form-section">
+    <h3>Ders İzlencesi (Syllabus)</h3>
+
+    <div style="margin-bottom: 15px;">
+        <strong>Mevcut Dosya:</strong>
+        {% if course.syllabus %}
+            <a href="{{ course.syllabus.url }}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                Dosyayı Görüntüle
+            </a>
+        {% else %}
+            <span style="color: orange;">Henüz yüklenmemiş.</span>
+        {% endif %}
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" style="background: #f9f9f9; padding: 15px; border-radius: 8px;">
+      {% csrf_token %}
+      <div style="margin-bottom: 10px;">
+          {{ syllabus_form.syllabus }}
+      </div>
+
+      <button type="submit" name="submit_syllabus" class="btn-small-solid btn-green">
+        Kaydet / Güncelle
+      </button>
+    </form>
+  </div>
+
+  <hr>
+
   <hr>
 
   <!-- Öğrenim Çıktıları -->

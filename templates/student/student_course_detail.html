@@ -38,6 +38,18 @@
           ← Derslerime Dön
         </a>
 
+      <div class="list-group-item text-center">
+            {% if course.syllabus %}
+                <a href="{{ course.syllabus.url }}" target="_blank" class="btn btn-primary btn-sm w-100">
+                    📄 Syllabus İndir
+                </a>
+            {% else %}
+                <button class="btn btn-secondary btn-sm w-100" disabled>
+                    Syllabus Yüklenmedi
+                </button>
+            {% endif %}
+        </div>
+
       </div>
     </div>
 

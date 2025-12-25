@@ -117,7 +117,7 @@ class SyllabusForm(forms.ModelForm):
         }
         widgets = {
             # FileInput widgetı kullanıyoruz dosyanın türünü kontrol etmek için, bu da djangonun kendi özelliği
-            'syllabus': forms.FileInput(attrs={'class': 'form-control-file'}),
+            'syllabus': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
         }
 
 
