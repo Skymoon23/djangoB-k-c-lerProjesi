@@ -1,4 +1,5 @@
 from decimal import Decimal, InvalidOperation
+from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -65,35 +66,36 @@ def manage_course(request, course_id):
 
         elif "submit_grades" in request.POST:
             try:
-                for key, value in request.POST.items():
-                    if not key.startswith("grade_"):
-                        continue
-
-                    parts = key.split("_")
-                    if len(parts) != 3:
-                        continue
-
-                    _, student_id, component_id = parts
-                    score_value = value.strip() if value else ""
-
-                    if score_value:
-                        try:
-                            score_decimal = Decimal(score_value)
-                            if not (Decimal("0") <= score_decimal <= Decimal("100")):
-                                continue
-                        except (ValueError, InvalidOperation):
+                with transaction.atomic():
+                    for key, value in request.POST.items():
+                        if not key.startswith("grade_"):
                             continue
-                    else:
-                        score_decimal = None
 
-                    grade, _ = Grade.objects.get_or_create(
-                        student_id=student_id,
-                        component_id=component_id
-                    )
-                    grade.score = score_decimal
-                    grade.save()
+                        parts = key.split("_")
+                        if len(parts) != 3:
+                            continue
 
-                messages.success(request, "Notlar başarıyla kaydedildi.")
+                        _, student_id, component_id = parts
+                        score_value = value.strip() if value else ""
+
+                        if score_value:
+                            try:
+                                score_decimal = Decimal(score_value)
+                                if not (Decimal("0") <= score_decimal <= Decimal("100")):
+                                    continue
+                            except (ValueError, InvalidOperation):
+                                continue
+                        else:
+                            score_decimal = None
+
+                        grade, _ = Grade.objects.get_or_create(
+                            student_id=student_id,
+                            component_id=component_id
+                        )
+                        grade.score = score_decimal
+                        grade.save()
+
+                    messages.success(request, "Notlar başarıyla kaydedildi.")
             except Exception as e:
                 messages.error(request, f"Notları kaydederken bir hata oluştu: {e}")
 
@@ -211,14 +213,16 @@ def manage_outcome_weights(request, component_id):
     outcomes = course.learning_outcomes.all()
 
     if request.method == "POST":
-        for outcome in outcomes:
-            value = request.POST.get(f"weight_{outcome.id}")
-            if value:
-                OutcomeWeight.objects.update_or_create(component=component, outcome=outcome, defaults={"weight": int(value)})
-            else:
-                OutcomeWeight.objects.filter(component=component, outcome=outcome).delete()
-        messages.success(request, "Outcome ağırlıkları başarıyla güncellendi.")
-        return redirect("instructor_dashboard")
+        with transaction.atomic():
+            for outcome in outcomes:
+                value = request.POST.get(f"weight_{outcome.id}")
+                if value:
+                    OutcomeWeight.objects.update_or_create(component=component, outcome=outcome,
+                                                           defaults={"weight": int(value)})
+                else:
+                    OutcomeWeight.objects.filter(component=component, outcome=outcome).delete()
+            messages.success(request, "Outcome ağırlıkları başarıyla güncellendi.")
+            return redirect("instructor_dashboard")
 
     weight_map = {w.outcome_id: w.weight for w in OutcomeWeight.objects.filter(component=component)}
     return render(request, "teacher/instructor_manage_outcomes.html", {
@@ -287,18 +291,19 @@ def manage_component_weights(request, course_id=None):
             course=course
         )
 
-        for outcome in outcomes:
-            key = f"weight_{component.id}_{outcome.id}"
-            value = request.POST.get(key)
+        with transaction.atomic():
+            for outcome in outcomes:
+                key = f"weight_{component.id}_{outcome.id}"
+                value = request.POST.get(key)
 
-            if value is not None and str(value).strip() != "":
-                OutcomeWeight.objects.update_or_create(
-                    component=component,
-                    outcome=outcome,
-                    defaults={"weight": int(value)}
-                )
-            else:
-                OutcomeWeight.objects.filter(component=component, outcome=outcome).delete()
+                if value is not None and str(value).strip() != "":
+                    OutcomeWeight.objects.update_or_create(
+                        component=component,
+                        outcome=outcome,
+                        defaults={"weight": int(value)}
+                    )
+                else:
+                    OutcomeWeight.objects.filter(component=component, outcome=outcome).delete()
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": True, "message": "Ağırlıklar başarıyla güncellendi."})
@@ -342,48 +347,49 @@ def upload_grades(request, course_id):
 
             kayit_sayisi = 0
             eslesmeyen_ogrenciler = []
+            with transaction.atomic():
+                # DataFrame içindeki her satırı (öğrenci/not kaydı) döngüye alıyoruz
+                for index, row in df.iterrows():
+                    # Alanların boş olup olmadığını kontrol ediyoruz
+                    if not row.get('username') or not row.get('component_name') or row.get('score') is None:
+                        messages.warning(request, f"{index + 2}. satırda eksik veri var ve atlandı.")
+                        continue
 
-            # DataFrame içindeki her satırı (öğrenci/not kaydı) döngüye alıyoruz
-            for index, row in df.iterrows():
-                # Alanların boş olup olmadığını kontrol ediyoruz
-                if not row.get('username') or not row.get('component_name') or row.get('score') is None:
-                    messages.warning(request, f"{index + 2}. satırda eksik veri var ve atlandı.")
-                    continue
+                    try:
+                        # Eşleştirme anahtarı olarak username'i kullanıyoruz (Tavsiye edilen yol)
+                        student_username = str(row['username']).strip()
+                        component_name = str(row['component_name']).strip()
+                        score = float(row['score'])
 
-                try:
-                    # Eşleştirme anahtarı olarak username'i kullanıyoruz (Tavsiye edilen yol)
-                    student_username = str(row['username']).strip()
-                    component_name = str(row['component_name']).strip()
-                    score = float(row['score'])
+                        # 1. Kullanıcı Adı ile öğrenciyi bul (User Modelini Kullanarak)
+                        # Not: User modelinin username alanı benzersizdir ve güvenilir bir eşleştirme sağlar.
+                        student_user = User.objects.get(username=student_username)
 
-                    # 1. Kullanıcı Adı ile öğrenciyi bul (User Modelini Kullanarak)
-                    # Not: User modelinin username alanı benzersizdir ve güvenilir bir eşleştirme sağlar.
-                    student_user = User.objects.get(username=student_username)
+                        # 2. Not bileşenini bul (Vize, Final, Ödev vb.)
+                        component = EvaluationComponent.objects.get(name=component_name)
 
-                    # 2. Not bileşenini bul (Vize, Final, Ödev vb.)
-                    component = EvaluationComponent.objects.get(name=component_name)
+                        # 3. Notu kaydet veya güncelle (Zaten varsa üzerine yazar)
+                        Grade.objects.update_or_create(
+                            student=student_user,
+                            component=component,
+                            defaults={'score': score}
+                        )
 
-                    # 3. Notu kaydet veya güncelle (Zaten varsa üzerine yazar)
-                    Grade.objects.update_or_create(
-                        student=student_user,
-                        component=component,
-                        defaults={'score': score}
-                    )
+                        kayit_sayisi += 1
 
-                    kayit_sayisi += 1
-
-                except User.DoesNotExist:
-                    # Kullanıcı adı veritabanında bulunamazsa
-                    eslesmeyen_ogrenciler.append(student_username)
-                except EvaluationComponent.DoesNotExist:
-                    # Excel'deki not bileşeni adı (vize1, final vb.) sistemde tanımlı değilse
-                    messages.warning(request, f"'{component_name}' adında Not Bileşeni bulunamadı ve not işlenemedi.")
-                except ValueError:
-                    # Not (score) alanı sayıya çevrilemezse
-                    messages.error(request, f"Hata: {student_username} kullanıcısının notu sayısal değil.")
-                except Exception as e:
-                    # Diğer tüm hatalar
-                    messages.error(request, f"Beklenmedik bir hata oluştu: {e}")
+                    except User.DoesNotExist:
+                        # Kullanıcı adı veritabanında bulunamazsa
+                        eslesmeyen_ogrenciler.append(student_username)
+                    except EvaluationComponent.DoesNotExist:
+                        # Excel'deki not bileşeni adı (vize1, final vb.) sistemde tanımlı değilse
+                        messages.warning(request,
+                                         f"'{component_name}' adında Not Bileşeni bulunamadı ve not işlenemedi.")
+                    except ValueError:
+                        # Not (score) alanı sayıya çevrilemezse
+                        messages.error(request, f"Hata: {student_username} kullanıcısının notu sayısal değil.")
+                    except Exception as e:
+                        # Diğer tüm hatalar
+                        messages.error(request, f"Beklenmedik bir hata oluştu: {e}")
 
             # Eşleşmeyen öğrencileri toplu halde raporla
             if eslesmeyen_ogrenciler:
