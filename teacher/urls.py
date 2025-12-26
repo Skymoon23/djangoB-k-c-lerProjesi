@@ -54,23 +54,26 @@ urlpatterns = [
     ),
 
     # LEARNING OUTCOME edit/delete
-path(
-    "course/<int:course_id>/outcomes/<int:outcome_id>/edit/",
-    views.edit_outcome,
-    name="edit_outcome",
-),
-path(
-    "course/<int:course_id>/outcomes/<int:outcome_id>/delete/",
-    views.delete_outcome,
-    name="delete_outcome",
-),
-
-    
+    path(
+        "course/<int:course_id>/outcomes/<int:outcome_id>/edit/",
+        views.edit_outcome,
+        name="edit_outcome",
+    ),
+    path(
+        "course/<int:course_id>/outcomes/<int:outcome_id>/delete/",
+        views.delete_outcome,
+        name="delete_outcome",
+    ),
 
    path("course/<int:course_id>/", views.course_home, name="course_home"),
+
    path("course/<int:course_id>/outcomes/", views.course_outcomes, name="course_lo_add"),
+
    path("course/<int:course_id>/components/", views.course_components, name="course_eval_add"),
+
    path("course/<int:course_id>/weights/", views.course_weights, name="course_weights"),
+
    path("course/<int:course_id>/csv-upload/", views.instructor_csv_upload_placeholder, name="instructor_csv_upload_placeholder"),
 
+   path("course/<int:course_id>/grades/", views.manage_course, name="course_grades")
 ]
