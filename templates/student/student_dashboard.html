@@ -1,93 +1,197 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Öğrenci Paneli - ALMS University</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Öğrenci Paneli | ALMS University</title>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-    <style>
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .container-main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 40px 20px;
-        }
-        .dashboard-card {
-            width: 900px;
-            padding: 30px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
-            background-color: #fff;
-        }
-        .course-box {
-            border: 1px solid #ccc;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: #f7f7f7;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .course-box:hover {
-            background-color: #eaf2ff;
-            transform: scale(1.02);
-        }
-    </style>
+  <style>
+    /* Yazı tipi ailesini tüm sayfada en optimize haliyle tanımlıyoruz */
+    body {
+      background: #f5f7fb;
+      min-height: 100vh;
+      margin: 0;
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      background-color: #0b2a4a !important;
+      padding: 15px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    /* ===== CONTENT AREA ===== */
+    .main-container {
+      padding: 50px 0;
+    }
+
+    .welcome-section {
+      margin-bottom: 40px;
+    }
+
+    .welcome-text {
+        color: #000; /* İstediğin siyah yazı rengi */
+        font-size: 1.1rem;
+    }
+
+    .student-name {
+        font-weight: 700; /* İstediğin kalın isim vurgusu */
+    }
+
+    /* Modern Ders Kartları */
+    .course-card {
+      background: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      height: 100%;
+      border-top: 5px solid #2563eb;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .course-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+    }
+
+    .course-code {
+      font-weight: 700;
+      color: #2563eb;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .course-name {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #0b2a4a;
+      line-height: 1.3;
+    }
+
+    /* Not Bilgi Alanı */
+    .grade-info {
+      background: #f8fafc;
+      padding: 12px 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grade-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .grade-value {
+      font-weight: 800;
+      color: #0b2a4a;
+      font-size: 1.1rem;
+    }
+
+    .card-footer-link {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-logout {
+        border-radius: 8px;
+        padding: 8px 20px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'home' %}">ALMS University</a>
-        <div class="d-flex">
-            <form action="{% url 'logout' %}" method="post">
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <i class="bi bi-mortarboard-fill me-2"></i>ALMS UNIVERSITY
+        </a>
+
+        <div class="ms-auto d-flex align-items-center">
+            <form action="{% url 'logout' %}" method="post" class="m-0">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-light">Çıkış Yap</button>
+                <button type="submit" class="btn btn-outline-light btn-sm btn-logout">
+                    <i class="bi bi-box-arrow-right me-1"></i> Çıkış Yap
+                </button>
             </form>
         </div>
     </div>
 </nav>
 
+<main class="main-container">
+    <div class="container">
 
-<!-- Dashboard -->
-<div class="container-main">
-    <div class="dashboard-card">
-        
-        <h1 class="text-center">Öğrenci Paneli: Derslerim</h1>
-        <p>Merhaba, <strong>{{ request.user.get_full_name }}</strong>Kayıtlı olduğunuz dersler:</p>
-
-        {% if not course_data %}
-            <p>Henüz herhangi bir derse kayıtlı değilsiniz.</p>
-        {% endif %}
-
-        {% for data in course_data %}
-        
-        <!-- Ders kutusu -->
-        <div class="course-box" onclick="window.location.href='/student/course/{{ data.course.id }}/'">
-            <h4>{{ data.course.course_code }} - {{ data.course.course_name }}</h4>
-            <p><strong>Dönem Sonu Ortalaman:</strong> {{ data.final_grade }}</p>
-            <p class="text-muted" style="margin-top: 15px;">Detayları görmek için kutuya tıklayın.</p>
+        <div class="welcome-section">
+            <h1 class="fw-bold text-dark display-6 mb-2">Derslerim</h1>
+            <p class="welcome-text">
+                Merhaba, <span class="student-name">{{ request.user.get_full_name }}</span>. Kayıtlı olduğun dersler aşağıda listelenmiştir.
+            </p>
         </div>
 
-        {% endfor %}
+        {% if not course_data %}
+            <div class="alert alert-light border shadow-sm p-5 text-center rounded-4">
+                <i class="bi bi-journal-x fs-1 text-muted mb-3 d-block"></i>
+                <h4 class="text-muted">Henüz kayıtlı bir dersiniz bulunmuyor.</h4>
+            </div>
+        {% endif %}
+
+        <div class="row g-4">
+            {% for data in course_data %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="course-card" onclick="window.location.href='/student/course/{{ data.course.id }}/'">
+                    <div>
+                        <span class="course-code">{{ data.course.course_code }}</span>
+                        <h3 class="course-name">{{ data.course.course_name }}</h3>
+                    </div>
+
+                    <div>
+                        <div class="grade-info">
+                            <span class="grade-label">Dönem Sonu Notu</span>
+                            <span class="grade-value">{% if data.final_grade %}{{ data.final_grade }}{% else %}--{% endif %}</span>
+                        </div>
+
+                        <div class="card-footer-link">
+                            İncele <i class="bi bi-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
     </div>
-</div>
+</main>
 
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-

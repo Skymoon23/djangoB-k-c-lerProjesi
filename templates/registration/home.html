@@ -1,45 +1,145 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <title>ALMS University</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .main-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-        .role-btn {
-            width: 200px;
-            margin: 10px 0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giriş Seçimi | ALMS University</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+  <style>
+    body {
+      background: #f5f7fb;
+      height: 100vh;
+      margin: 0;
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      background-color: #0b2a4a !important;
+      padding: 15px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    /* ===== SELECTION AREA ===== */
+    .main-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .selection-card {
+        background: #fff;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        text-align: center;
+        max-width: 500px;
+        width: 100%;
+    }
+
+    .selection-card h2 {
+        font-weight: 700;
+        color: #0b2a4a;
+        margin-bottom: 10px;
+    }
+
+    .selection-card p {
+        color: #64748b;
+        margin-bottom: 30px;
+    }
+
+    .role-btn {
+      width: 100%;
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      color: #334155;
+    }
+
+    .role-btn:hover {
+      background-color: #f8fafc;
+      border-color: #2563eb;
+      color: #2563eb;
+      transform: translateX(5px);
+    }
+
+    .role-btn i {
+        font-size: 1.4rem;
+    }
+
+    .role-btn span {
+        font-size: 1.1rem;
+    }
+
+    /* Özel İkon Renkleri */
+    .bi-person-badge { color: #2563eb; }
+    .bi-person-workspace { color: #0ea5e9; }
+    .bi-mortarboard { color: #6366f1; }
+
+  </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <span class="navbar-brand">ALMS University</span>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <span class="navbar-brand mx-auto">
+                <i class="bi bi-mortarboard-fill me-2"></i>ALMS UNIVERSITY
+            </span>
         </div>
     </nav>
 
-    <!-- Ortadaki Butonlar -->
     <div class="main-container">
-        <a href="{% url 'login' %}?role=department_head" class="btn btn-primary role-btn">Headteacher</a>
-        <a href="{% url 'login' %}?role=instructor" class="btn btn-primary role-btn">Teacher</a>
-        <a href="{% url 'login' %}?role=student" class="btn btn-primary role-btn">Student</a>
+        <div class="selection-card">
+            <h2>Hoş Geldiniz</h2>
+            <p>Devam etmek için lütfen sistemdeki rolünüzü seçin.</p>
+
+            <a href="{% url 'login' %}?role=department_head" class="role-btn">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-person-badge me-3"></i>
+                    <span>Bölüm Başkanı</span>
+                </div>
+                <i class="bi bi-chevron-right small opacity-50"></i>
+            </a>
+
+            <a href="{% url 'login' %}?role=instructor" class="role-btn">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-person-workspace me-3"></i>
+                    <span>Öğretim Görevlisi</span>
+                </div>
+                <i class="bi bi-chevron-right small opacity-50"></i>
+            </a>
+
+            <a href="{% url 'login' %}?role=student" class="role-btn">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-mortarboard me-3"></i>
+                    <span>Öğrenci</span>
+                </div>
+                <i class="bi bi-chevron-right small opacity-50"></i>
+            </a>
+        </div>
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

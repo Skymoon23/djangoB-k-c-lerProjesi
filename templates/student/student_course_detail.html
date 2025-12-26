@@ -1,166 +1,260 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ course.course_code }} Detay</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+  <style>
+    body {
+      background: #f5f7fb;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      background: #0b2a4a;
+      color: #fff;
+      padding: 20px 15px;
+    }
+
+    .course-title {
+      font-weight: 800;
+      font-size: 1.2rem;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,.80);
+      border-radius: 10px;
+      padding: 12px 15px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,.12);
+      color: #fff;
+    }
+
+    .nav-link.active {
+      background: #2563eb;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .nav-link i {
+      margin-right: 10px;
+      font-size: 1.1rem;
+    }
+
+    /* Syllabus Butonu */
+    .btn-syllabus {
+      background: rgba(255,255,255,0.08);
+      border: 1px dashed rgba(255,255,255,0.3);
+      color: #fff;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .btn-syllabus:hover {
+      background: #fff;
+      color: #0b2a4a;
+      border-style: solid;
+    }
+
+    /* ===== CONTENT AREA ===== */
+    .content {
+      padding: 30px;
+    }
+
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      background: #fff;
+    }
+
+    .table thead {
+      background-color: #f8f9fa;
+    }
+
+    .progress {
+      background-color: #eaedf2;
+    }
+  </style>
 </head>
+
 <body>
+<div class="layout">
 
-<div class="container-fluid mt-4">
-  <div class="row">
-
-    <!-- ===== SIDEBAR ===== -->
-    <div class="col-md-3 col-lg-2">
-      <div class="list-group">
-
-        <div class="list-group-item fw-bold">
-          {{ course.course_code }}
-        </div>
-
-        <a class="list-group-item list-group-item-action {% if section == 'grades' %}active{% endif %}"
-           href="{% url 'student_course_detail' course.id %}?section=grades">
-          Değerlendirme & Notlar
-        </a>
-
-        <a class="list-group-item list-group-item-action {% if section == 'lo' %}active{% endif %}"
-           href="{% url 'student_course_detail' course.id %}?section=lo">
-          Learning Outcome
-        </a>
-
-        <a class="list-group-item list-group-item-action {% if section == 'po' %}active{% endif %}"
-           href="{% url 'student_course_detail' course.id %}?section=po">
-          Program Outcome
-        </a>
-
-        <a class="list-group-item list-group-item-action"
-           href="{% url 'student_dashboard' %}">
-          ← Derslerime Dön
-        </a>
-
-      <div class="list-group-item text-center">
-            {% if course.syllabus %}
-                <a href="{{ course.syllabus.url }}" target="_blank" class="btn btn-primary btn-sm w-100">
-                    📄 Syllabus İndir
-                </a>
-            {% else %}
-                <button class="btn btn-secondary btn-sm w-100" disabled>
-                    Syllabus Yüklenmedi
-                </button>
-            {% endif %}
-        </div>
-
-      </div>
+  <aside class="sidebar">
+    <div class="course-title">
+      <i class="bi bi-book-half"></i> {{ course.course_code }}
     </div>
 
-    <!-- ===== CONTENT ===== -->
-    <div class="col-md-9 col-lg-10">
+    <nav>
+      <a href="?section=grades" class="nav-link {% if section == 'grades' or not section %}active{% endif %}">
+        <i class="bi bi-journal-check"></i> Değerlendirme & Notlar
+      </a>
 
-      <h2 class="mb-1">{{ course.course_code }} - {{ course.course_name }}</h2>
+      <a href="?section=lo" class="nav-link {% if section == 'lo' %}active{% endif %}">
+        <i class="bi bi-target"></i> Learning Outcomes
+      </a>
 
-      <!-- ===== 1) GRADES ===== -->
-      {% if section == "grades" %}
-        <p>Derse ait değerlendirme bileşenleri ve notlarınız:</p>
+      <a href="?section=po" class="nav-link {% if section == 'po' %}active{% endif %}">
+        <i class="bi bi-diagram-3"></i> Program Outcomes
+      </a>
 
-        <table class="table table-bordered mt-3">
-          <thead>
-            <tr>
-              <th>Bileşen</th>
-              <th>Yüzde</th>
-              <th>Not</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in component_grade_list %}
-            <tr>
-              <td>{{ item.name }}</td>
-              <td>%{{ item.percentage }}</td>
-              <td>
-                {% if item.score %}
-                  {{ item.score }}
-                {% else %}
-                  (N/A)
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      {% if course.syllabus %}
+          <a href="{{ course.syllabus.url }}" target="_blank" class="btn-syllabus">
+              <i class="bi bi-file-earmark-pdf me-2"></i> Syllabus İndir
+          </a>
+      {% else %}
+          <div class="btn-syllabus" style="opacity: 0.5; cursor: not-allowed;">
+              <i class="bi bi-file-earmark-x me-2"></i> Syllabus Yok
+          </div>
       {% endif %}
 
-      <!-- ===== 2) LEARNING OUTCOME ===== -->
-      {% if section == "lo" %}
-        <h3>Learning Outcome Skorlarınız</h3>
+      <hr style="border-color: rgba(255,255,255,0.2); margin-top: 25px;">
 
-        {% if learning_outcome_scores %}
-        <table class="table table-bordered mt-3">
-          <thead>
-            <tr>
-              <th>Learning Outcome</th>
-              <th>Skor</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for lo_data in learning_outcome_scores %}
-            <tr>
-              <td>
-                <strong>LO #{{ lo_data.outcome.id }}:</strong><br>
-                <small class="text-muted">{{ lo_data.outcome.description }}</small>
-              </td>
-              <td>
-                {% if lo_data.score is not None %}
-                  {{ lo_data.score|floatformat:2 }}
-                {% else %}
-                  <span class="text-muted">Hesaplanamadı</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        {% else %}
-          <p class="text-muted mt-3">Learning Outcome verisi bulunamadı.</p>
+      <a href="{% url 'student_dashboard' %}" class="nav-link">
+        <i class="bi bi-arrow-left-circle"></i> Derslerime Dön
+      </a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <div class="container-fluid">
+
+      <h2 class="fw-bold text-dark mb-4">{{ course.course_code }} - {{ course.course_name }}</h2>
+
+      <div class="card p-4">
+
+        {% if section == "grades" or not section %}
+          <h4 class="mb-3 border-bottom pb-2">Not Durumu</h4>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Bileşen</th>
+                  <th>Ağırlık</th>
+                  <th class="text-end">Not</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in component_grade_list %}
+                <tr>
+                  <td class="fw-semibold text-dark">{{ item.name }}</td>
+                  <td><span class="badge bg-light text-dark border">%{{ item.percentage }}</span></td>
+                  <td class="text-end fw-bold text-primary">
+                    {% if item.score %} {{ item.score }} {% else %} -- {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         {% endif %}
-      {% endif %}
 
-      <!-- ===== 3) PROGRAM OUTCOME ===== -->
-      {% if section == "po" %}
-        <h3>Program Outcome Skorlarınız</h3>
-
-        {% if program_outcome_scores %}
-        <table class="table table-bordered mt-3">
-          <thead>
-            <tr>
-              <th>Program Outcome</th>
-              <th>Skor</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for po_data in program_outcome_scores %}
-            <tr>
-              <td>
-                <strong>{{ po_data.program_outcome.code }}</strong><br>
-                <small class="text-muted">{{ po_data.program_outcome.description }}</small>
-              </td>
-              <td>
-                {% if po_data.score is not None %}
-                  {{ po_data.score|floatformat:2 }}
-                {% else %}
-                  <span class="text-muted">Hesaplanamadı</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        {% else %}
-          <p class="text-muted mt-3">Program Outcome verisi bulunamadı.</p>
+        {% if section == "lo" %}
+          <h4 class="mb-3 border-bottom pb-2">Learning Outcomes</h4>
+          {% if learning_outcome_scores %}
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead>
+                  <tr>
+                    <th>Kapsam</th>
+                    <th class="text-center">Skor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for lo_data in learning_outcome_scores %}
+                  <tr>
+                    <td>
+                      <div class="fw-bold text-dark">LO #{{ forloop.counter }}</div>
+                      <div class="text-muted small">{{ lo_data.outcome.description }}</div>
+                    </td>
+                    <td class="text-center fw-bold">
+                      {% if lo_data.score is not None %}
+                        <span class="{% if lo_data.score >= 60 %}text-success{% else %}text-dark{% endif %}">
+                          %{{ lo_data.score|floatformat:1 }}
+                        </span>
+                      {% else %}
+                        <span class="text-muted">--</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-muted p-3">Henüz veri hesaplanmadı.</p>
+          {% endif %}
         {% endif %}
-      {% endif %}
 
-    </div>
-  </div>
+        {% if section == "po" %}
+          <h4 class="mb-3 border-bottom pb-2">Program Outcomes</h4>
+          {% if program_outcome_scores %}
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead>
+                  <tr>
+                    <th>Program Çıktısı</th>
+                    <th class="text-center">Skor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for po_data in program_outcome_scores %}
+                  <tr>
+                    <td>
+                      <div class="fw-bold text-dark">{{ po_data.program_outcome.code }}</div>
+                      <div class="text-muted small">{{ po_data.program_outcome.description }}</div>
+                    </td>
+                    <td class="text-center align-middle">
+                        <div class="progress mb-1" style="height: 6px; width: 120px; margin: 0 auto;">
+                            <div class="progress-bar bg-primary" style="width: {{ po_data.score }}%"></div>
+                        </div>
+                        <span class="fw-bold small text-dark">{% if po_data.score %}{{ po_data.score|floatformat:1 }}{% else %}0{% endif %}/100</span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-muted p-3">Veri bulunamadı.</p>
+          {% endif %}
+        {% endif %}
+
+      </div> </div>
+  </main>
+
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
