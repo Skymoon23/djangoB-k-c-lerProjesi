@@ -4,132 +4,228 @@
 
 {% block extra_head %}
 <style>
-  .page-title{ font-weight: 800; margin: 0 0 6px; }
-  .muted{ color:#666; margin-bottom: 16px; }
+  body { background: #f5f7fb; font-family: "Segoe UI", Roboto, sans-serif; }
 
-  .cardx{
-    border: 1px solid #eee;
-    border-radius: 16px;
-    padding: 18px;
-    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  .card-main {
     background: #fff;
+    border: none;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
 
-  .tablex{ width:100%; border-collapse: collapse; margin-top: 10px; }
-  .tablex th, .tablex td{ border: 1px solid #e5e5e5; padding: 10px; }
-  .tablex th{ background:#f7f7f7; }
-
-  .w-input{
-    width: 120px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 8px 10px;
-  }
-
-  .btn-save{
-    background:#0d6efd;
-    color:#fff;
-    border:0;
-    border-radius: 10px;
-    padding: 9px 14px;
-    cursor:pointer;
+  .page-title {
     font-weight: 800;
+    color: #0b2a4a;
+    margin-bottom: 8px;
   }
-  .btn-save:hover{ filter: brightness(0.95); }
 
-  .acc-btn{
-    width:100%;
-    text-align:left;
-    background:#f6f8ff;
-    border: 1px solid #dfe7ff;
+  .muted-text {
+    color: #64748b;
+    margin-bottom: 25px;
+    font-size: 0.95rem;
+  }
+
+  /* Akordiyon Stilleri */
+  .accordion-wrapper {
+    margin-bottom: 12px;
+  }
+
+  .acc-btn {
+    width: 100%;
+    text-align: left;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 12px 14px;
-    font-weight: 800;
-    cursor:pointer;
-    display:flex;
+    padding: 15px 20px;
+    font-weight: 700;
+    color: #0b2a4a;
+    cursor: pointer;
+    display: flex;
     justify-content: space-between;
-    align-items:center;
+    align-items: center;
+    transition: all 0.2s ease;
   }
-  .acc-body{
-    border: 1px solid #eee;
+
+  .acc-btn:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+  }
+
+  .acc-btn.active {
+    background: #fff;
+    border-color: #2563eb;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.05);
+  }
+
+  .acc-body {
+    border: 1px solid #f1f5f9;
     border-radius: 12px;
     margin-top: 10px;
-    padding: 12px;
-    background:#fff;
+    padding: 20px;
+    background: #fff;
+    display: none;
+    animation: slideDown 0.3s ease;
   }
-  .chip{
-    display:inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background:#fff;
-    border: 1px solid #e8e8e8;
-    color:#333;
-    font-size: 12px;
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Tablo Tasarımı */
+  .table-custom {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-custom th {
+    background: #f8fafc;
+    color: #64748b;
     font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    padding: 12px 15px;
+    border-bottom: 2px solid #edf2f7;
+  }
+
+  .table-custom td {
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: middle;
+  }
+
+  /* Form Elemanları */
+  .w-input {
+    width: 100px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-weight: 700;
+    color: #0b2a4a;
+    transition: 0.2s;
+    background: #f8fafc;
+  }
+
+  .w-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .btn-save {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 24px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: 0.3s;
+  }
+
+  .btn-save:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  }
+
+  .percentage-chip {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-left: 10px;
+  }
+
+  .acc-icon {
+    font-size: 1.2rem;
+    color: #94a3b8;
+    transition: 0.2s;
+  }
+
+  .active .acc-icon {
+    color: #2563eb;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-  <div class="cardx">
+  <div class="card-main">
     <h3 class="page-title">Outcome Ağırlıkları</h3>
-    <div class="muted">
-      Her değerlendirme bileşeni (vize/final vb.) için learning outcome ağırlıklarını girin.
-    </div>
+    <p class="muted-text">
+      Her değerlendirme bileşeni (vize/final vb.) için learning outcome (LO) ağırlıklarını belirleyin.
+    </p>
 
     {% if not course_data %}
-      <div class="text-muted">Veri bulunamadı.</div>
+      <div class="alert alert-light border">Veri bulunamadı.</div>
     {% else %}
 
-      {# course_data list geliyor ama biz tek ders bekliyoruz; ilk elemanı alıyoruz #}
       {% with c=course_data.0 %}
         {% if not c.component_data %}
-          <div class="text-muted">Bu derse ait bileşen bulunamadı.</div>
+          <div class="alert alert-light border">Bu derse ait bileşen bulunamadı.</div>
         {% elif not c.outcomes %}
-          <div class="text-muted">Bu derse ait learning outcome bulunamadı.</div>
+          <div class="alert alert-light border">Bu derse ait learning outcome bulunamadı.</div>
         {% else %}
 
           {% for block in c.component_data %}
-            <div style="margin-bottom:14px;">
-              <button class="acc-btn" type="button" onclick="toggleAcc('acc_{{ block.component.id }}')">
-                <span>{{ block.component.name }} <span class="chip">%{{ block.component.percentage }}</span></span>
-                <span id="ico_acc_{{ block.component.id }}">+</span>
+            <div class="accordion-wrapper">
+              <button class="acc-btn" type="button" onclick="toggleAcc('acc_{{ block.component.id }}', this)">
+                <span>
+                    <i class="bi bi-layers-fill me-2 opacity-50"></i>
+                    {{ block.component.name }}
+                    <span class="percentage-chip">Ağırlık: %{{ block.component.percentage }}</span>
+                </span>
+                <i class="bi bi-plus-circle acc-icon" id="ico_acc_{{ block.component.id }}"></i>
               </button>
 
-              <div id="acc_{{ block.component.id }}" class="acc-body" style="display:none;">
+              <div id="acc_{{ block.component.id }}" class="acc-body">
                 <form method="POST">
                   {% csrf_token %}
                   <input type="hidden" name="component_id" value="{{ block.component.id }}">
 
-                  <table class="tablex">
-                    <thead>
-                      <tr>
-                        <th style="width:70%;">Learning Outcome</th>
-                        <th style="width:30%;">Ağırlık</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for row in block.outcome_rows %}
-                        <tr>
-                          <td>{{ row.outcome.description }}</td>
-                          <td>
-                            <input
-                              class="w-input"
-                              type="number"
-                              min="0"
-                              step="1"
-                              name="weight_{{ block.component.id }}_{{ row.outcome.id }}"
-                              value="{% if row.weight is not None %}{{ row.weight }}{% endif %}"
-                              placeholder="örn: 20"
-                            >
-                          </td>
-                        </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
+                  <div class="table-responsive">
+                      <table class="table-custom">
+                        <thead>
+                          <tr>
+                            <th style="width:75%;">Learning Outcome</th>
+                            <th style="width:25%;" class="text-center">Ağırlık (%)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for row in block.outcome_rows %}
+                            <tr>
+                              <td>
+                                <div class="fw-bold text-dark mb-1">LO #{{ forloop.counter }}</div>
+                                <div class="small text-muted">{{ row.outcome.description }}</div>
+                              </td>
+                              <td class="text-center">
+                                <input
+                                  class="w-input text-center"
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  step="1"
+                                  name="weight_{{ block.component.id }}_{{ row.outcome.id }}"
+                                  value="{% if row.weight is not None %}{{ row.weight }}{% endif %}"
+                                  placeholder="0"
+                                >
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                  </div>
 
-                  <div style="display:flex; justify-content:flex-end; margin-top:12px;">
-                    <button class="btn-save" type="submit">Kaydet</button>
+                  <div class="d-flex justify-content-end mt-4">
+                    <button class="btn-save" type="submit">
+                        <i class="bi bi-save2 me-2"></i>Değişiklikleri Kaydet
+                    </button>
                   </div>
                 </form>
               </div>
@@ -144,13 +240,24 @@
 
 {% block extra_js %}
 <script>
-  function toggleAcc(id){
+  function toggleAcc(id, btn){
     const el = document.getElementById(id);
     const ico = document.getElementById("ico_" + id);
     if(!el) return;
+
     const isOpen = el.style.display === "block";
+
+    // Kapat veya Aç
     el.style.display = isOpen ? "none" : "block";
-    if(ico) ico.textContent = isOpen ? "+" : "−";
+
+    // Aktif sınıfları ve ikonları güncelle
+    if(!isOpen) {
+        btn.classList.add('active');
+        ico.classList.replace('bi-plus-circle', 'bi-dash-circle');
+    } else {
+        btn.classList.remove('active');
+        ico.classList.replace('bi-dash-circle', 'bi-plus-circle');
+    }
   }
 </script>
 {% endblock %}

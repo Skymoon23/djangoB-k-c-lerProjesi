@@ -1,53 +1,146 @@
 {% extends "headteacher/base_headteacher.html" %}
-{% block title %}Çıktı Yönetimi{% endblock %}
+{% block title %}Çıktı Yönetimi | ALMS University{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-title {
+    font-weight: 800;
+    color: #0b2a4a;
+  }
+
+  /* Dashboard Kart Stili */
+  .management-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    border: 1px solid #eef2ff;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  }
+
+  .management-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(37, 99, 235, 0.08);
+    border-color: #2563eb;
+  }
+
+  /* İkon Konteynırı */
+  .icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  /* Renk Paletleri */
+  .color-blue { background: #e0f2fe; color: #0284c7; }
+  .color-purple { background: #f5f3ff; color: #7c3aed; }
+  .color-green { background: #dcfce7; color: #16a34a; }
+
+  .card-header-title {
+    font-weight: 700;
+    color: #0b2a4a;
+    font-size: 1.25rem;
+  }
+
+  .card-description {
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 25px;
+  }
+
+  /* Buton Modernizasyonu */
+  .btn-manage {
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 700;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+  }
+
+  .btn-blue { background-color: #2563eb; color: #fff; }
+  .btn-blue:hover { background-color: #1d4ed8; color: #fff; }
+
+  .btn-purple { background-color: #7c3aed; color: #fff; }
+  .btn-purple:hover { background-color: #6d28d9; color: #fff; }
+
+  .btn-green { background-color: #16a34a; color: #fff; }
+  .btn-green:hover { background-color: #15803d; color: #fff; }
+
+</style>
+{% endblock %}
 
 {% block content %}
-  <h2 class="mb-4">Çıktı Yönetimi</h2>
-  <p class="text-muted">
-    Aşağıdaki ekranlardan devam edebilirsiniz.
-  </p>
+<div class="container-fluid">
+
+  <div class="mb-5">
+    <h2 class="page-title">Çıktı Yönetimi</h2>
+    <p class="text-muted lead">
+      Eğitim hedefleri, başarı analizleri ve matris ilişkilerini buradan yönetin.
+    </p>
+  </div>
 
   <div class="row g-4 mt-2">
     <div class="col-lg-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <h5 class="mb-2">LO–PO Ağırlıkları</h5>
-          <p class="text-muted small">
-            Learning Outcome → Program Outcome ağırlıklarını 1–5 arası belirleyin.
+      <div class="management-card h-100">
+        <div>
+          <div class="icon-wrapper color-blue">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
+          </div>
+          <h5 class="card-header-title mb-2">LO–PO Ağırlıkları</h5>
+          <p class="card-description">
+            Öğrenme çıktıları ile program çıktıları arasındaki <b>1–5 matris</b> ağırlıklarını tanımlayın ve güncelleyin.
           </p>
-          <a class="btn btn-primary w-100" href="{% url 'manage_lo_po_weights' %}">
-            Aç
-          </a>
         </div>
+        <a class="btn btn-manage btn-blue w-100" href="{% url 'manage_lo_po_weights' %}">
+          <i class="bi bi-gear-fill me-2"></i> Matrisi Yönet
+        </a>
       </div>
     </div>
 
     <div class="col-lg-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <h5 class="mb-2">LO/PO İlişkileri</h5>
-          <p class="text-muted small">
-            Ders bileşenleri → LO ve LO → PO ilişkilerini görüntüleyin.
+      <div class="management-card h-100">
+        <div>
+          <div class="icon-wrapper color-purple">
+            <i class="bi bi-diagram-3-fill"></i>
+          </div>
+          <h5 class="card-header-title mb-2">LO/PO İlişkileri</h5>
+          <p class="card-description">
+            Ders bileşenlerinin öğrenme çıktılarıyla ve bunların program çıktılarıyla olan <b>hiyerarşik bağlarını</b> görüntüleyin.
           </p>
-          <a class="btn btn-primary w-100" href="{% url 'view_outcomes' %}">
-            Aç
-          </a>
         </div>
+        <a class="btn btn-manage btn-purple w-100" href="{% url 'view_outcomes' %}">
+          <i class="bi bi-eye-fill me-2"></i> İlişkileri Görüntüle
+        </a>
       </div>
     </div>
 
     <div class="col-lg-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <h5 class="mb-2">PO Öğrenilme Durumu</h5>
-          <p class="text-muted small">
-            Program outcome’ların öğrenci skor özetlerini görüntüleyin.
+      <div class="management-card h-100">
+        <div>
+          <div class="icon-wrapper color-green">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+          <h5 class="card-header-title mb-2">PO Başarı Analizi</h5>
+          <p class="card-description">
+            Öğrenci puanlarına dayalı olarak program çıktılarına <b>ulaşılma oranlarını</b> ve başarı özetlerini inceleyin.
           </p>
-          <a class="btn btn-primary w-100" href="{% url 'po_achievement' %}">
-            Aç
-          </a>
         </div>
+        <a class="btn btn-manage btn-green w-100" href="{% url 'po_achievement' %}">
+          <i class="bi bi-bar-chart-line-fill me-2"></i> Analizi Aç
+        </a>
       </div>
     </div>
   </div>
+</div>
 {% endblock %}

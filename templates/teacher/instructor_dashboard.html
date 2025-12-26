@@ -1,89 +1,178 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Hoca Paneli - ALMS University</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hoca Paneli | ALMS University</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
   <style>
-    body { min-height: 100vh; display: flex; flex-direction: column; }
-    .container-main { flex: 1; padding: 40px 0; }
-    .dash-wrap { max-width: 980px; margin: 0 auto; }
-    .course-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    body {
+      background: #f5f7fb;
+      min-height: 100vh;
+      margin: 0;
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
 
-    @media (max-width: 992px){ .course-grid { grid-template-columns: repeat(2, 1fr);} }
-    @media (max-width: 576px){ .course-grid { grid-template-columns: 1fr;} }
+    /* ===== NAVBAR ===== */
+    .navbar {
+      background-color: #0b2a4a !important;
+      padding: 15px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
 
-    .course-card{
-      border: 1px solid #e8e8e8;
-      border-radius: 14px;
+    .navbar-brand {
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    /* ===== CONTENT AREA ===== */
+    .main-container {
+      padding: 50px 0;
+    }
+
+    .welcome-section {
+      margin-bottom: 40px;
+    }
+
+    .instructor-name {
+        font-weight: 700;
+        color: #000;
+    }
+
+    /* Ders Kartları Grid */
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 25px;
+    }
+
+    .course-card {
       background: #fff;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-      padding: 16px;
+      border: none;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
-      transition: transform .12s ease, box-shadow .12s ease;
       text-decoration: none;
-      color: inherit;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      border-top: 5px solid #0ea5e9; /* Hocalar için ayırt edici renk */
+    }
+
+    .course-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+    }
+
+    .course-badge {
+      font-weight: 700;
+      color: #0ea5e9;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
       display: block;
     }
-    .course-card:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
-      text-decoration: none;
-      color: inherit;
-    }
-    .course-badge{
-      display:inline-block;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: #e8f0ff;
-      color: #2f54eb;
+
+    .course-title {
       font-weight: 700;
-      font-size: 12px;
-      letter-spacing: .03em;
+      font-size: 1.3rem;
+      color: #0b2a4a;
+      line-height: 1.3;
+      margin-bottom: 15px;
     }
-    .course-title{ margin: 10px 0 0; font-weight: 800; font-size: 18px; }
-    .course-sub{ margin: 6px 0 0; color:#666; font-size: 13px; }
-    .course-cta{ margin-top: 14px; display:flex; align-items:center; gap:10px; color:#0d6efd; font-weight:600; }
-    .mini-dot{ width: 8px; height: 8px; border-radius: 50%; background:#0d6efd; display:inline-block; }
+
+    .course-subtext {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .card-footer-cta {
+        padding-top: 15px;
+        border-top: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #0ea5e9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-logout {
+        border-radius: 8px;
+        padding: 8px 20px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
   </style>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="{% url 'home' %}">ALMS University</a>
-      <div class="d-flex">
-        <a class="btn btn-outline-light" href="{% url 'home' %}">Çıkış Yap</a>
-      </div>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <i class="bi bi-mortarboard-fill me-2"></i>ALMS UNIVERSITY
+        </a>
+        
+        <div class="ms-auto">
+            <form action="{% url 'logout' %}" method="post" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light btn-sm btn-logout">
+                    <i class="bi bi-box-arrow-right me-1"></i> Çıkış Yap
+                </button>
+            </form>
+        </div>
     </div>
-  </nav>
+</nav>
 
-  <div class="container-main">
-    <div class="dash-wrap">
-      <h1 class="text-center mb-2">Hoca Paneli: Derslerim</h1>
-      <p class="text-center text-muted mb-4">
-        Merhaba, {{ request.user.get_full_name }} — Yönetebileceğiniz dersler aşağıdadır:
-      </p>
+<main class="main-container">
+    <div class="container">
+        
+        <div class="welcome-section text-center text-md-start">
+            <h1 class="fw-bold text-dark display-6 mb-2">Hoca Paneli</h1>
+            <p class="lead" style="color: #475569;">
+                Merhaba, <span class="instructor-name">{{ request.user.get_full_name }}</span>. Yönetebileceğiniz dersler aşağıdadır:
+            </p>
+        </div>
 
-      {% if courses %}
+        {% if not courses %}
+            <div class="alert alert-light border shadow-sm p-5 text-center rounded-4">
+                <i class="bi bi-journal-x fs-1 text-muted mb-3 d-block"></i>
+                <h4 class="text-muted">Üzerinize atanmış bir ders bulunmamaktadır.</h4>
+            </div>
+        {% endif %}
+
         <div class="course-grid">
           {% for course in courses %}
-            <!-- ÖNEMLİ: buradaki url'yi birazdan sidebar yapısına göre netleştireceğiz -->
             <a class="course-card" href="{% url 'course_home' course.id %}">
-              <span class="course-badge">{{ course.course_code }}</span>
-              <div class="course-title">{{ course.course_name }}</div>
-              <div class="course-sub">Dersi yönetmek için karta tıklayın.</div>
-              <div class="course-cta"><span class="mini-dot"></span> Dersi aç</div>
+                <div>
+                    <span class="course-badge">{{ course.course_code }}</span>
+                    <h3 class="course-title">{{ course.course_name }}</h3>
+                    <p class="course-subtext">
+                        Not girişi, syllabus yönetimi ve başarı analizleri için dersi açın.
+                    </p>
+                </div>
+                
+                <div class="card-footer-cta">
+                    <i class="bi bi-gear-fill"></i> Dersi Yönetmeye Başla
+                </div>
             </a>
           {% endfor %}
         </div>
-      {% else %}
-        <p class="text-center">Üzerinize atanmış bir ders bulunmamaktadır.</p>
-      {% endif %}
-    </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

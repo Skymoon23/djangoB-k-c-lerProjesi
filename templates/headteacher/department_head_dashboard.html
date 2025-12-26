@@ -1,70 +1,148 @@
 {% extends "headteacher/base_headteacher.html" %}
 
-{% block title %}Bölüm Başkanı Dashboard{% endblock %}
+{% block title %}Bölüm Başkanı Dashboard | ALMS University{% endblock %}
 
 {% block extra_head %}
 <style>
-  .summary-box {
-    display: flex;
-    justify-content: space-around;
-    gap: 16px;
-    background-color: #f4f4f4;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
+  body {
+    background: #f5f7fb;
+    font-family: "Segoe UI", Roboto, sans-serif;
   }
-  .summary-item {
-    text-align: center;
-    min-width: 180px;
+
+  /* Dashboard Başlığı */
+  .dashboard-header {
+    margin-bottom: 40px;
   }
-  .summary-item h2 {
-    margin: 0 0 6px 0;
+
+  .dashboard-header h1 {
     font-weight: 800;
+    color: #0b2a4a;
+    font-size: 2rem;
   }
-  .summary-item p {
+
+  /* Özet Kartları Izgarası */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.02);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+  }
+
+  /* Kart Renkleri */
+  .icon-courses { background: #e0f2fe; color: #0284c7; }
+  .icon-instructors { background: #fef3c7; color: #d97706; }
+  .icon-students { background: #dcfce7; color: #16a34a; }
+
+  .stat-info h2 {
     margin: 0;
-    font-size: 1.05em;
-    color: #555;
+    font-weight: 800;
+    color: #0b2a4a;
+    font-size: 1.8rem;
+  }
+
+  .stat-info p {
+    margin: 0;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  /* Boş İçerik Alanı İçin Stil */
+  .empty-state-card {
+    background: #ffffff;
+    border: 2px dashed #e2e8f0;
+    border-radius: 20px;
+    padding: 60px;
+    text-align: center;
+    color: #94a3b8;
+  }
+
+  .empty-state-card i {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    display: block;
   }
 </style>
 {% endblock %}
 
 {% block content %}
 
-  <h1 class="mb-2">Bölüm Başkanı Paneli</h1>
-  <p class="text-muted mb-4">
-    Merhaba, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong> — sisteme hoş geldiniz.
-  </p>
+  <div class="dashboard-header">
+    <h1>Bölüm Başkanı Paneli</h1>
+    <p class="text-muted lead">
+      Merhaba, <span class="fw-bold text-dark">{{ request.user.get_full_name|default:request.user.username }}</span>. Akademik yönetim paneline hoş geldiniz.
+    </p>
+  </div>
 
   {% if messages %}
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-        {{ message }}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 rounded-4 shadow-sm mb-4" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     {% endfor %}
   {% endif %}
 
-  <h2 class="h5 mb-3">Sistem Özeti</h2>
-  <div class="summary-box">
-    <div class="summary-item">
-      <h2>{{ course_count }}</h2>
-      <p>Toplam Ders</p>
+  <h2 class="h5 fw-bold text-secondary mb-4">Sistem Genel Özeti</h2>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon icon-courses">
+        <i class="bi bi-book-half"></i>
+      </div>
+      <div class="stat-info">
+        <h2>{{ course_count }}</h2>
+        <p>Toplam Ders</p>
+      </div>
     </div>
-    <div class="summary-item">
-      <h2>{{ instructor_count }}</h2>
-      <p>Toplam Öğretim Görevlisi</p>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-instructors">
+        <i class="bi bi-person-badge-fill"></i>
+      </div>
+      <div class="stat-info">
+        <h2>{{ instructor_count }}</h2>
+        <p>Öğretim Görevlisi</p>
+      </div>
     </div>
-    <div class="summary-item">
-      <h2>{{ student_count }}</h2>
-      <p>Toplam Öğrenci</p>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-students">
+        <i class="bi bi-people-fill"></i>
+      </div>
+      <div class="stat-info">
+        <h2>{{ student_count }}</h2>
+        <p>Toplam Öğrenci</p>
+      </div>
     </div>
   </div>
 
-  <!-- Sağ içerik alanı şimdilik boş: sidebar'dan sayfalara gidilecek -->
-  <div class="text-muted">
-    Soldaki menüden bir işlem seç.
-  </div>
+
 
 {% endblock %}

@@ -1,54 +1,189 @@
 {% extends "headteacher/base_headteacher.html" %}
-{% block title %}Öğrenciler{% endblock %}
+{% block title %}Öğrenciler | ALMS University{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-title {
+    font-weight: 800;
+    color: #0b2a4a;
+  }
+
+  /* Ana Kart Tasarımı */
+  .student-list-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    border: none;
+  }
+
+  /* Tablo Modernizasyonu */
+  .table-modern {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+  }
+
+  .table-modern th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    padding: 15px;
+    border: none;
+  }
+
+  .table-modern td {
+    background: #fff;
+    padding: 20px 15px;
+    vertical-align: middle;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .table-modern tr td:first-child {
+    border-left: 1px solid #f1f5f9;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+  }
+
+  .table-modern tr td:last-child {
+    border-right: 1px solid #f1f5f9;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+  }
+
+  /* Öğrenci İsmi */
+  .student-name {
+    font-weight: 700;
+    color: #0b2a4a;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Ders Rozetleri */
+  .course-tag {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+
+  /* Buton Stilleri */
+  .btn-action {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+  }
+
+  .btn-edit-student {
+    background-color: #e0f2fe;
+    color: #0369a1;
+  }
+
+  .btn-edit-student:hover {
+    background-color: #bae6fd;
+    transform: translateY(-2px);
+  }
+
+  .btn-delete-student {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  .btn-delete-student:hover {
+    background-color: #fecaca;
+    transform: translateY(-2px);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px;
+    color: #94a3b8;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-  <h2 class="mb-4">Öğrenciler ({{ student_count }})</h2>
+<div class="container-fluid">
 
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <ul class="list-group list-group-flush">
-        {% for student in all_students %}
-          <li class="list-group-item">
-            <div class="d-flex justify-content-between align-items-start">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="page-title">Öğrenciler ({{ student_count }})</h2>
+      <p class="text-muted mb-0">Sisteme kayıtlı tüm öğrenciler ve aldıkları derslerin özeti.</p>
 
-              {# SOL: isim + dersler #}
-              <div>
-                <strong>{{ student.get_full_name|default:student.username }}</strong>
-                <div class="mt-2 small text-muted">
-                  <strong>Kayıtlı Dersler:</strong>
+
+  <div class="student-list-card">
+    <div class="table-responsive">
+      <table class="table-modern">
+        <thead>
+          <tr>
+            <th>Öğrenci Bilgisi</th>
+            <th>Kayıtlı Olduğu Dersler</th>
+            <th class="text-end">İşlemler</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in all_students %}
+            <tr>
+              <td>
+                <div class="student-name">
+                  <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="bi bi-person-fill text-secondary"></i>
+                  </div>
+                  {{ student.get_full_name|default:student.username }}
+                </div>
+              </td>
+              <td>
+                <div class="d-flex flex-wrap gap-1">
                   {% for course in student.enrolled_courses.all %}
-                    {{ course.course_code }}{% if not forloop.last %}, {% endif %}
+                    <span class="course-tag">{{ course.course_code }}</span>
                   {% empty %}
-                    (Henüz bir derse kayıtlı değil)
+                    <span class="text-muted small italic">Henüz bir derse kayıtlı değil</span>
                   {% endfor %}
                 </div>
-              </div>
+              </td>
+              <td>
+                <div class="d-flex justify-content-end gap-2">
+                  <a href="{% url 'edit_student_courses' student.id %}" class="btn-action btn-edit-student">
+                    <i class="bi bi-book-half"></i> Dersler
+                  </a>
 
-              {# SAĞ: Düzenle + Sil butonları #}
-              <div class="d-flex flex-column gap-2">
-                <a href="{% url 'edit_student_courses' student.id %}"
-                   class="btn btn-sm btn-outline-primary">
-                  Dersleri Düzenle
-                </a>
-
-                <form method="post"
-                      action="{% url 'delete_student' student.id %}"
-                      onsubmit="return confirm('Bu öğrenciyi silmek istediğine emin misin?');">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-sm btn-outline-danger">
-                    Öğrenciyi Sil
-                  </button>
-                </form>
-              </div>
-
-            </div>
-          </li>
-        {% empty %}
-          <li class="list-group-item text-muted">
-            Sistemde kayıtlı öğrenci bulunmamaktadır.
-          </li>
-        {% endfor %}
-      </ul>
+                  <form method="post" action="{% url 'delete_student' student.id %}" onsubmit="return confirm('Bu öğrenciyi silmek istediğine emin misin?');" style="margin:0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action btn-delete-student">
+                      <i class="bi bi-trash3-fill"></i> Sil
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3" class="empty-state">
+                <i class="bi bi-people fs-1 d-block mb-3"></i>
+                Sistemde kayıtlı öğrenci bulunmamaktadır.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
+</div>
 {% endblock %}

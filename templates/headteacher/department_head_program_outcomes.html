@@ -1,35 +1,172 @@
 {% extends "headteacher/base_headteacher.html" %}
-{% block title %}Program Çıktıları{% endblock %}
+{% block title %}Program Çıktıları | ALMS University{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-title {
+    font-weight: 800;
+    color: #0b2a4a;
+  }
+
+  /* Liste Kartı */
+  .po-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    border: none;
+  }
+
+  /* Tablo Tasarımı */
+  .table-custom {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+  }
+
+  .table-custom th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    padding: 15px;
+    border: none;
+    letter-spacing: 0.5px;
+  }
+
+  .table-custom td {
+    background: #fff;
+    padding: 18px 15px;
+    vertical-align: middle;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .table-custom td:first-child {
+    border-left: 1px solid #f1f5f9;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    font-weight: 800;
+    color: #2563eb;
+    width: 120px;
+  }
+
+  .table-custom td:last-child {
+    border-right: 1px solid #f1f5f9;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    text-align: right;
+  }
+
+  .description-text {
+    color: #334155;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  /* Butonlar */
+  .btn-action {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-edit {
+    background-color: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fde68a;
+  }
+
+  .btn-edit:hover {
+    background-color: #fde68a;
+    color: #92400e;
+  }
+
+  .btn-delete {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+  }
+
+  .btn-delete:hover {
+    background-color: #fecaca;
+    color: #991b1b;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+    font-style: italic;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-  <h2 class="mb-4">Program Çıktıları</h2>
+<div class="container-fluid">
 
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <ul class="list-group list-group-flush">
-        {% for po in all_program_outcomes %}
-          <li class="list-group-item d-flex justify-content-between align-items-start">
-            <div>
-              <strong>{{ po.code }}:</strong> {{ po.description }}
-            </div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="page-title">Program Çıktıları</h2>
+      <p class="text-muted mb-0">Bölümün genel yetkinlik hedeflerini (PO) buradan yönetebilirsiniz.</p>
+    </div>
+    <a href="{% url 'department_head_create_program_outcome' %}" class="btn btn-primary rounded-3 fw-bold px-4 shadow-sm">
+      <i class="bi bi-plus-lg me-1"></i> Yeni Ekle
+    </a>
+  </div>
 
-            <div class="d-flex gap-2">
-              <a class="btn btn-sm btn-warning" href="{% url 'edit_program_outcome' po.id %}">
-                Düzenle
-              </a>
+  <div class="po-card">
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Kod</th>
+            <th>Açıklama</th>
+            <th>İşlemler</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for po in all_program_outcomes %}
+            <tr>
+              <td>{{ po.code }}</td>
+              <td>
+                <div class="description-text">
+                  {{ po.description }}
+                </div>
+              </td>
+              <td>
+                <div class="d-flex justify-content-end gap-2">
+                  <a class="btn-action btn-edit text-decoration-none" href="{% url 'edit_program_outcome' po.id %}">
+                    <i class="bi bi-pencil-square"></i> Düzenle
+                  </a>
 
-              <form method="POST" action="{% url 'delete_program_outcome' po.id %}" style="margin:0;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-danger">
-                  Sil
-                </button>
-              </form>
-            </div>
-          </li>
-        {% empty %}
-          <li class="list-group-item text-muted">Sistemde kayıtlı program çıktısı bulunmamaktadır.</li>
-        {% endfor %}
-      </ul>
+                  <form method="POST" action="{% url 'delete_program_outcome' po.id %}"
+                        onsubmit="return confirm('Bu program çıktısını silmek istediğinize emin misiniz?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action btn-delete">
+                      <i class="bi bi-trash3-fill"></i> Sil
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3" class="empty-state">
+                <i class="bi bi-folder-x fs-2 d-block mb-2"></i>
+                Sistemde kayıtlı program çıktısı bulunmamaktadır.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
+</div>
 {% endblock %}

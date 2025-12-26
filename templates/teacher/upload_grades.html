@@ -1,162 +1,194 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toplu Not Yükleme Sayfası</title>
+{% extends "teacher/base_course.html" %}
 
-    <style>
-        body { 
-            font-family: sans-serif; 
-            line-height: 1.6; 
-            padding: 20px; 
-            max-width: 800px; 
-            margin: auto; 
-            background-color: #f8f8f8; 
-        }
-        h1, h2 { 
-            color: #333; 
-            border-bottom: 2px solid #eee; 
-            padding-bottom: 10px; 
-        }
-        p { color: #555; }
-        a { text-decoration: none; }
-        hr { 
-            border: 0; 
-            border-top: 1px solid #ddd; 
-            margin: 20px 0; 
-        }
+{% block title %}Toplu Not Yükleme | {{ course.course_code }}{% endblock %}
 
-        form { 
-            background-color: #ffffff; 
-            border: 1px solid #ddd; 
-            padding: 20px; 
-            margin-top: 20px; 
-            border-radius: 5px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-        }
-        .form-label { 
-            display: block; 
-            margin-bottom: 5px; 
-            font-weight: bold; 
-            color: #333; 
-        }
-        input[type="file"] { 
-            border: 1px solid #ccc; 
-            padding: 10px; 
-            border-radius: 4px; 
-            display: block; 
-            width: 100%; 
-            box-sizing: border-box; 
-        }
+{% block extra_head %}
+<style>
+    body { background: #f5f7fb; font-family: "Segoe UI", Roboto, sans-serif; }
 
-        .btn-primary {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-        .btn-primary:hover { background-color: #218838; }
+    .management-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 35px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: none;
+    }
 
-        /* 🔵 yeni geri dön butonu */
-        .btn-back {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            font-size: 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-        .btn-back:hover {
-            background-color: #0056b3;
-        }
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f8fafc;
+    }
 
-        .alert { 
-            padding: 10px; 
-            margin-bottom: 15px; 
-            border-radius: 4px; 
-            border: 1px solid transparent; 
-        }
-        .alert-success { 
-            color: #155724; 
-            background-color: #d4edda; 
-            border-color: #c3e6cb; 
-        }
-        .alert-warning { 
-            color: #856404; 
-            background-color: #fff3cd; 
-            border-color: #ffeeba; 
-        }
-        .alert-danger { 
-            color: #721c24; 
-            background-color: #f8d7da; 
-            border-color: #f5c6cb; 
-        }
-    </style>
-</head>
-<body>
+    .page-header h2 {
+        font-weight: 800;
+        color: #0b2a4a;
+        margin: 0;
+        font-size: 1.5rem;
+    }
 
-    <div class="container">
-        <h1>Excel ile Toplu Not Yükleme</h1>
-        <p>Bölüm Başkanı/Yönetici paneli.</p>
-        <hr>
+    .page-header i { color: #2563eb; font-size: 1.8rem; }
 
-        <!-- 🔵 yeni buton -->
-        <a href="{% url 'manage_course' course.id %}" class="btn-back">
-            &larr; Dersi Yönet Sayfasına Geri Dön
-        </a>
+    /* Bilgilendirme Kutusu */
+    .format-info {
+        background: #eef2ff;
+        border: 1px solid #e0e7ff;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .format-info h5 {
+        color: #1e40af;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+
+    .format-info ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #374151;
+        font-size: 0.95rem;
+    }
+
+    .format-info li { margin-bottom: 5px; }
+
+    /* Form Elemanları */
+    .upload-zone {
+        border: 2px dashed #cbd5e1;
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        transition: 0.3s;
+    }
+
+    .upload-zone:hover {
+        border-color: #2563eb;
+        background: #f1f5f9;
+    }
+
+    .custom-file-input-wrapper input[type="file"] {
+        padding: 10px;
+        background: white;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    /* Butonlar */
+    .btn-upload-main {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 20px;
+    }
+
+    .btn-upload-main:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .back-nav {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #64748b;
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 20px;
+        transition: 0.2s;
+    }
+
+    .back-nav:hover { color: #0b2a4a; }
+
+    /* Django Mesajları */
+    .alert {
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        padding: 12px 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <a href="{% url 'manage_course' course.id %}" class="back-nav">
+        <i class="bi bi-arrow-left"></i> Dersi Yönet Sayfasına Geri Dön
+    </a>
+
+    <div class="management-card">
+        <div class="page-header">
+            <i class="bi bi-file-earmark-spreadsheet"></i>
+            <h2>Excel ile Toplu Not Yükleme</h2>
+        </div>
 
         {% if messages %}
-            <ul class="list-unstyled">
             {% for message in messages %}
-                <li class="alert alert-{{ message.tags }} p-2">
+                <div class="alert alert-{{ message.tags }} shadow-sm mb-4">
+                    <i class="bi {% if message.tags == 'success' %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
                     {{ message }}
-                </li>
+                </div>
             {% endfor %}
-            </ul>
         {% endif %}
 
-        <h2>Not Dosyası Yükleme</h2>
-        <p>
-            Lütfen öğrencilerin 
-            <strong>username</strong>,
-            <strong>component_name</strong> 
-            ve 
-            <strong>score</strong>
-            sütunlarını içeren dosyayı yükleyiniz. 
-            Format: <strong>.xlsx</strong> veya <strong>.csv</strong>
-        </p>
+        <div class="format-info">
+            <h5><i class="bi bi-info-circle-fill me-2"></i>Dosya Format Kuralları</h5>
+            <p class="small text-muted mb-3">Lütfen yükleyeceğiniz dosyanın aşağıdaki sütun başlıklarını içerdiğinden emin olun:</p>
+            <ul>
+                <li><strong>username:</strong> Öğrencinin kullanıcı adı.</li>
+                <li><strong>first_name:</strong> Öğrencinin adı.</li>
+                <li><strong>last_name:</strong> Öğrencinin soyadı.</li>
+                <li><strong>component_name:</strong> Notun ait olduğu bileşen (Vize, Final, Ödev 1 vb.).</li>
+                <ul><strong>Önemli Not!</strong> Bileşen isimleri oluşturduğunuz şekilde olmalıdır. Büyük küçük harflere dikkat ediniz!</ul>
+                <li><strong>score:</strong> Öğrencinin aldığı not (0-100 arası).</li>
+            </ul>
+            <p class="small text-muted mt-3 mb-0 italic">Desteklenen formatlar: <strong>.xlsx</strong> (Excel) veya <strong>.csv</strong></p>
+        </div>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-
-            <div class="mb-3">
-                <label for="{{ form.file.id_for_label }}" class="form-label">
-                    Not Dosyasını Seçin:
+            
+            <div class="upload-zone">
+                <i class="bi bi-cloud-upload text-primary display-4 mb-3 d-block"></i>
+                <label for="{{ form.file.id_for_label }}" class="form-label d-block fw-bold mb-3">
+                    Not Dosyasını Seçin
                 </label>
 
-                {{ form.file }}
+                <div class="custom-file-input-wrapper">
+                    {{ form.file }}
+                </div>
 
                 {% if form.file.errors %}
-                    <div class="alert alert-danger mt-2">
-                        {{ form.file.errors }}
+                    <div class="text-danger small fw-bold mt-2">
+                        <i class="bi bi-x-circle me-1"></i> {{ form.file.errors }}
                     </div>
                 {% endif %}
+
+                <button type="submit" class="btn-upload-main">
+                    <i class="bi bi-save2 me-2"></i> Notları Yükle ve Kaydet
+                </button>
             </div>
-
-            <button type="submit" class="btn-primary">
-                Notları Yükle ve Kaydet
-            </button>
         </form>
-
     </div>
 
-</body>
-</html>
+    <footer class="mt-5 text-center text-muted small">
+        <p>&copy; 2024 ALMS Akademik Başarı Takip Sistemi</p>
+    </footer>
+</div>
+{% endblock %}
