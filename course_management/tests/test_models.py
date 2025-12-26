@@ -8,7 +8,6 @@ from course_management.models import (
 
 
 class ProfileModelTest(TestCase):
-    """Profile model testleri"""
     
     def setUp(self):
         self.user = User.objects.create_user(
@@ -20,7 +19,6 @@ class ProfileModelTest(TestCase):
         )
     
     def test_profile_creation(self):
-        """Profile oluşturma testi"""
         profile, _ = Profile.objects.get_or_create(user=self.user)
         profile.role = 'student'
         profile.save()
@@ -29,7 +27,6 @@ class ProfileModelTest(TestCase):
         self.assertIn('Öğrenci', str(profile))
     
     def test_profile_role_display(self):
-        """Role display testi"""
         profile, _ = Profile.objects.get_or_create(user=self.user)
         profile.role = 'instructor'
         profile.save()
@@ -40,7 +37,6 @@ class ProfileModelTest(TestCase):
         self.assertEqual(profile.get_role_display(), 'Bölüm Başkanı')
     
     def test_profile_str_method(self):
-        """Profile __str__ metodu testi"""
         profile, _ = Profile.objects.get_or_create(user=self.user)
         profile.role = 'student'
         profile.save()
@@ -49,7 +45,6 @@ class ProfileModelTest(TestCase):
 
 
 class CourseModelTest(TestCase):
-    """Course model testleri"""
     
     def setUp(self):
         self.instructor = User.objects.create_user(
@@ -73,7 +68,6 @@ class CourseModelTest(TestCase):
         profile.save()
     
     def test_course_creation(self):
-        """Course oluşturma testi"""
         course = Course.objects.create(
             course_code='CSE311',
             course_name='Software Engineering'
@@ -89,7 +83,6 @@ class CourseModelTest(TestCase):
             Course.objects.create(course_code='CSE311', course_name='Another Course')
     
     def test_course_instructor_assignment(self):
-        """Course'a instructor atama testi"""
         course = Course.objects.create(
             course_code='CSE311',
             course_name='Software Engineering'
@@ -99,7 +92,6 @@ class CourseModelTest(TestCase):
         self.assertEqual(course.instructors.count(), 1)
     
     def test_course_student_enrollment(self):
-        """Course'a öğrenci kayıt testi"""
         course = Course.objects.create(
             course_code='CSE311',
             course_name='Software Engineering'
@@ -110,7 +102,6 @@ class CourseModelTest(TestCase):
 
 
 class EvaluationComponentModelTest(TestCase):
-    """EvaluationComponent model testleri"""
     
     def setUp(self):
         self.course = Course.objects.create(
@@ -119,7 +110,6 @@ class EvaluationComponentModelTest(TestCase):
         )
     
     def test_evaluation_component_creation(self):
-        """EvaluationComponent oluşturma testi"""
         component = EvaluationComponent.objects.create(
             course=self.course,
             name='Midterm',
@@ -131,7 +121,6 @@ class EvaluationComponentModelTest(TestCase):
         self.assertIn('Midterm', str(component))
     
     def test_evaluation_component_unique_together(self):
-        """Aynı ders için aynı isimde iki component olamaz"""
         EvaluationComponent.objects.create(
             course=self.course,
             name='Midterm',
@@ -146,7 +135,6 @@ class EvaluationComponentModelTest(TestCase):
 
 
 class LearningOutcomeModelTest(TestCase):
-    """LearningOutcome model testleri"""
     
     def setUp(self):
         self.course = Course.objects.create(
@@ -155,7 +143,6 @@ class LearningOutcomeModelTest(TestCase):
         )
     
     def test_learning_outcome_creation(self):
-        """LearningOutcome oluşturma testi"""
         outcome = LearningOutcome.objects.create(
             course=self.course,
             description='Test learning outcome description'
@@ -166,7 +153,6 @@ class LearningOutcomeModelTest(TestCase):
 
 
 class GradeModelTest(TestCase):
-    """Grade model testleri"""
     
     def setUp(self):
         self.student = User.objects.create_user(
@@ -188,7 +174,6 @@ class GradeModelTest(TestCase):
         )
     
     def test_grade_creation(self):
-        """Grade oluşturma testi"""
         grade = Grade.objects.create(
             student=self.student,
             component=self.component,
@@ -214,10 +199,8 @@ class GradeModelTest(TestCase):
 
 
 class ProgramOutcomeModelTest(TestCase):
-    """ProgramOutcome model testleri"""
     
     def test_program_outcome_creation(self):
-        """ProgramOutcome oluşturma testi"""
         po = ProgramOutcome.objects.create(
             code='PO-1',
             description='Test program outcome description'
@@ -234,7 +217,6 @@ class ProgramOutcomeModelTest(TestCase):
 
 
 class OutcomeWeightModelTest(TestCase):
-    """OutcomeWeight model testleri"""
     
     def setUp(self):
         self.course = Course.objects.create(
@@ -252,7 +234,6 @@ class OutcomeWeightModelTest(TestCase):
         )
     
     def test_outcome_weight_creation(self):
-        """OutcomeWeight oluşturma testi"""
         weight = OutcomeWeight.objects.create(
             component=self.component,
             outcome=self.outcome,

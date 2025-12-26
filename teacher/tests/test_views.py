@@ -12,10 +12,10 @@ class TeacherViewsTest(TestCase):
 
     def setUp(self):
         self.client = Client()
+        class_name = self.__class__.__name__.lower()
 
-        # Instructor
         self.instructor = User.objects.create_user(
-            username="instructor",
+            username=f"{class_name}_instructor",
             password="testpass123",
             first_name="Instructor",
             last_name="User"
@@ -24,9 +24,8 @@ class TeacherViewsTest(TestCase):
         profile.role = "instructor"
         profile.save()
 
-        # Student user
         self.student = User.objects.create_user(
-            username="student1",
+            username=f"{class_name}_student",
             password="testpass123",
             first_name="Student",
             last_name="User"
@@ -36,7 +35,6 @@ class TeacherViewsTest(TestCase):
         s_profile.student_number = "220101"
         s_profile.save()
 
-        # Course
         self.course = Course.objects.create(
             course_code="CSE101",
             course_name="Intro to Programming"
@@ -44,37 +42,34 @@ class TeacherViewsTest(TestCase):
         self.course.instructors.add(self.instructor)
         self.course.students.add(self.student)
 
-        # Component
         self.component = EvaluationComponent.objects.create(
             course=self.course,
             name="Midterm",
             percentage=40
         )
 
-        # Learning Outcome
         self.outcome = LearningOutcome.objects.create(
             course=self.course,
             description="Understand basics"
         )
 
-        # Grade (DÜZELTİLDİ: User veriyoruz)
         Grade.objects.create(
-            student=self.student,  # <-- hatanın sebebi buydu
+            student=self.student,
             component=self.component,
             score=85
         )
 
-    # -------------------- Tests ------------------------
-
     def test_instructor_dashboard(self):
-        self.client.login(username="instructor", password="testpass123")
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
         response = self.client.get(reverse("instructor_dashboard"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "teacher/instructor_dashboard.html")
         self.assertContains(response, "CSE101")
 
     def test_manage_course_get(self):
-        self.client.login(username="instructor", password="testpass123")
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
         response = self.client.get(
             reverse("manage_course", args=[self.course.id])
         )
@@ -82,7 +77,8 @@ class TeacherViewsTest(TestCase):
         self.assertTemplateUsed(response, "teacher/course_manage_detail.html")
 
     def test_manage_course_add_evaluation_component(self):
-        self.client.login(username="instructor", password="testpass123")
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
         response = self.client.post(
             reverse("manage_course", args=[self.course.id]),
             {
@@ -92,6 +88,7 @@ class TeacherViewsTest(TestCase):
             }
         )
         self.assertEqual(response.status_code, 302)
+        
         self.assertTrue(
             EvaluationComponent.objects.filter(
                 course=self.course,
@@ -100,7 +97,8 @@ class TeacherViewsTest(TestCase):
         )
 
     def test_manage_course_add_learning_outcome(self):
-        self.client.login(username="instructor", password="testpass123")
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
         response = self.client.post(
             reverse("manage_course", args=[self.course.id]),
             {
@@ -109,6 +107,7 @@ class TeacherViewsTest(TestCase):
             }
         )
         self.assertEqual(response.status_code, 302)
+        
         self.assertTrue(
             LearningOutcome.objects.filter(
                 course=self.course,
@@ -117,7 +116,8 @@ class TeacherViewsTest(TestCase):
         )
 
     def test_manage_course_update_grades(self):
-        self.client.login(username="instructor", password="testpass123")
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
         response = self.client.post(
             reverse("manage_course", args=[self.course.id]),
             {
@@ -130,19 +130,9 @@ class TeacherViewsTest(TestCase):
         grade = Grade.objects.get(student=self.student, component=self.component)
         self.assertEqual(grade.score, Decimal("92.5"))
 
-    def test_add_learning_outcome(self):
-        self.client.login(username="instructor", password="testpass123")
-        response = self.client.post(
-            reverse("add_learning_outcome", args=[self.course.id]),
-            {"description": "Test LO"}
-        )
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(
-            LearningOutcome.objects.filter(description="Test LO").exists()
-        )
-
     def test_manage_outcome_weights(self):
-        self.client.login(username="instructor", password="testpass123")
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
         response = self.client.post(
             reverse("manage_outcome_weights", args=[self.component.id]),
             {
@@ -150,11 +140,13 @@ class TeacherViewsTest(TestCase):
             }
         )
         self.assertEqual(response.status_code, 302)
+        
         ow = OutcomeWeight.objects.get(component=self.component, outcome=self.outcome)
         self.assertEqual(ow.weight, 3)
 
     def test_manage_component_weights(self):
-        self.client.login(username="instructor", password="testpass123")
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
         response = self.client.post(
             reverse("manage_course_component_weights", args=[self.course.id]),
             {
@@ -164,3 +156,105 @@ class TeacherViewsTest(TestCase):
             HTTP_X_REQUESTED_WITH="XMLHttpRequest"
         )
         self.assertEqual(response.status_code, 200)
+        
+        ow = OutcomeWeight.objects.get(component=self.component, outcome=self.outcome)
+        self.assertEqual(ow.weight, 4)
+
+    def test_add_grade(self):
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
+        response = self.client.get(reverse("add_grade", args=[self.component.id]))
+        self.assertEqual(response.status_code, 302)
+        
+        response = self.client.post(
+            reverse("add_grade", args=[self.component.id]),
+            {"student": self.student.id, "score": 90}
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        grade = Grade.objects.get(student=self.student, component=self.component)
+        self.assertEqual(grade.score, Decimal("90"))
+
+    def test_course_outcomes(self):
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
+        response = self.client.get(reverse("course_lo_add", args=[self.course.id]))
+        self.assertEqual(response.status_code, 200)
+        
+        response = self.client.post(
+            reverse("course_lo_add", args=[self.course.id]),
+            {"description": "New LO"}
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        self.assertTrue(LearningOutcome.objects.filter(description="New LO").exists())
+
+    def test_course_components(self):
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
+        response = self.client.get(reverse("course_eval_add", args=[self.course.id]))
+        self.assertEqual(response.status_code, 200)
+        
+        response = self.client.post(
+            reverse("course_eval_add", args=[self.course.id]),
+            {"name": "Final", "percentage": 60}
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        self.assertTrue(EvaluationComponent.objects.filter(name="Final").exists())
+
+    def test_edit_component(self):
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
+        response = self.client.get(
+            reverse("edit_component", args=[self.course.id, self.component.id])
+        )
+        self.assertEqual(response.status_code, 200)
+        
+        response = self.client.post(
+            reverse("edit_component", args=[self.course.id, self.component.id]),
+            {"name": "Updated", "percentage": 50}
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        self.component.refresh_from_db()
+        self.assertEqual(self.component.name, "Updated")
+
+    def test_delete_component(self):
+        self.client.login(username=self.instructor.username, password="testpass123")
+        comp_id = self.component.id
+        
+        response = self.client.post(
+            reverse("delete_component", args=[self.course.id, comp_id])
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        self.assertFalse(EvaluationComponent.objects.filter(id=comp_id).exists())
+
+    def test_edit_outcome(self):
+        self.client.login(username=self.instructor.username, password="testpass123")
+        
+        response = self.client.get(
+            reverse("edit_outcome", args=[self.course.id, self.outcome.id])
+        )
+        self.assertEqual(response.status_code, 200)
+        
+        response = self.client.post(
+            reverse("edit_outcome", args=[self.course.id, self.outcome.id]),
+            {"description": "Updated"}
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        self.outcome.refresh_from_db()
+        self.assertEqual(self.outcome.description, "Updated")
+
+    def test_delete_outcome(self):
+        self.client.login(username=self.instructor.username, password="testpass123")
+        outcome_id = self.outcome.id
+        
+        response = self.client.post(
+            reverse("delete_outcome", args=[self.course.id, outcome_id])
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        self.assertFalse(LearningOutcome.objects.filter(id=outcome_id).exists())

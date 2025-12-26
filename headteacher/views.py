@@ -5,7 +5,6 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from course_management.forms import LearningOutcomeForm
 from django.db import transaction
-from course_management.models import Course
 
 from course_management.decorators import user_is_department_head
 from course_management.forms import (
@@ -496,17 +495,29 @@ def edit_course(request, course_id):
 
 
     if request.method == "POST":
+<<<<<<< Updated upstream
         course_name = request.POST.get("course_name", "").strip()
         instructor_ids = request.POST.getlist("instructors")
 
         if course_name:
             course.course_name = course_name
             course.save()
+=======
+        with transaction.atomic():
+            course_code = request.POST.get("course_code", "").strip()
+            course_name = request.POST.get("course_name", "").strip()
+            instructor_ids = request.POST.getlist("instructors")
 
-        course.instructors.set(instructor_ids)
+            if course_name and course_code:
+                course.course_code = course_code
+                course.course_name = course_name
+                course.save()
+>>>>>>> Stashed changes
 
-        messages.success(request, "Ders güncellendi.")
-        return redirect("department_head_courses")
+            course.instructors.set(instructor_ids)
+
+            messages.success(request, "Ders güncellendi.")
+            return redirect("department_head_courses")
 
     return render(request, "headteacher/course_edit.html", {
         "course": course,

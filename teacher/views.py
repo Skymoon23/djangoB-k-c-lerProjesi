@@ -247,11 +247,9 @@ def add_grade(request, component_id):
                 grade.score = score
             grade.save()
             messages.success(request, "Öğrenci notu başarıyla kaydedildi.")
-            return redirect("instructor_dashboard")
+            return redirect("course_home", course_id=course.id)
     else:
-        form = GradeForm(course=course)
-
-    return render(request, "teacher/add_grade.html", {"component": component, "course": course, "form": form})
+        return redirect("course_home", course_id=course.id)
 
 @login_required
 @user_is_instructor

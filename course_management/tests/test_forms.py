@@ -9,7 +9,6 @@ from course_management.models import Profile, Course
 
 class CourseCreateFormTest(TestCase):
     def setUp(self):
-        # instructor ve öğrenciler oluşturalım (profil rolleri ile)
         self.instructor = User.objects.create_user(username='ins', password='pw')
         profile, _ = Profile.objects.get_or_create(user=self.instructor)
         profile.role = 'instructor'; profile.save()
@@ -31,6 +30,7 @@ class CourseCreateFormTest(TestCase):
         }
         form = CourseCreateForm(data)
         self.assertTrue(form.is_valid())
+        
         course = form.save()
         self.assertIsNotNone(course.pk)
         self.assertIn(self.instructor, course.instructors.all())
@@ -39,10 +39,10 @@ class CourseCreateFormTest(TestCase):
     def test_duplicate_course_code_validation(self):
         Course.objects.create(course_code='CSE100', course_name='Mevcut')
         form = CourseCreateForm({'course_code': 'CSE100', 'course_name': 'Yeni'})
+        
         self.assertFalse(form.is_valid())
         self.assertIn('course_code', form.errors)
         self.assertIn('Bu ders kodu ile zaten bir ders mevcut.', form.errors['course_code'])
-
 
 
 class ProgramOutcomeFormTest(TestCase):
@@ -65,6 +65,7 @@ class ProgramOutcomeFormTest(TestCase):
         }
         form = ProgramOutcomeForm(data=form_data)
         self.assertTrue(form.is_valid())
+        
         po = form.save()
         self.assertEqual(po.code, 'PO-1')
         self.assertEqual(po.description, 'Test program outcome description')
@@ -152,6 +153,7 @@ class GradeFormTest(TestCase):
         
         form = GradeForm(course=self.course)
         student_ids = [student.id for student in form.fields['student'].queryset]
+        
         self.assertIn(self.student.id, student_ids)
         self.assertNotIn(other_student.id, student_ids)
 

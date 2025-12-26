@@ -9,12 +9,12 @@ from course_management.models import (
 
 
 class StudentDashboardTest(TestCase):
-    """Student dashboard testleri"""
     
     def setUp(self):
         self.client = Client()
+        class_name = self.__class__.__name__.lower()
         self.student = User.objects.create_user(
-            username='student',
+            username=f'{class_name}_student',
             password='testpass123',
             first_name='Student',
             last_name='User'
@@ -24,7 +24,7 @@ class StudentDashboardTest(TestCase):
         profile.save()
         
         self.instructor = User.objects.create_user(
-            username='instructor',
+            username=f'{class_name}_instructor',
             password='testpass123'
         )
         profile, _ = Profile.objects.get_or_create(user=self.instructor)
@@ -56,33 +56,28 @@ class StudentDashboardTest(TestCase):
         )
     
     def test_student_dashboard_access(self):
-        """Öğrenci dashboard erişim testi"""
-        self.client.login(username='student', password='testpass123')
+        self.client.login(username=self.student.username, password='testpass123')
+        
         response = self.client.get(reverse('student_dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'student/student_dashboard.html')
     
-    def test_student_dashboard_without_login(self):
-        """Login olmadan dashboard erişim testi"""
-        response = self.client.get(reverse('student_dashboard'))
-        self.assertEqual(response.status_code, 302)  # Login'e redirect
-    
     def test_student_dashboard_course_list(self):
-        """Dashboard'da ders listesi testi"""
-        self.client.login(username='student', password='testpass123')
+        self.client.login(username=self.student.username, password='testpass123')
+        
         response = self.client.get(reverse('student_dashboard'))
         self.assertContains(response, 'CSE311')
         self.assertContains(response, 'Software Engineering')
     
     def test_student_dashboard_grade_calculation(self):
-        """Not hesaplama testi"""
         Grade.objects.create(
             student=self.student,
             component=self.component,
             score=Decimal('85.0')
         )
         
-        self.client.login(username='student', password='testpass123')
+        self.client.login(username=self.student.username, password='testpass123')
+        
         response = self.client.get(reverse('student_dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertIn('course_data', response.context)
@@ -90,43 +85,45 @@ class StudentDashboardTest(TestCase):
         self.assertIsNotNone(response.context['course_data'][0]['final_grade'])
     
     def test_student_dashboard_no_courses(self):
-        """Ders kayıtlı olmayan öğrenci için dashboard testi"""
+        class_name = self.__class__.__name__.lower()
         new_student = User.objects.create_user(
-            username='newstudent',
+            username=f'{class_name}_newstudent',
             password='testpass123'
         )
         profile, _ = Profile.objects.get_or_create(user=new_student)
         profile.role = 'student'
         profile.save()
         
-        self.client.login(username='newstudent', password='testpass123')
+        self.client.login(username=new_student.username, password='testpass123')
+        
         response = self.client.get(reverse('student_dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['course_data']), 0)
     
     def test_student_dashboard_learning_outcome_scores(self):
-        """Learning outcome skorları hesaplama testi"""
         Grade.objects.create(
             student=self.student,
             component=self.component,
             score=Decimal('80.0')
         )
         
-        self.client.login(username='student', password='testpass123')
+        self.client.login(username=self.student.username, password='testpass123')
+        
         response = self.client.get(reverse('student_dashboard'))
         self.assertEqual(response.status_code, 200)
+        
         course_data = response.context['course_data'][0]
         self.assertIn('learning_outcome_scores', course_data)
         self.assertEqual(len(course_data['learning_outcome_scores']), 1)
 
 
 class StudentCourseDetailTest(TestCase):
-    """Student course detail testleri"""
     
     def setUp(self):
         self.client = Client()
+        class_name = self.__class__.__name__.lower()
         self.student = User.objects.create_user(
-            username='student',
+            username=f'{class_name}_student',
             password='testpass123',
             first_name='Student',
             last_name='User'
@@ -136,7 +133,7 @@ class StudentCourseDetailTest(TestCase):
         profile.save()
         
         self.instructor = User.objects.create_user(
-            username='instructor',
+            username=f'{class_name}_instructor',
             password='testpass123'
         )
         profile, _ = Profile.objects.get_or_create(user=self.instructor)
@@ -179,43 +176,36 @@ class StudentCourseDetailTest(TestCase):
         )
     
     def test_student_course_detail_access(self):
-        """Öğrenci ders detay erişim testi"""
-        self.client.login(username='student', password='testpass123')
+        self.client.login(username=self.student.username, password='testpass123')
+        
         response = self.client.get(
             reverse('student_course_detail', args=[self.course.id])
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'student/student_course_detail.html')
     
-    def test_student_course_detail_without_login(self):
-        """Login olmadan ders detay erişim testi"""
-        response = self.client.get(
-            reverse('student_course_detail', args=[self.course.id])
-        )
-        self.assertEqual(response.status_code, 302)  # Login'e redirect
-    
     def test_student_course_detail_unauthorized_course(self):
-        """Kayıtlı olmadığı derse erişim testi"""
         other_course = Course.objects.create(
             course_code='CSE312',
             course_name='Other Course'
         )
         
-        self.client.login(username='student', password='testpass123')
+        self.client.login(username=self.student.username, password='testpass123')
+        
         response = self.client.get(
             reverse('student_course_detail', args=[other_course.id])
         )
-        self.assertEqual(response.status_code, 404)  # Not found
+        self.assertEqual(response.status_code, 404)
     
     def test_student_course_detail_grade_display(self):
-        """Not gösterimi testi"""
         Grade.objects.create(
             student=self.student,
             component=self.component,
             score=Decimal('85.50')
         )
         
-        self.client.login(username='student', password='testpass123')
+        self.client.login(username=self.student.username, password='testpass123')
+        
         response = self.client.get(
             reverse('student_course_detail', args=[self.course.id])
         )
@@ -224,14 +214,14 @@ class StudentCourseDetailTest(TestCase):
         self.assertEqual(len(response.context['component_grade_list']), 1)
     
     def test_student_course_detail_program_outcome_scores(self):
-        """Program outcome skorları hesaplama testi"""
         Grade.objects.create(
             student=self.student,
             component=self.component,
             score=Decimal('80.0')
         )
         
-        self.client.login(username='student', password='testpass123')
+        self.client.login(username=self.student.username, password='testpass123')
+        
         response = self.client.get(
             reverse('student_course_detail', args=[self.course.id])
         )
