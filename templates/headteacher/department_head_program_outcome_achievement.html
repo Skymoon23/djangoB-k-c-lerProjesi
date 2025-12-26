@@ -1,138 +1,130 @@
 {% extends "headteacher/base_headteacher.html" %}
-
-{% block title %}PO Öğrenilme Durumu{% endblock %}
+{% block title %}PO Öğrenilme Durumu | ALMS University{% endblock %}
 
 {% block extra_head %}
 <style>
-    .page-title {
-        font-weight: 700;
-        letter-spacing: 0.03em;
-    }
-    .card-main {
-        border-radius: 16px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-        border: none;
-        margin-bottom: 30px;
-    }
-    .badge-po {
-        background: #d4edda;
-        color: #155724;
-        font-size: 1.1em;
-    }
-    .score-badge {
-        font-size: 1.2em;
-        padding: 10px 20px;
-    }
-    .score-excellent { background: #d4edda; color: #155724; }
-    .score-good { background: #d1ecf1; color: #0c5460; }
-    .score-average { background: #fff3cd; color: #856404; }
-    .score-poor { background: #f8d7da; color: #721c24; }
+    .page-title { font-weight: 800; color: #0b2a4a; }
 
-    .toggle-btn {
-        background-color: #eef2ff;
-        border: 1px solid #cfd6ff;
-        color: #2f54eb;
+    /* PO Kartı - Metnin tamamını alacak şekilde genişletildi */
+    .po-achievement-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid #f1f5f9;
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+    }
+
+    /* Metin Alanı Ayarları */
+    .po-description-full {
+        color: #334155;
         font-weight: 600;
-        border-radius: 999px;
-        padding: 4px 12px;
-        display: inline-flex;
+        line-height: 1.6; /* Satır aralığı okumayı kolaylaştırır */
+        font-size: 1.05rem;
+        margin-bottom: 15px;
+        display: block; /* Truncate kaldırıldı, metin doğal akışında */
+    }
+
+    .score-circle {
+        width: 75px;
+        height: 75px;
+        border-radius: 50%;
+        display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 0.85rem;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.3rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
-    .toggle-btn:hover {
-        background-color: #dfe6ff;
-        color: #1d3fbf;
-    }
-    .toggle-btn .bi {
-        transition: transform 0.2s ease;
-    }
-    .toggle-btn[aria-expanded="true"] .bi {
-        transform: rotate(90deg);
-    }
+
+    /* Renk Paleti */
+    .excellent { background: #dcfce7; color: #166534; border: 2px solid #bbf7d0; }
+    .good { background: #e0f2fe; color: #075985; border: 2px solid #bae6fd; }
+    .average { background: #fef3c7; color: #92400e; border: 2px solid #fde68a; }
+    .poor { background: #fee2e2; color: #991b1b; border: 2px solid #fecaca; }
+
+    .progress { height: 12px; border-radius: 10px; background-color: #f1f5f9; }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="container-fluid">
 
-<div class="card card-main">
-    <div class="card-body">
-        <h3 class="page-title mb-3">Program Outcome'larının Öğrenilme Durumu</h3>
-        <p class="text-muted mb-0">
-            Tüm öğrencilerin program outcome'larını ne kadar öğrendiklerini görüntüleyebilirsiniz.
-            Hesaplama; değerlendirme bileşenleri → learning outcome ve learning outcome → program outcome ağırlıkları (1-5) ile yapılır.
-        </p>
+    <div class="mb-4">
+        <h2 class="page-title">Program Outcome Başarı Analizi</h2>
+        <p class="text-muted">Tüm öğrenci verilerine dayalı tam kapsamlı PO analiz raporu.</p>
     </div>
-</div>
 
-{% for item in po_achievement_data %}
-<div class="card card-main">
-    <div class="card-body">
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <h4 class="mb-2">
-                    <span class="badge badge-po">{{ item.program_outcome.code }}</span>
-                </h4>
-                <p class="text-muted mb-0">{{ item.program_outcome.description }}</p>
-            </div>
-
-            <div class="text-end">
-                {% if item.average_score >= 80 %}
-                    <span class="badge score-badge score-excellent">{{ item.average_score|floatformat:2 }}</span>
-                {% elif item.average_score >= 70 %}
-                    <span class="badge score-badge score-good">{{ item.average_score|floatformat:2 }}</span>
-                {% elif item.average_score >= 60 %}
-                    <span class="badge score-badge score-average">{{ item.average_score|floatformat:2 }}</span>
-                {% else %}
-                    <span class="badge score-badge score-poor">{{ item.average_score|floatformat:2 }}</span>
-                {% endif %}
-                <p class="text-muted small mb-0 mt-1">Ortalama Skor</p>
-            </div>
-        </div>
-
-        <div class="text-start">
-            <button class="toggle-btn collapsed" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#poCollapse{{ forloop.counter }}"
-                    aria-expanded="false"
-                    aria-controls="poCollapse{{ forloop.counter }}">
-                <span>Detayları Gör</span>
-                <i class="bi bi-chevron-right"></i>
-            </button>
-        </div>
-
-        <div id="poCollapse{{ forloop.counter }}" class="collapse mt-3">
+    {% for item in po_achievement_data %}
+    <div class="card po-achievement-card shadow-sm">
+        <div class="card-body p-4">
             <div class="row">
-                <div class="col-md-4">
-                    <div class="text-center p-3" style="background-color: #f8f9fa; border-radius: 8px;">
-                        <h5 class="mb-1">{{ item.min_score|floatformat:2 }}</h5>
-                        <p class="text-muted small mb-0">En Düşük Skor</p>
+
+                <div class="col-lg-9 col-md-8">
+                    <div class="d-flex align-items-start gap-3">
+                        <span class="badge bg-primary px-3 py-2 rounded-3" style="font-size: 1rem;">
+                            {{ item.program_outcome.code }}
+                        </span>
+                        <div class="w-100">
+                            <span class="po-description-full">
+                                {{ item.program_outcome.description }}
+                            </span>
+
+                            <div class="d-flex align-items-center gap-3 mt-3">
+                                <div class="progress flex-grow-1">
+                                    <div class="progress-bar
+                                        {% if item.average_score >= 80 %}bg-success{% elif item.average_score >= 60 %}bg-info{% else %}bg-warning{% endif %}"
+                                        role="progressbar" style="width: {{ item.average_score }}%">
+                                    </div>
+                                </div>
+                                <span class="fw-bold text-dark">%{{ item.average_score|floatformat:1 }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="text-center p-3" style="background-color: #f8f9fa; border-radius: 8px;">
-                        <h5 class="mb-1">{{ item.max_score|floatformat:2 }}</h5>
-                        <p class="text-muted small mb-0">En Yüksek Skor</p>
+
+                <div class="col-lg-3 col-md-4 text-center border-start d-flex flex-column align-items-center justify-content-center">
+                    <div class="score-circle mb-2
+                        {% if item.average_score >= 80 %}excellent{% elif item.average_score >= 70 %}good{% elif item.average_score >= 60 %}average{% else %}poor{% endif %}">
+                        {{ item.average_score|floatformat:0 }}
                     </div>
+                    <small class="text-muted fw-bold d-block mb-3">Ortalama Başarı</small>
+
+                    <button class="btn btn-sm btn-dark px-4 rounded-pill fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#poCollapse{{ forloop.counter }}">
+                        Detayları Gör
+                    </button>
                 </div>
-                <div class="col-md-4">
-                    <div class="text-center p-3" style="background-color: #f8f9fa; border-radius: 8px;">
-                        <h5 class="mb-1">{{ item.student_count }}</h5>
-                        <p class="text-muted small mb-0">Değerlendirilen Öğrenci</p>
+            </div>
+
+            <div id="poCollapse{{ forloop.counter }}" class="collapse mt-4 pt-4 border-top">
+                <div class="row text-center g-3">
+                    <div class="col-4">
+                        <div class="p-3 bg-light rounded-4">
+                            <h6 class="text-muted small fw-bold mb-1">EN DÜŞÜK</h6>
+                            <span class="h5 fw-bold text-danger">{{ item.min_score|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 bg-light rounded-4">
+                            <h6 class="text-muted small fw-bold mb-1">EN YÜKSEK</h6>
+                            <span class="h5 fw-bold text-success">{{ item.max_score|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 bg-light rounded-4">
+                            <h6 class="text-muted small fw-bold mb-1">ÖĞRENCİ</h6>
+                            <span class="h5 fw-bold text-primary">{{ item.student_count }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
-</div>
-{% empty %}
-<div class="card card-main">
-    <div class="card-body">
-        <p class="text-muted">Sistemde program outcome'ı bulunmamaktadır.</p>
+    {% empty %}
+    <div class="alert alert-info rounded-4 border-0 shadow-sm text-center py-5">
+        <i class="bi bi-info-circle fs-1 d-block mb-3"></i>
+        Henüz hesaplanmış bir başarı verisi bulunamadı.
     </div>
-</div>
-{% endfor %}
+    {% endfor %}
 
+</div>
 {% endblock %}

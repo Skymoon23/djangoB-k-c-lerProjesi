@@ -4,285 +4,298 @@
 
 {% block extra_head %}
 <style>
-  h1 { display:none; }
-  hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
-  table { width:100%; border-collapse: collapse; margin-bottom: 20px; }
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-  th { background-color: #f4f4f4; }
-  form { border-radius: 12px; }
-  ul, ol { padding-left: 20px; }
-  .form-section { margin-bottom: 30px; }
+  body { background: #f5f7fb; font-family: "Segoe UI", Roboto, sans-serif; }
 
-  .grade-actions{
-    display:flex;
-    gap:12px;
-    align-items:center;
-    margin-top: 12px;
+  .management-section {
+    background: #fff;
+    border: none;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 25px; /* Bölümler arası boşluk */
   }
-  .csv-hint { color:#666; font-size: 12px; margin-top: 6px; }
 
-  .component-list, .outcome-list {
-    list-style: none;
-    padding-left: 0;
-    margin: 0;
-  }
-  .component-item, .outcome-item {
+  .section-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 8px;
-  }
-  .component-name, .outcome-name {
-    font-weight: 400;
-    width: 300px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f8fafc;
   }
 
-  .btn-small-solid {
-    font-size: 12px;
-    padding: 6px 12px;
-    border-radius: 6px;
-    color: white;
+  .section-header h3 {
+    font-weight: 800;
+    color: #0b2a4a;
+    font-size: 1.35rem;
+    margin: 0;
+  }
+
+  .section-header i { color: #2563eb; font-size: 1.5rem; }
+
+  /* Listeler */
+  .custom-list { list-style: none; padding: 0; margin: 0; }
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #edf2f7;
+    transition: 0.2s;
+  }
+  .list-item:hover { background: #f1f5f9; border-color: #d1d5db; }
+
+  /* Butonlar */
+  .btn-action-sm {
+    font-size: 0.85rem;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    transition: 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     border: none;
     cursor: pointer;
   }
-  .btn-green { background-color: #28a745; }
-  .btn-green:hover { background-color: #218838; }
-  .btn-red { background-color: #dc3545; }
-  .btn-red:hover { background-color: #b02a37; }
+  .btn-edit { background: #dbeafe; color: #1e40af; }
+  .btn-edit:hover { background: #bfdbfe; }
+  .btn-delete { background: #fee2e2; color: #dc2626; }
+  .btn-delete:hover { background: #fecaca; }
 
-  .outcome-item form,
-  .component-item form {
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
+  .btn-primary-main {
+    background: #2563eb;
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-weight: 700;
+    border: none;
+    transition: 0.3s;
+    cursor: pointer;
   }
+  .btn-primary-main:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
 
-  .btn-red-big {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
-.btn-red-big:hover {
-  background-color: #b02a37;
-}
+  /* Modern Tablo */
+  .table-responsive { border-radius: 12px; overflow: hidden; border: 1px solid #edf2f7; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th { background: #f8fafc; color: #64748b; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; padding: 18px; border-bottom: 2px solid #edf2f7; }
+  td { padding: 15px 18px; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: middle; }
 
+  .grade-input {
+    width: 90px;
+    padding: 8px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 700;
+    color: #0b2a4a;
+  }
+  .grade-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+  /* SYLLABUS PANEL */
+  .syllabus-card-wrapper { background: #fcfdfe; border: 1px solid #eef2f6; border-radius: 15px; padding: 25px; }
+  .status-box { display: flex; align-items: center; gap: 20px; padding: 20px; border-radius: 12px; }
+  .status-uploaded { background: #f0fdf4; border: 1px solid #dcfce7; }
+  .status-empty { background: #fffcf0; border: 1px solid #fef3c7; }
+  .status-icon { font-size: 2.2rem; }
+  .status-uploaded .status-icon { color: #16a34a; }
+  .status-empty .status-icon { color: #d97706; }
+  .status-value { font-weight: 800; font-size: 1.1rem; color: #0b2a4a; margin-bottom: 2px; display: block;}
+  .btn-view-syllabus { background: #16a34a; color: white; text-decoration: none; padding: 8px 18px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; }
+  .btn-view-syllabus:hover { background: #15803d; color: white; }
+  .custom-file-input-wrapper input[type="file"]::file-selector-button { background: #0b2a4a; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; }
 </style>
 {% endblock %}
 
 {% block content %}
 
-  <!-- Değerlendirme Bileşenleri -->
-  <div class="form-section">
-    <h3>Değerlendirme Bileşenleri (Sınavlar, Yüzdeler)</h3>
+<div class="container-fluid">
 
-    <ul class="component-list">
-      {% for component in components %}
-        <li class="component-item">
-
-          <span class="component-name">
-            {{ component.name }}: %{{ component.percentage }}
-          </span>
-
-          <a href="{% url 'edit_component' course.id component.id %}">
-            <button type="button" class="btn-small-solid btn-green">Düzenle</button>
-          </a>
-
-          <form method="POST"
-                action="{% url 'delete_component' course.id component.id %}">
-            {% csrf_token %}
-            <button type="submit"
-                    class="btn-small-solid btn-red"
-                    onclick="return confirm('Silinsin mi?');">
-              Sil
-            </button>
-          </form>
-
-        </li>
-      {% empty %}
-        <li>Henüz bir değerlendirme bileşeni eklenmemiş.</li>
-      {% endfor %}
-    </ul>
+  <div class="mb-4">
+    <h2 class="fw-bold text-dark">
+      <i class="bi bi-gear-wide-connected text-primary me-2"></i>Ders Yönetimi: {{ course.course_code }}
+    </h2>
+    <p class="text-muted small">Bu sayfadan dersin tüm akademik yapılandırmasını ve not girişlerini yapabilirsiniz.</p>
   </div>
 
-    <div class="form-section">
-    <h3>Ders İzlencesi (Syllabus)</h3>
-
-    <div style="margin-bottom: 15px;">
-        <strong>Mevcut Dosya:</strong>
-        {% if course.syllabus %}
-            <a href="{{ course.syllabus.url }}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
-                Dosyayı Görüntüle
-            </a>
-        {% else %}
-            <span style="color: orange;">Henüz yüklenmemiş.</span>
-        {% endif %}
+  <section class="management-section">
+    <div class="section-header">
+      <i class="bi bi-percent"></i>
+      <h3>Değerlendirme Bileşenleri</h3>
     </div>
-
-    <form method="POST" enctype="multipart/form-data" style="background: #f9f9f9; padding: 15px; border-radius: 8px;">
-      {% csrf_token %}
-      <div style="margin-bottom: 10px;">
-          {{ syllabus_form.syllabus }}
-      </div>
-
-      <button type="submit" name="submit_syllabus" class="btn-small-solid btn-green">
-        Kaydet / Güncelle
-      </button>
-    </form>
-  </div>
-
-  <hr>
-
-  <hr>
-
-  <!-- Öğrenim Çıktıları -->
-  <div class="form-section">
-    <h3>Öğrenim Çıktıları</h3>
-
-    <ul class="outcome-list">
-      {% for outcome in outcomes %}
-        <li class="outcome-item">
-
-          <span class="outcome-name">
-            {{ outcome.description }}
-          </span>
-
-          <a href="{% url 'edit_outcome' course.id outcome.id %}">
-            <button type="button" class="btn-small-solid btn-green">Düzenle</button>
-          </a>
-
-          <form method="POST"
-                action="{% url 'delete_outcome' course.id outcome.id %}">
-            {% csrf_token %}
-            <button type="submit"
-                    class="btn-small-solid btn-red"
-                    onclick="return confirm('Silinsin mi?');">
-              Sil
-            </button>
-          </form>
-
+    <ul class="custom-list">
+      {% for component in components %}
+        <li class="list-item">
+          <span class="fw-bold text-dark fs-5">{{ component.name }} <span class="badge bg-white text-primary border ms-2 px-3 py-2">%{{ component.percentage }}</span></span>
+          <div class="d-flex gap-2">
+            <a href="{% url 'edit_component' course.id component.id %}" class="btn-action-sm btn-edit"><i class="bi bi-pencil"></i> Düzenle</a>
+            <form method="POST" action="{% url 'delete_component' course.id component.id %}" class="m-0">
+              {% csrf_token %}
+              <button type="submit" class="btn-action-sm btn-delete" onclick="return confirm('Silinsin mi?');"><i class="bi bi-trash"></i> Sil</button>
+            </form>
+          </div>
         </li>
       {% empty %}
-        <li>Henüz bir öğrenim çıktısı eklenmemiş.</li>
+        <div class="text-center p-4 text-muted border-dashed rounded-4">Henüz bir değerlendirme bileşeni (vize, final vb.) eklenmemiş.</div>
       {% endfor %}
     </ul>
-  </div>
+  </section>
 
-  <hr>
+  <section class="management-section">
+    <div class="section-header">
+      <i class="bi bi-file-earmark-pdf"></i>
+      <h3>Ders İzlencesi (Syllabus)</h3>
+    </div>
+    <div class="syllabus-card-wrapper">
+      <div class="row align-items-center">
+          <div class="col-md-6 mb-4 mb-md-0 border-end">
+              <div class="status-box {% if course.syllabus %}status-uploaded{% else %}status-empty{% endif %}">
+                  <div class="status-icon">
+                      {% if course.syllabus %}<i class="bi bi-file-check-fill"></i>{% else %}<i class="bi bi-file-earmark-x-fill"></i>{% endif %}
+                  </div>
+                  <div>
+                      <span class="status-value">{% if course.syllabus %}Dosya Yüklü{% else %}Dosya Eksik{% endif %}</span>
+                      {% if course.syllabus %}
+                        <a href="{{ course.syllabus.url }}" target="_blank" class="btn-view-syllabus d-inline-block mt-2">Görüntüle</a>
+                      {% else %}
+                        <small class="text-muted">Öğrencilerin görebilmesi için PDF yükleyin.</small>
+                      {% endif %}
+                  </div>
+              </div>
+          </div>
+          <div class="col-md-6 ps-md-4">
+              <form method="POST" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div class="custom-file-input-wrapper">{{ syllabus_form.syllabus }}</div>
+                  <button type="submit" name="submit_syllabus" class="btn-primary-main btn-sm w-100 mt-3">
+                      <i class="bi bi-cloud-arrow-up me-2"></i> Dosyayı Kaydet / Güncelle
+                  </button>
+              </form>
+          </div>
+      </div>
+    </div>
+  </section>
 
-  <!-- Not Girişi -->
-  <div class="form-section">
-    <h3>Not Girişi</h3>
-    <p>Bu derse kayıtlı {{ students.count }} öğrenci bulunmaktadır.</p>
+  <section class="management-section">
+    <div class="section-header">
+      <i class="bi bi-bullseye"></i>
+      <h3>Öğrenim Çıktıları (Learning Outcomes)</h3>
+    </div>
+    <ul class="custom-list">
+      {% for outcome in outcomes %}
+        <li class="list-item">
+          <div class="me-3">
+            <span class="badge bg-primary px-3 mb-2">LO #{{ forloop.counter }}</span>
+            <div class="text-dark fw-semibold small">{{ outcome.description }}</div>
+          </div>
+          <div class="d-flex gap-2">
+            <a href="{% url 'edit_outcome' course.id outcome.id %}" class="btn-action-sm btn-edit">Düzenle</a>
+            <form method="POST" action="{% url 'delete_outcome' course.id outcome.id %}" class="m-0">
+              {% csrf_token %}
+              <button type="submit" class="btn-action-sm btn-delete" onclick="return confirm('Silinsin mi?');">Sil</button>
+            </form>
+          </div>
+        </li>
+      {% empty %}
+        <div class="text-center p-4 text-muted">Öğrenim çıktısı tanımlanmamış.</div>
+      {% endfor %}
+    </ul>
+  </section>
 
+  <section class="management-section">
+    <div class="section-header">
+      <i class="bi bi-pencil-square"></i>
+      <h3>Öğrenci Not Girişi</h3>
+    </div>
     {% if not components %}
-      <p style="color: red; font-weight: bold;">
-        Not girişi yapabilmek için lütfen önce değerlendirme bileşenleri tanımlanmış olmalı.
-      </p>
+      <div class="alert alert-danger border-0 shadow-sm"><i class="bi bi-exclamation-triangle me-2"></i> Önce <b>Değerlendirme Bileşenlerini</b> tanımlamanız gerekmektedir.</div>
     {% elif not students %}
-      <p style="color: orange;">Bu derse henüz kayıtlı öğrenci yok.</p>
+      <div class="alert alert-warning border-0 shadow-sm">Bu derse kayıtlı öğrenci bulunamadı.</div>
     {% else %}
       <form method="POST">
         {% csrf_token %}
-
-        <table>
-          <thead>
-            <tr>
-              <th>Öğrenci</th>
-              {% for component in components %}
-                <th>{{ component.name }} (%{{ component.percentage }})</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in student_grade_rows %}
+        <div class="table-responsive shadow-sm border rounded-4">
+          <table>
+            <thead>
               <tr>
-                <td>{{ row.student_object.get_full_name }} ({{ row.student_object.username }})</td>
-                {% for grade_info in row.grades_list %}
-                  <td>
-                    <input
-                      type="number"
-                      name="grade_{{ row.student_object.id }}_{{ grade_info.component_id }}"
-                      value="{% if grade_info.score is not None %}{{ grade_info.score|floatformat:2 }}{% endif %}"
-                      min="0" max="100" step="0.01"
-                      style="width: 90px;"
-                    >
-                  </td>
+                <th>Öğrenci</th>
+                {% for component in components %}
+                  <th class="text-center">{{ component.name }} <br><span class="badge bg-light text-dark fw-normal border mt-1">%{{ component.percentage }}</span></th>
                 {% endfor %}
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-
-        <div class="grade-actions">
-          <button type="submit" name="submit_grades" class="btn-red-big">
-  Tüm Notları Kaydet
-</button>
-
-
-          <a href="{% url 'upload_grades' course.id %}">
-  <button type="button" class="btn-red-big">
-    CSV ile Not Yükle
-  </button>
-</a>
-
+            </thead>
+            <tbody>
+              {% for row in student_grade_rows %}
+                <tr>
+                  <td>
+                    <div class="fw-bold text-dark">{{ row.student_object.get_full_name }}</div>
+                    <div class="text-muted small">{{ row.student_object.username }}</div>
+                  </td>
+                  {% for grade_info in row.grades_list %}
+                    <td class="text-center">
+                      <input type="number" name="grade_{{ row.student_object.id }}_{{ grade_info.component_id }}"
+                        value="{% if grade_info.score is not None %}{{ grade_info.score|floatformat:2 }}{% endif %}"
+                        min="0" max="100" step="0.01" class="grade-input">
+                    </td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-
-        <div class="csv-hint">(isterseniz csv dosyası da ekleyebilirsiniz)</div>
+        <div class="mt-4 d-flex gap-3">
+          <button type="submit" name="submit_grades" class="btn-primary-main"><i class="bi bi-save2 me-2"></i> Tüm Notları Kaydet</button>
+          <a href="{% url 'upload_grades' course.id %}" class="btn-primary-main" style="background:#0b2a4a; text-decoration:none;"><i class="bi bi-filetype-csv me-2"></i> CSV ile Not Yükle</a>
+        </div>
       </form>
     {% endif %}
-  </div>
+  </section>
 
-  <hr>
-
-  <!-- LO Skorları -->
-  <div class="form-section">
-    <h3>Öğrencilerin Learning Outcome Skorları</h3>
-    <p>Her öğrencinin learning outcome'ları ne kadar öğrenebildiğini görebilirsiniz.</p>
-
-    {% if not components %}
-      <p style="color: red; font-weight: bold;">
-        Learning outcome skorlarını hesaplayabilmek için önce değerlendirme bileşenleri ve outcome ağırlıkları tanımlanmalıdır.
-      </p>
-    {% elif not students %}
-      <p style="color: orange;">Bu derse henüz kayıtlı öğrenci yok.</p>
-    {% elif not outcomes %}
-      <p style="color: orange;">Bu ders için learning outcome tanımlanmamış.</p>
+  <section class="management-section">
+    <div class="section-header">
+      <i class="bi bi-graph-up-arrow"></i>
+      <h3>Öğrenci Başarı Analizi (LO)</h3>
+    </div>
+    {% if not components or not outcomes %}
+        <div class="alert alert-light border">LO başarı skorlarının hesaplanması için bileşen ve LO tanımları gereklidir.</div>
     {% else %}
-      <table>
-        <thead>
-          <tr>
-            <th>Öğrenci</th>
-            {% for outcome in outcomes %}
-              <th>
-                LO #{{ outcome.id }}<br>
-                <small style="color:#666;">{{ outcome.description|truncatewords:12 }}</small>
-              </th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for student_lo in student_lo_scores %}
-            <tr>
-              <td><strong>{{ student_lo.student.get_full_name|default:student_lo.student.username }}</strong></td>
-              {% for lo_data in student_lo.lo_scores %}
-                <td>
-                  {% if lo_data.score is not None %}
-                    {{ lo_data.score|floatformat:2 }}
-                  {% else %}
-                    <span style="color: #999;">-</span>
-                  {% endif %}
-                </td>
+        <div class="table-responsive shadow-sm border rounded-4">
+          <table>
+            <thead>
+              <tr>
+                <th>Öğrenci Adı Soyadı</th>
+                {% for outcome in outcomes %}
+                  <th class="text-center" title="{{ outcome.description }}">LO #{{ forloop.counter }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for student_lo in student_lo_scores %}
+                <tr>
+                  <td class="fw-bold text-dark small">{{ student_lo.student.get_full_name|default:student_lo.student.username }}</td>
+                  {% for lo_data in student_lo.lo_scores %}
+                    <td class="text-center fw-bold">
+                      {% if lo_data.score is not None %}
+                        <span class="{% if lo_data.score >= 60 %}text-success{% else %}text-danger{% endif %}">
+                          {{ lo_data.score|floatformat:1 }}%
+                        </span>
+                      {% else %}
+                        <span class="text-muted">-</span>
+                      {% endif %}
+                    </td>
+                  {% endfor %}
+                </tr>
               {% endfor %}
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </div>
     {% endif %}
-  </div>
+  </section>
+
+</div>
 
 {% endblock %}

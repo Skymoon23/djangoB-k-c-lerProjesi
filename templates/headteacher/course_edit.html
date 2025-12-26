@@ -1,38 +1,218 @@
 {% extends "headteacher/base_headteacher.html" %}
-{% block title %}Ders Düzenle{% endblock %}
+{% block title %}Ders Düzenle: {{ course.course_code }} | ALMS University{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Sayfa Başlığı */
+  .page-title {
+    font-weight: 800;
+    color: #0b2a4a;
+  }
+
+  /* Form Kartı */
+  .edit-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    border: none;
+    max-width: 900px;
+  }
+
+  .form-section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  .form-section-header h4 {
+    font-weight: 700;
+    color: #0b2a4a;
+    margin: 0;
+  }
+
+  .form-section-header i {
+    color: #2563eb;
+    font-size: 1.4rem;
+  }
+
+  /* Form Elemanları */
+  .form-group label {
+    display: block;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+
+  .form-control, .form-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+    color: #0b2a4a;
+  }
+
+  .form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+
+  /* Çoklu Seçim Alanı */
+  .form-select[multiple] {
+    padding: 10px;
+    height: auto;
+    min-height: 220px;
+  }
+
+  .form-select option {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  /* Butonlar */
+  .btn-group-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .btn-save {
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 12px 35px;
+    border-radius: 12px;
+    font-weight: 700;
+    border: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .btn-save:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+    color: #fff;
+  }
+
+  .btn-cancel {
+    background-color: #f1f5f9;
+    color: #475569;
+    padding: 12px 25px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .btn-cancel:hover {
+    background-color: #e2e8f0;
+    color: #1e293b;
+  }
+
+  .form-text-info {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-  <h2 class="mb-4">Ders Düzenle: {{ course.course_code }}</h2>
+<div class="container-fluid">
 
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <form method="POST">
-        {% csrf_token %}
-
-        <div class="mb-3">
-          <label class="form-label">Ders İsmi</label>
-          <input type="text"
-                 name="course_name"
-                 class="form-control"
-                 value="{{ course.course_name }}">
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Atanan Hocalar</label>
-          <select name="instructors" class="form-select" multiple size="8">
-            {% for ins in instructors %}
-              <option value="{{ ins.id }}"
-                {% if ins in course.instructors.all %}selected{% endif %}>
-                {{ ins.get_full_name|default:ins.username }}
-              </option>
-            {% endfor %}
-          </select>
-          <div class="form-text">Ctrl (Windows) / Cmd (Mac) ile çoklu seçim.</div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Kaydet</button>
-        <a href="{% url 'department_head_courses' %}" class="btn btn-secondary">İptal</a>
-      </form>
-    </div>
+  <div class="mb-4">
+    <h2 class="page-title">Ders Düzenle</h2>
+    <p class="text-muted">Sistemdeki ders bilgilerini ve hoca atamalarını güncelleyin.</p>
   </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 rounded-4 shadow-sm mb-4">
+        <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="edit-card">
+    <div class="form-section-header">
+      <i class="bi bi-pencil-square"></i>
+      <h4>Ders Detaylarını Güncelle</h4>
+    </div>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label>Ders Kodu</label>
+            <input type="text"
+                   name="course_code"
+                   class="form-control"
+                   value="{{ course.course_code }}"
+                   placeholder="Örn: CSE101"
+                   required>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="form-group">
+            <label>Ders İsmi</label>
+            <input type="text"
+                   name="course_name"
+                   class="form-control"
+                   value="{{ course.course_name }}"
+                   placeholder="Örn: Veri Yapıları"
+                   required>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group mb-4">
+        <label>Atanan Öğretim Görevlileri</label>
+        <select name="instructors" class="form-select" multiple>
+          {% for ins in instructors %}
+            <option value="{{ ins.id }}"
+              {% if ins in course.instructors.all %}selected{% endif %}>
+              {{ ins.get_full_name|default:ins.username }}
+            </option>
+          {% endfor %}
+        </select>
+        <div class="form-text-info">
+          <i class="bi bi-info-circle-fill"></i> Birden fazla hoca seçmek için <b>Ctrl</b> (Win) veya <b>Cmd</b> (Mac) tuşuna basılı tutun.
+        </div>
+      </div>
+
+      <div class="btn-group-actions">
+        <a href="{% url 'department_head_courses' %}" class="btn-cancel">İptal</a>
+        <button type="submit" class="btn-save">
+          <i class="bi bi-cloud-arrow-up-fill"></i>
+          Değişiklikleri Uygula
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

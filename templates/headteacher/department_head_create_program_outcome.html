@@ -1,18 +1,145 @@
 {% extends "headteacher/base_headteacher.html" %}
-{% block title %}Yeni Program Çıktısı{% endblock %}
+{% block title %}Yeni Program Çıktısı Ekle | ALMS University{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Sayfa Başlığı */
+  .page-title {
+    font-weight: 800;
+    color: #0b2a4a;
+    margin-bottom: 5px;
+  }
+
+  /* Form Kartı */
+  .po-form-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    border: none;
+    max-width: 800px;
+  }
+
+  .form-section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  .form-section-header h4 {
+    font-weight: 700;
+    color: #0b2a4a;
+    margin: 0;
+  }
+
+  .form-section-header i {
+    color: #2563eb;
+    font-size: 1.4rem;
+  }
+
+  /* Django Form P ve Input Stillendirme */
+  form p {
+    margin-bottom: 25px;
+  }
+
+  label {
+    display: block;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+  }
+
+  input[type="text"],
+  textarea,
+  .form-control {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+    color: #0b2a4a;
+  }
+
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+
+  textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  /* Kaydet Butonu */
+  .btn-submit-po {
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 14px 35px;
+    border-radius: 12px;
+    font-weight: 700;
+    border: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .btn-submit-po:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+    color: #ffffff;
+  }
+
+  .info-text {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-  <h2 class="mb-4">Yeni Program Çıktısı Ekle</h2>
+<div class="container-fluid">
 
-  <div class="card shadow-sm" style="max-width: 800px;">
-    <div class="card-body">
-      <form method="POST">
-        {% csrf_token %}
-        {{ program_outcome_form.as_p }}
-        <button type="submit" name="submit_program_outcome" class="btn btn-primary">
-          Program Çıktısı Ekle
-        </button>
-      </form>
-    </div>
+  <div class="mb-4">
+    <h2 class="page-title">Yeni Program Çıktısı</h2>
+    <p class="text-muted">Bölüm hedefleriyle uyumlu yeni bir Program Çıktısı (PO) tanımlayın.</p>
   </div>
+
+  <div class="po-form-card">
+    <div class="form-section-header">
+      <i class="bi bi-file-earmark-plus-fill"></i>
+      <h4>Çıktı Detayları</h4>
+    </div>
+
+    <p class="info-text">
+        <strong>Not:</strong> Program çıktıları (PO), öğrencilerin mezun olana kadar kazanmaları gereken bilgi ve becerileri temsil eder.
+        Örn: <em>PO1 - Temel bilimler ve mühendislik bilgilerini uygulama becerisi.</em>
+    </p>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      {# Django'nun ürettiği formu modern CSS ile yakalıyoruz #}
+      {{ program_outcome_form.as_p }}
+
+      <div class="d-flex justify-content-end border-top pt-4 mt-4">
+        <button type="submit" name="submit_program_outcome" class="btn-submit-po">
+          <i class="bi bi-check-circle-fill"></i>
+          Program Çıktısını Kaydet
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
