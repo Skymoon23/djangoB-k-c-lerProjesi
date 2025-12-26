@@ -44,4 +44,8 @@ path(
     views.delete_student,
     name="delete_student",
 ),
+
+path("courses/", views.department_head_courses, name="department_head_courses"),
+path("courses/<int:course_id>/edit/", views.edit_course, name="edit_course"),
+path("courses/<int:course_id>/delete/", views.delete_course, name="delete_course"),
 ]
