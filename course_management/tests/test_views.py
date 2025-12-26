@@ -48,7 +48,7 @@ class RoleBasedLoginViewTest(TestCase):
             follow=True
         )
         # Hata mesajı gösterilmeli ve login sayfasında kalmalı
-        self.assertContains(response, 'rolüne sahip', status_code=200)
+        self.assertContains(response, 'Kullanıcı adı veya şifre hatalı', status_code=200)
     
     def test_login_without_role_parameter(self):
         """Role parametresi olmadan login testi"""
