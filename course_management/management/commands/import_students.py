@@ -26,6 +26,7 @@ class Command(BaseCommand):
                     first_name = row['first_name']
                     last_name = row['last_name']
                     student_number = row['student_number']
+                    email = row.get('email', '')
 
                     # User oluştur veya al
                     user, created = User.objects.get_or_create(
@@ -33,8 +34,14 @@ class Command(BaseCommand):
                         defaults={
                             'first_name': first_name,
                             'last_name': last_name,
+                            'email': email,
                         }
                     )
+
+                    # Eğer kullanıcı zaten varsa ama email'i boşsa güncelleyelim
+                    if not created and email and not user.email:
+                        user.email = email
+                        user.save()
 
                     # Şifreyi her durumda uygula (yeni veya eski kullanıcı farketmez)
                     if created or not user.check_password(password):
