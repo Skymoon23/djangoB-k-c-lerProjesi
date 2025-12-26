@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from course_management.forms import LearningOutcomeForm
 from django.db import transaction
-
+from course_management.models import Course
 
 from course_management.decorators import user_is_department_head
 from course_management.forms import (
@@ -484,3 +484,45 @@ def delete_student(request, student_id):
         messages.error(request, "Öğrenci silme isteği geçersiz.")
 
     return redirect("department_head_students")
+
+@login_required
+@user_is_department_head
+def edit_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+
+    instructors_qs = User.objects.filter(
+    profile__role="instructor"
+).order_by("first_name", "last_name", "username")
+
+
+    if request.method == "POST":
+        course_name = request.POST.get("course_name", "").strip()
+        instructor_ids = request.POST.getlist("instructors")
+
+        if course_name:
+            course.course_name = course_name
+            course.save()
+
+        course.instructors.set(instructor_ids)
+
+        messages.success(request, "Ders güncellendi.")
+        return redirect("department_head_courses")
+
+    return render(request, "headteacher/course_edit.html", {
+        "course": course,
+        "instructors": instructors_qs,
+    })
+
+
+@login_required
+@user_is_department_head
+def delete_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+
+    if request.method == "POST":
+        code = course.course_code
+        course.delete()
+        messages.success(request, f"{code} dersi silindi.")
+        return redirect("department_head_courses")
+
+    return redirect("department_head_courses")

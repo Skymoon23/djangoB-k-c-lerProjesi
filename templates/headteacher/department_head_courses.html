@@ -8,16 +8,38 @@
     <div class="card-body">
       <ul class="list-group list-group-flush">
         {% for course in all_courses %}
-          <li class="list-group-item">
-            <strong>{{ course.course_code }}</strong> - {{ course.course_name }}
-            <div class="mt-2 small text-muted">
-              <strong>Atanan Hocalar:</strong>
-              {% for instructor in course.instructors.all %}
-                {{ instructor.get_full_name|default:instructor.username }}{% if not forloop.last %}, {% endif %}
-              {% empty %}
-                (Henüz hoca atanmamış)
-              {% endfor %}
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+
+            <div>
+              <strong>{{ course.course_code }}</strong> - {{ course.course_name }}
+
+              <div class="mt-2 small text-muted">
+                <strong>Atanan Hocalar:</strong>
+                {% for instructor in course.instructors.all %}
+                  {{ instructor.get_full_name|default:instructor.username }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                  (Henüz hoca atanmamış)
+                {% endfor %}
+              </div>
             </div>
+
+            <div class="ms-3 d-flex gap-2">
+              <a href="{% url 'edit_course' course.id %}" class="btn btn-sm btn-success">
+                Düzenle
+              </a>
+
+              <form method="POST"
+                    action="{% url 'delete_course' course.id %}"
+                    style="margin:0;">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-sm btn-danger"
+                        onclick="return confirm('Bu dersi silmek istediğine emin misin?');">
+                  Sil
+                </button>
+              </form>
+            </div>
+
           </li>
         {% empty %}
           <li class="list-group-item text-muted">Sistemde kayıtlı ders bulunmamaktadır.</li>
