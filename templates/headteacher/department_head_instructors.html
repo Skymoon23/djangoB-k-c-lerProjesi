@@ -1,60 +1,180 @@
 {% extends "headteacher/base_headteacher.html" %}
-{% block title %}Öğretim Görevlileri{% endblock %}
+{% block title %}Öğretim Görevlileri | ALMS University{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-title {
+    font-weight: 800;
+    color: #0b2a4a;
+  }
+
+  /* Ana Liste Kartı */
+  .instructor-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    border: none;
+  }
+
+  /* Tablo Tasarımı */
+  .table-custom {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 15px;
+  }
+
+  .table-custom th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    padding: 15px;
+    border: none;
+    letter-spacing: 0.5px;
+  }
+
+  .table-custom td {
+    background: #fff;
+    padding: 20px 15px;
+    vertical-align: top;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .table-custom tr td:first-child {
+    border-left: 1px solid #f1f5f9;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    width: 250px;
+  }
+
+  .table-custom tr td:last-child {
+    border-right: 1px solid #f1f5f9;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    text-align: right;
+    width: 180px;
+  }
+
+  /* Hoca İsmi Vurgusu */
+  .instructor-name {
+    font-weight: 700;
+    color: #0b2a4a;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Ders Etiketleri */
+  .course-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 5px;
+  }
+
+  .course-tag {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* Buton Stili */
+  .btn-edit-instructor {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-edit-instructor:hover {
+    background-color: #bae6fd;
+    color: #075985;
+    transform: translateY(-2px);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px;
+    color: #94a3b8;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-  <h2 class="mb-4">Öğretim Görevlileri ({{ instructor_count }})</h2>
+<div class="container-fluid">
 
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <ul class="list-group list-group-flush">
-
-        {% for instructor in all_instructors %}
-          <li class="list-group-item">
-
-            <div class="d-flex justify-content-between align-items-start">
-
-              {# SOL: isim + dersler #}
-              <div>
-                <strong>{{ instructor.get_full_name|default:instructor.username }}</strong>
-
-                {% with courses=instructor.courses_taught.all %}
-                  {% if courses %}
-                    <ul class="mt-2 mb-0">
-                      {% for course in courses %}
-                        <li>
-                          <span class="text-muted">
-                            {{ course.course_code }} – {{ course.course_name }}
-                          </span>
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  {% else %}
-                    <p class="text-muted small mt-2 mb-0">
-                      Atanmış ders bulunmuyor.
-                    </p>
-                  {% endif %}
-                {% endwith %}
-              </div>
-
-              {# SAĞ: tam burada buton var #}
-              <div>
-                <a href="{% url 'edit_instructor_courses' instructor.id %}"
-                   class="btn btn-sm btn-outline-primary">
-                  Dersleri Düzenle
-                </a>
-              </div>
-
-            </div>
-
-          </li>
-        {% empty %}
-          <li class="list-group-item text-muted">
-            Sistemde kayıtlı öğretim görevlisi bulunmamaktadır.
-          </li>
-        {% endfor %}
-
-      </ul>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="page-title">Öğretim Görevlileri ({{ instructor_count }})</h2>
+      <p class="text-muted mb-0">Bölümdeki hocaları ve verdikleri ders yüklerini buradan takip edin.</p>
     </div>
   </div>
 
+  <div class="instructor-card">
+    <div class="table-responsive">
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Öğretim Görevlisi</th>
+            <th>Verdiği Dersler</th>
+            <th class="text-end">İşlemler</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for instructor in all_instructors %}
+            <tr>
+              <td>
+                <div class="instructor-name">
+                  <i class="bi bi-person-circle text-primary"></i>
+                  {{ instructor.get_full_name|default:instructor.username }}
+                </div>
+              </td>
+              <td>
+                {% with courses=instructor.courses_taught.all %}
+                  <div class="course-list">
+                    {% for course in courses %}
+                      <span class="course-tag">
+                        <i class="bi bi-book me-1"></i> {{ course.course_code }}
+                      </span>
+                    {% empty %}
+                      <span class="text-muted small italic">Atanmış ders bulunmuyor</span>
+                    {% endfor %}
+                  </div>
+                {% endwith %}
+              </td>
+              <td>
+                <a href="{% url 'edit_instructor_courses' instructor.id %}" class="btn-edit-instructor">
+                  <i class="bi bi-gear-fill"></i> Dersleri Düzenle
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="3" class="empty-state">
+                <i class="bi bi-people fs-1 d-block mb-3"></i>
+                Sistemde kayıtlı öğretim görevlisi bulunmamaktadır.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 {% endblock %}

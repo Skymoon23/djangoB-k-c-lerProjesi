@@ -1,60 +1,248 @@
 {% extends "headteacher/base_headteacher.html" %}
-{% block title %}Hızlı İşlemler{% endblock %}
+{% block title %}Hızlı İşlemler | ALMS University{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Sayfa Başlığı ve Açıklama */
+  .page-title {
+    font-weight: 800;
+    color: #0b2a4a;
+    margin-bottom: 5px;
+  }
+
+  /* Ana Kart Tasarımı */
+  .quick-action-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    border: none;
+    margin-bottom: 40px;
+  }
+
+  .form-section-title {
+    font-weight: 700;
+    color: #0b2a4a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    font-size: 1.15rem;
+  }
+
+  /* Form Elemanları */
+  .form-group label {
+    display: block;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+
+  input[type="text"],
+  select,
+  .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+    color: #0b2a4a;
+  }
+
+  input:focus, select:focus {
+    outline: none;
+    border-color: #2563eb;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+
+  /* Öğrenci Seçim Alanı */
+  .student-selection-wrapper {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 15px;
+    max-height: 350px;
+    overflow-y: auto;
+  }
+
+  /* Django Checkbox Listesi Temizleme */
+  .student-selection-wrapper ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .student-selection-wrapper li {
+    padding: 10px 12px;
+    border-bottom: 1px solid #edf2f7;
+    display: flex;
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .student-selection-wrapper li:hover {
+    background: #f1f5f9;
+  }
+
+  .student-selection-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+    cursor: pointer;
+  }
+
+  .student-selection-wrapper label {
+    cursor: pointer;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0;
+    flex: 1;
+  }
+
+  /* Kaydet Butonu */
+  .btn-submit-action {
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 14px 40px;
+    border-radius: 12px;
+    font-weight: 700;
+    border: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-submit-action:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+  }
+
+  /* Tümünü Seç Alanı */
+  .select-all-box {
+      background: #eef2ff;
+      padding: 10px 15px;
+      border-radius: 10px;
+      border: 1px solid #e0e7ff;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
 
   <div class="mb-4">
-    <h2 class="fw-bold">Hızlı İşlemler</h2>
-    <p class="text-muted mb-0">Yeni ders oluştur ve öğretim görevlisi/öğrenci ata</p>
+    <h2 class="page-title">Hızlı İşlemler</h2>
+    <p class="text-muted mb-0">Tek ekrandan ders oluşturun ve toplu atamaları gerçekleştirin.</p>
   </div>
 
-  <div class="card shadow-sm border-0">
-    <div class="card-body p-4">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 rounded-4 shadow-sm mb-4">
+        <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
 
-      <h5 class="fw-semibold mb-4">📘 Yeni Ders Oluştur ve Ata</h5>
+  <div class="quick-action-card">
+    <div class="form-section-title">
+      <i class="bi bi-rocket-takeoff-fill text-primary"></i>
+      Ders Kayıt Paneli
+    </div>
 
-      <form method="post">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+    <form method="post" id="quickActionForm">
+      {% csrf_token %}
 
-        <div class="row mb-3">
-          <div class="col-md-6">
-            {{ form.course_code.label_tag }}
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>{{ form.course_code.label }}</label>
             {{ form.course_code }}
             {{ form.course_code.errors }}
           </div>
+        </div>
 
-          <div class="col-md-6">
-            {{ form.course_name.label_tag }}
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>{{ form.course_name.label }}</label>
             {{ form.course_name }}
             {{ form.course_name.errors }}
           </div>
         </div>
+      </div>
 
-        <div class="mb-3">
-          {{ form.instructor.label_tag }}
-          {{ form.instructor }}
-          {{ form.instructor.errors }}
+      <div class="form-group mb-4">
+        <label>{{ form.instructor.label }}</label>
+        {{ form.instructor }}
+        {{ form.instructor.errors }}
+      </div>
+
+      <div class="form-group mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <label class="mb-0">{{ form.students.label }}</label>
+
+            <div class="select-all-box">
+                <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" id="masterCheckbox">
+                    <label class="form-check-label small fw-bold text-primary" for="masterCheckbox" style="cursor:pointer;">
+                        Tüm Öğrencileri Seç
+                    </label>
+                </div>
+            </div>
         </div>
 
-        <div class="mb-4">
-          {{ form.students.label_tag }}
-          <div class="border rounded p-3 bg-light">
-            {{ form.students }}
-          </div>
-          {{ form.students.errors }}
+        <div class="student-selection-wrapper" id="studentsContainer">
+          {{ form.students }}
         </div>
+        {{ form.students.errors }}
+      </div>
 
-        <div class="text-end">
-          <button type="submit" class="btn btn-primary px-4">
-             Kaydet
-          </button>
-        </div>
+      <div class="text-end border-top pt-4">
+        <button type="submit" class="btn-submit-action">
+          <i class="bi bi-check-all fs-5"></i>
+          Dersi Oluştur ve Kaydet
+        </button>
+      </div>
 
-      </form>
-    </div>
+    </form>
   </div>
-
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const masterCheckbox = document.getElementById("masterCheckbox");
+    const container = document.getElementById("studentsContainer");
+
+    // Django'nun ürettiği checkboxları yakala
+    const studentCheckboxes = container.querySelectorAll('input[type="checkbox"]');
+
+    // 1. Üstteki kutuya basınca hepsini seç/kaldır
+    masterCheckbox.addEventListener("change", function () {
+        studentCheckboxes.forEach(cb => {
+            cb.checked = masterCheckbox.checked;
+        });
+    });
+
+    // 2. Alt listeden birinin tiki kalkarsa, "Tümünü Seç" tiki de kalksın
+    studentCheckboxes.forEach(cb => {
+        cb.addEventListener("change", function() {
+            if (!this.checked) {
+                masterCheckbox.checked = false;
+            } else {
+                // Eğer hepsi manuel seçilirse üsttekini de tikle
+                const allChecked = Array.from(studentCheckboxes).every(c => c.checked);
+                masterCheckbox.checked = allChecked;
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

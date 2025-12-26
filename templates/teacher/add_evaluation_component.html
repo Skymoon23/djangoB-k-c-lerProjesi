@@ -4,63 +4,154 @@
 
 {% block extra_head %}
 <style>
-  .cardx{
-    border: 1px solid #eee;
-    border-radius: 16px;
-    padding: 22px;
-    box-shadow: 0 6px 18px rgba(0,0,0,.06);
-    background: #fff;
-    max-width: 900px;
-  }
-  .muted{ color:#666; }
-
-  .cardx label{ font-weight: 700; }
-  .cardx p{ margin-bottom: 12px; }
-
-  .cardx input,
-  .cardx select,
-  .cardx textarea,
-  .cardx .form-control{
-    width: 100%;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 10px 12px;
+  body {
+    background: #f5f7fb;
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
 
-  .row-actions{
-    display:flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 12px;
+  .card-main {
+    background: #ffffff;
+    border: none;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    max-width: 850px;
   }
 
-  .btn-save{
-    background:#f0ad4e;
-    color:#111;
-    border:0;
-    border-radius: 10px;
-    padding: 10px 16px;
-    cursor:pointer;
+  .page-header {
+    border-bottom: 2px solid #f8fafc;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+  }
+
+  .page-header h3 {
     font-weight: 800;
+    color: #0b2a4a; /* Kurumsal Lacivert */
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
-  .btn-save:hover{ filter: brightness(0.95); }
+
+  .page-header i {
+    color: #2563eb; /* Kurumsal Mavi */
+  }
+
+  .muted-text {
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+
+  /* Django Form P Etiketlerini ve Inputları Stillendirme */
+  form p {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+
+  input, select, textarea, .form-control {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    background-color: #f8fafc;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    color: #0b2a4a;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+
+  .row-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .btn-save-component {
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 35px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-save-component:hover {
+    background-color: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+    color: #ffffff;
+  }
+
+  .back-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #94a3b8;
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 20px;
+    transition: 0.2s;
+  }
+
+  .back-nav:hover {
+    color: #0b2a4a;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-  <div class="cardx">
-    <h3 style="margin:0;">{{ course.course_code }} — Yeni Değerlendirme Bileşeni</h3>
-    <p class="muted" style="margin-top:8px;">
-      Bu sayfadan derse yeni bir bileşen ekleyebilirsiniz (Vize, Final, Ödev vb.).
-    </p>
+  <div class="container-fluid">
 
-    <form method="POST">
-      {% csrf_token %}
-      {{ form.as_p }}
+    <a href="{% url 'manage_course' course.id %}" class="back-nav">
+      <i class="bi bi-arrow-left"></i> Yönetim Paneline Dön
+    </a>
 
-      <div class="row-actions">
-        <button class="btn-save" type="submit">Kaydet</button>
+    <div class="card-main">
+      <div class="page-header">
+        <h3>
+          <i class="bi bi-plus-square-dotted"></i>
+          Yeni Değerlendirme Bileşeni
+        </h3>
+        <p class="muted-text">
+          Bu derse ait sınav, ödev veya proje gibi bir değerlendirme kriteri tanımlayınız.
+          Belirlediğiniz yüzde, dönem sonu başarı puanının hesaplanmasında baz alınacaktır.
+        </p>
       </div>
-    </form>
+
+      <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="row-actions">
+          <button class="btn-save-component" type="submit">
+            <i class="bi bi-save"></i>
+            Bileşeni Kaydet
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 {% endblock %}

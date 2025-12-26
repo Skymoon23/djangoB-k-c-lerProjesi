@@ -1,60 +1,147 @@
 {% with current=request.resolver_match.url_name %}
-<nav class="d-grid gap-1">
+<style>
+  /* Sidebar Genel Stil */
+  .pc-nav-sidebar {
+    padding: 1rem;
+    background: #0b2a4a; /* Kurumsal Lacivert */
+    border-radius: 15px;
+    color: #fff;
+  }
+
+  /* Navigasyon Linkleri */
+  .nav-link {
+    color: #cbd5e1 !important;
+    padding: 12px 18px !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 4px !important;
+    text-decoration: none !important;
+  }
+
+  .nav-link i {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+  }
+
+  /* Hover ve Active Durumu */
+  .nav-link:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+  }
+
+  .nav-link.active {
+    background: #2563eb !important; /* Modern Mavi */
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  }
+
+  /* Alt Menü (Submenu) Tasarımı */
+  .pc-submenu-panel {
+    display: none;
+    padding-left: 28px;
+    margin-bottom: 8px;
+  }
+
+  .pc-submenu.open .pc-submenu-panel {
+    display: grid;
+    gap: 4px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .pc-submenu .nav-link {
+    font-size: 0.88rem !important;
+    padding: 8px 15px !important;
+  }
+
+  .pc-caret {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    font-size: 1.2rem;
+  }
+
+  .pc-submenu.open .pc-caret {
+    transform: rotate(90deg);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  hr {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 15px 10px;
+  }
+</style>
+
+<nav class="d-grid gap-1 pc-nav-sidebar">
 
   <a href="{% url 'department_head_dashboard' %}"
      class="nav-link {% if current == 'department_head_dashboard' %}active{% endif %}">
-    Dashboard
+    <i class="bi bi-speedometer2"></i> Dashboard
   </a>
 
   <a href="{% url 'department_head_quick_actions' %}"
      class="nav-link {% if current == 'department_head_quick_actions' %}active{% endif %}">
-    Hızlı İşlemler
+    <i class="bi bi-lightning-charge"></i> Hızlı İşlemler
   </a>
 
   <a href="{% url 'department_head_create_program_outcome' %}"
      class="nav-link {% if current == 'department_head_create_program_outcome' %}active{% endif %}">
-    Yeni Program Çıktısı Ekle
+    <i class="bi bi-plus-square"></i> Yeni PO Ekle
   </a>
 
-  <!-- ÇIKTI YÖNETİMİ (CLICK İLE AÇILAN) -->
-  <div class="pc-submenu">
+  <div class="pc-submenu {% if current in 'manage_lo_po_weights view_outcomes po_achievement' %}open{% endif %}">
     <a href="javascript:void(0)"
        class="nav-link {% if current in 'manage_lo_po_weights view_outcomes po_achievement' %}active{% endif %}"
        id="toggleOutcomes">
-      Çıktı Yönetimi
+      <i class="bi bi-diagram-3"></i> Çıktı Yönetimi
       <span class="pc-caret">›</span>
     </a>
 
     <div class="pc-submenu-panel">
-      <a href="{% url 'manage_lo_po_weights' %}" class="nav-link">
-        LO–PO Ağırlıkları
+      <a href="{% url 'manage_lo_po_weights' %}" class="nav-link {% if current == 'manage_lo_po_weights' %}text-white fw-bold{% endif %}">
+        • LO–PO Ağırlıkları
       </a>
-      <a href="{% url 'view_outcomes' %}" class="nav-link">
-        LO / PO İlişkileri
+      <a href="{% url 'view_outcomes' %}" class="nav-link {% if current == 'view_outcomes' %}text-white fw-bold{% endif %}">
+        • LO / PO İlişkileri
       </a>
-      <a href="{% url 'po_achievement' %}" class="nav-link">
-        PO Öğrenilme Durumu
+      <a href="{% url 'po_achievement' %}" class="nav-link {% if current == 'po_achievement' %}text-white fw-bold{% endif %}">
+        • PO Başarı Durumu
       </a>
     </div>
   </div>
 
   <hr />
 
-  <a href="{% url 'department_head_courses' %}" class="nav-link">
-    Tüm Dersler
+  <a href="{% url 'department_head_courses' %}" class="nav-link {% if current == 'department_head_courses' %}active{% endif %}">
+    <i class="bi bi-book"></i> Tüm Dersler
   </a>
 
-  <a href="{% url 'department_head_program_outcomes' %}" class="nav-link">
-    Program Çıktıları
+  <a href="{% url 'department_head_program_outcomes' %}" class="nav-link {% if current == 'department_head_program_outcomes' %}active{% endif %}">
+    <i class="bi bi-list-check"></i> Program Çıktıları
   </a>
 
-  <a href="{% url 'department_head_instructors' %}" class="nav-link">
-    Öğretim Görevlileri
+  <a href="{% url 'department_head_instructors' %}" class="nav-link {% if current == 'department_head_instructors' %}active{% endif %}">
+    <i class="bi bi-person-badge"></i> Öğretim Görevlileri
   </a>
 
-  <a href="{% url 'department_head_students' %}" class="nav-link">
-    Öğrenciler
+  <a href="{% url 'department_head_students' %}" class="nav-link {% if current == 'department_head_students' %}active{% endif %}">
+    <i class="bi bi-people"></i> Öğrenciler
   </a>
 
 </nav>
+
+<script>
+  // Submenu Toggle Mantığı
+  document.getElementById('toggleOutcomes').addEventListener('click', function() {
+    this.parentElement.classList.toggle('open');
+  });
+</script>
 {% endwith %}

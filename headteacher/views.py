@@ -14,8 +14,6 @@ from course_management.models import (
     Course, Grade, LearningOutcome, LearningOutcomeProgramOutcomeWeight,
     OutcomeWeight, ProgramOutcome, User,
 )
-
-
 # =========================
 # DASHBOARD (SADE)
 # =========================
@@ -495,14 +493,6 @@ def edit_course(request, course_id):
 
 
     if request.method == "POST":
-<<<<<<< Updated upstream
-        course_name = request.POST.get("course_name", "").strip()
-        instructor_ids = request.POST.getlist("instructors")
-
-        if course_name:
-            course.course_name = course_name
-            course.save()
-=======
         with transaction.atomic():
             course_code = request.POST.get("course_code", "").strip()
             course_name = request.POST.get("course_name", "").strip()
@@ -512,7 +502,6 @@ def edit_course(request, course_id):
                 course.course_code = course_code
                 course.course_name = course_name
                 course.save()
->>>>>>> Stashed changes
 
             course.instructors.set(instructor_ids)
 
