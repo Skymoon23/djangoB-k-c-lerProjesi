@@ -1,141 +1,182 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sisteme Giriş Yap</title>
-    <style>
-        body { 
-            font-family: sans-serif; 
-            line-height: 1.6; 
-            padding: 40px 20px; 
-            margin: auto; 
-            background-color: #f4f4f4; 
-        }
-        
-        .login-container {
-            max-width: 450px;
-            margin: auto;
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-            padding: 20px 30px 30px 30px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giriş Yap | ALMS University</title>
 
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-        
-        h2 { 
-            color: #333; 
-            margin: 0;
-            flex: 1;
-        }
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-        /* Hata mesajı stili */
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+  <style>
+    body {
+      background: #f5f7fb;
+      height: 100vh;
+      margin: 0;
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        /* Django'nun {{ form.as_p }} çıktısını stillendirme */
-        .login-container form p {
-            margin-bottom: 15px;
-        }
-        .login-container form label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .login-container form input[type="text"],
-        .login-container form input[type="password"] {
-            width: 95%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-        
-        /* Buton stili */
-        button { 
-            background-color: #007bff; 
-            color: white; 
-            padding: 12px 20px; 
-            border: none; 
-            cursor: pointer; 
-            border-radius: 4px; 
-            font-size: 1em;
-            width: 100%; /* Butonu tam genişlik yap */
-            margin-top: 10px;
-        }
-        button:hover { 
-            background-color: #0056b3; 
-        }
-        
-        /* Geri butonu stili */
-        .back-button {
-            background-color: #6c757d;
-            color: white;
-            padding: 6px 12px;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 0.8em;
-            text-decoration: none;
-            display: inline-block;
-            white-space: nowrap;
-        }
-        .back-button:hover {
-            background-color: #5a6268;
-        }
-    </style>
+    .login-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .login-header h2 {
+      font-weight: 800;
+      color: #0b2a4a;
+      margin-bottom: 5px;
+    }
+
+    .role-indicator {
+      background-color: #eef2ff;
+      color: #2563eb;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-bottom: 20px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* Django Form Elemanlarını Stillendirme */
+    form p {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background-color: #f8fafc;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #2563eb;
+      background-color: #fff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Butonlar */
+    .btn-login {
+      background-color: #2563eb;
+      color: white;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-login:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    .error-message {
+      background-color: #fef2f2;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+      text-align: center;
+      border: 1px solid #fee2e2;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 25px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    .back-link:hover {
+      color: #0b2a4a;
+    }
+
+    .forgot-password {
+        display: block;
+        text-align: center;
+        margin-top: 15px;
+        font-size: 0.85rem;
+        color: #2563eb;
+        text-decoration: none;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="login-container">
-        <div class="header-container">
-        <h2>Sisteme Giriş Yap</h2>
-            <a href="{% url 'home' %}" class="back-button">← Ana Sayfa</a>
+    <div class="login-card">
+        <div class="login-header">
+            <div class="mb-3">
+                <i class="bi bi-mortarboard-fill fs-1 text-primary"></i>
+            </div>
+            <h2>Sisteme Giriş</h2>
         </div>
-        
+
         {% if selected_role_display %}
-        <div style="background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; padding: 10px 15px; border-radius: 4px; margin-bottom: 20px; text-align: center;">
-            <strong>{{ selected_role_display }}</strong> olarak giriş yapıyorsunuz
+        <div class="role-indicator">
+            <i class="bi bi-shield-check me-1"></i>
+            {{ selected_role_display }} Paneli
         </div>
         {% endif %}
 
-        {% if messages %}
-            {% for message in messages %}
-                <p class="error-message">{{ message }}</p>
-            {% endfor %}
+        {% if messages or form.errors %}
+          <div class="error-message">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            Kullanıcı adı veya şifre hatalı.
+          </div>
         {% endif %}
 
-        {% if form.errors %}
-          <p class="error-message">Kullanıcı adı veya şifre hatalı.</p>
-        {% endif %}
-        
         <form method="post" action="{% url 'login' %}{% if request.GET.role %}?role={{ request.GET.role }}{% endif %}">
-          {% csrf_token %}
-          
-          {{ form.as_p }}
-          
-          <button type="submit">Giriş Yap</button>
+            {% csrf_token %}
+            
+            {{ form.as_p }}
+            
+            <button type="submit" class="btn-login">Giriş Yap</button>
         </form>
 
-        <div style="text-align: center; margin-top: 15px;">
-            <a href="{% url 'password_reset' %}" style="color: #007bff; text-decoration: none; font-size: 0.9em;">
+        <a href="{% url 'password_reset' %}" class="forgot-password">
             Şifremi Unuttum
-            </a>
-        </div>
+        </a>
+
+        <a href="{% url 'home' %}" class="back-link">
+            <i class="bi bi-arrow-left me-1"></i> Rol Seçimine Dön
+        </a>
     </div>
 
 </body>
