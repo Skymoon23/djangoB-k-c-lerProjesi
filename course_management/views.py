@@ -9,10 +9,6 @@ def home(request):
 
 
 class RoleBasedLoginView(LoginView):
-    """
-    Role-based login view. Kullanıcının seçtiği role ile
-    gerçek rolünü karşılaştırır.
-    """
     template_name = 'registration/login.html'
     
     def get_context_data(self, **kwargs):
@@ -40,13 +36,11 @@ class RoleBasedLoginView(LoginView):
         }
         
         if not selected_role or selected_role not in role_mapping:
-            # Mesaj göstermeden direkt home'a yönlendir
             return redirect('home')
         
         return super().get(request, *args, **kwargs)
     
     def form_valid(self, form):
-        # Kullanıcıyı giriş yaptırır
         user = form.get_user()
         
         # URL'den seçilen role'ü alır
@@ -96,10 +90,6 @@ class RoleBasedLoginView(LoginView):
 
 @login_required
 def dashboard_redirect(request):
-    """
-    kullanıcıyı giriş yaptıktan sonra rolüne göre
-    doğru dashboard'a yönlendir
-    """
     try:
         role = request.user.profile.role
     except Profile.DoesNotExist:
@@ -155,8 +145,7 @@ import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Student, Course, Grade   # modeller seninkiyse
-                                             # isimler farklıysa söyle düzenleyeyim
+from .models import Student, Course, Grade
 
 @login_required
 def import_grades_from_excel(request):
