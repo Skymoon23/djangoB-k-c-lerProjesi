@@ -135,7 +135,7 @@
             <a href="{% url 'edit_component' course.id component.id %}" class="btn-action-sm btn-edit"><i class="bi bi-pencil"></i> Düzenle</a>
             <form method="POST" action="{% url 'delete_component' course.id component.id %}" class="m-0">
               {% csrf_token %}
-              <button type="submit" class="btn-action-sm btn-delete" onclick="return confirm('Silinsin mi?');"><i class="bi bi-trash"></i> Sil</button>
+              <button type="button" class="btn-action-sm btn-delete" onclick="event.preventDefault(); const form = this.closest('form'); customConfirm('Bu öğrenim bileşenini silmek istediğinize emin misiniz?').then(ok => { if(ok) form.submit(); });"><i class="bi bi-trash"></i> Sil</button>
             </form>
           </div>
         </li>
@@ -196,7 +196,7 @@
             <a href="{% url 'edit_outcome' course.id outcome.id %}" class="btn-action-sm btn-edit">Düzenle</a>
             <form method="POST" action="{% url 'delete_outcome' course.id outcome.id %}" class="m-0">
               {% csrf_token %}
-              <button type="submit" class="btn-action-sm btn-delete" onclick="return confirm('Silinsin mi?');">Sil</button>
+              <button type="button" class="btn-action-sm btn-delete" onclick="event.preventDefault(); const form = this.closest('form'); customConfirm('Bu öğrenim çıktısını silmek istediğinize emin misiniz?').then(ok => { if(ok) form.submit(); });">Sil</button>
             </form>
           </div>
         </li>

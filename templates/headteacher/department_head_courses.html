@@ -160,8 +160,8 @@
 
                   <form method="POST" action="{% url 'delete_course' course.id %}" style="margin:0;">
                     {% csrf_token %}
-                    <button type="submit" class="btn-action btn-delete-course"
-                            onclick="return confirm('Bu dersi ve bu derse bağlı tüm verileri silmek istediğinizden emin misiniz?');">
+                    <button type="button" class="btn-action btn-delete-course"
+                            onclick="event.preventDefault(); const form = this.closest('form'); customConfirm('Bu dersi ve bu derse bağlı tüm verileri silmek istediğinizden emin misiniz?').then(ok => { if(ok) form.submit(); });">
                       <i class="bi bi-trash3"></i> Sil
                     </button>
                   </form>

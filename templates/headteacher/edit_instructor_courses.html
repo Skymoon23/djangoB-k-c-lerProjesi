@@ -157,7 +157,7 @@
                 <td><span class="course-code-badge">{{ course.course_code }}</span></td>
                 <td><span class="fw-bold text-dark">{{ course.course_name }}</span></td>
                 <td class="text-end">
-                  <form method="post" class="d-inline" onsubmit="return confirm('Bu dersi hocadan geri almak istediğinize emin misiniz?');">
+                  <form method="post" class="d-inline" onsubmit="return handleFormSubmit(event, 'Bu dersi hocadan geri almak istediğinize emin misiniz?');">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="remove">
                     <input type="hidden" name="course_id" value="{{ course.id }}">

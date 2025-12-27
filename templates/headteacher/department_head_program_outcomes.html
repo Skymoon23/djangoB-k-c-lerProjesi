@@ -147,7 +147,7 @@
                   </a>
 
                   <form method="POST" action="{% url 'delete_program_outcome' po.id %}"
-                        onsubmit="return confirm('Bu program çıktısını silmek istediğinize emin misiniz?');">
+                        onsubmit="return handleFormSubmit(event, 'Bu program çıktısını silmek istediğinize emin misiniz?');">
                     {% csrf_token %}
                     <button type="submit" class="btn-action btn-delete">
                       <i class="bi bi-trash3-fill"></i> Sil

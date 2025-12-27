@@ -172,7 +172,7 @@
                                 </a>
                                 <form method="post" action="{% url 'delete_learning_outcome' outcome_item.outcome.id %}" class="d-inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Silmek istediğinize emin misiniz?');">
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="event.preventDefault(); const form = this.closest('form'); customConfirm('Silmek istediğinize emin misiniz?').then(ok => { if(ok) form.submit(); });">
                                         <i class="bi bi-trash3"></i> Sil
                                     </button>
                                 </form>
