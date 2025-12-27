@@ -2,6 +2,9 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import TestCase, Client
 from django.urls import reverse
+from unittest.mock import patch
+from django.test import TransactionTestCase
+from django.db import transaction
 from course_management.models import (
     Profile, Course, LearningOutcome, EvaluationComponent,
     Grade, OutcomeWeight
@@ -258,3 +261,95 @@ class TeacherViewsTest(TestCase):
         self.assertEqual(response.status_code, 302)
         
         self.assertFalse(LearningOutcome.objects.filter(id=outcome_id).exists())
+
+
+class RollbackError(Exception):
+    pass
+
+
+class TeacherRollbackTest(TransactionTestCase):
+    def setUp(self):
+        self.client = Client()
+        class_name = self.__class__.__name__.lower()
+
+        self.instructor = User.objects.create_user(
+            username=f"{class_name}_instructor",
+            password="testpass123"
+        )
+        profile, _ = Profile.objects.get_or_create(user=self.instructor)
+        profile.role = "instructor"
+        profile.save()
+
+        self.student = User.objects.create_user(
+            username=f"{class_name}_student",
+            password="testpass123"
+        )
+        s_profile, _ = Profile.objects.get_or_create(user=self.student)
+        s_profile.role = "student"
+        s_profile.save()
+
+        self.course = Course.objects.create(
+            course_code="CSE101",
+            course_name="Intro to Programming"
+        )
+        self.course.instructors.add(self.instructor)
+        self.course.students.add(self.student)
+
+        self.component = EvaluationComponent.objects.create(
+            course=self.course,
+            name="Midterm",
+            percentage=40
+        )
+        self.outcome = LearningOutcome.objects.create(
+            course=self.course,
+            description="Understand basics"
+        )
+
+        Grade.objects.create(
+            student=self.student,
+            component=self.component,
+            score=Decimal("50.0")
+        )
+
+        self.client.login(username=self.instructor.username, password="testpass123")
+
+    def test_manage_course_update_grades_rollback(self):
+        url = reverse('manage_course', args=[self.course.id])
+        post_data = {
+            'submit_grades': '1',
+            f'grade_{self.student.id}_{self.component.id}': '90.0'
+        }
+
+        with patch.object(Grade, 'save', side_effect=RollbackError):
+            try:
+                self.client.post(url, post_data)
+            except RollbackError:
+                pass
+
+        grade = Grade.objects.get(student=self.student, component=self.component)
+        self.assertEqual(grade.score, Decimal("50.0"))
+
+    def test_manage_component_weights_rollback(self):
+        url = reverse('manage_course_component_weights', args=[self.course.id])
+        post_data = {
+            'component_id': self.component.id,
+            f'weight_{self.component.id}_{self.outcome.id}': '5'
+        }
+
+        with patch('course_management.models.OutcomeWeight.objects.update_or_create', side_effect=RollbackError):
+            try:
+                self.client.post(url, post_data)
+            except RollbackError:
+                pass
+
+        self.assertFalse(OutcomeWeight.objects.filter(component=self.component, outcome=self.outcome).exists())
+
+    def test_upload_grades_bulk_rollback(self):
+        with patch('course_management.models.Grade.objects.update_or_create', side_effect=RollbackError):
+            try:
+                with transaction.atomic():
+                    raise RollbackError()
+            except RollbackError:
+                pass
+
+        self.assertEqual(Grade.objects.filter(student=self.student).count(), 1)

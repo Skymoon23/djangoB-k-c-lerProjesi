@@ -1,6 +1,9 @@
 from decimal import Decimal
+from unittest.mock import patch
+
 from django.contrib.auth.models import User
-from django.test import TestCase, Client
+from django.db.models.signals import m2m_changed
+from django.test import TestCase, Client, TransactionTestCase
 from django.urls import reverse
 from course_management.models import (
     Profile, Course, LearningOutcome, EvaluationComponent,
@@ -662,3 +665,79 @@ class DeleteLearningOutcomeTest(TestCase):
         
         self.assertFalse(LearningOutcome.objects.filter(id=outcome_id).exists())
 
+class RollbackError(Exception):
+    pass
+
+class DepartmentHeadRollbackTest(TransactionTestCase):
+    def setUp(self):
+        self.client = Client()
+        self.head = User.objects.create_user(username='rollback_head', password='testpass123')
+        profile, _ = Profile.objects.get_or_create(user=self.head)
+        profile.role = 'department_head'
+        profile.save()
+        self.client.login(username='rollback_head', password='testpass123')
+
+    def test_delete_student_rollback(self):
+        student = User.objects.create_user(username='failed_student')
+        profile, _ = Profile.objects.get_or_create(user=student)
+        profile.role = 'student'
+        profile.save()
+
+        with patch.object(User, 'delete', side_effect=RollbackError):
+            try:
+                self.client.post(reverse('delete_student', args=[student.id]))
+            except RollbackError:
+                pass
+        self.assertTrue(User.objects.filter(id=student.id).exists())
+
+    def test_delete_course_rollback(self):
+        course = Course.objects.create(course_code='CSE311', course_name='Software Engineering')
+
+        with patch.object(Course, 'delete', side_effect=RollbackError):
+            try:
+                self.client.post(reverse('delete_course', args=[course.id]))
+            except RollbackError:
+                pass
+        self.assertTrue(Course.objects.filter(course_code='CSE311').exists())
+
+    def test_edit_instructor_courses_rollback(self):
+        instructor = User.objects.create_user(username='failed_inst')
+        profile, _ = Profile.objects.get_or_create(user=instructor)
+        profile.role = 'instructor'
+        profile.save()
+        course = Course.objects.create(course_code='CSE311', course_name='Software Engineering')
+
+        def fail_m2m(*args, **kwargs):
+            raise RollbackError()
+
+        m2m_changed.connect(fail_m2m, sender=User.courses_taught.through)
+        try:
+            self.client.post(reverse('edit_instructor_courses', args=[instructor.id]),
+                             {'action': 'add', 'course_id': course.id})
+        except RollbackError:
+            pass
+        finally:
+            m2m_changed.disconnect(fail_m2m, sender=User.courses_taught.through)
+
+        self.assertNotIn(course, instructor.courses_taught.all())
+
+    def test_edit_student_courses_rollback(self):
+        student = User.objects.create_user(username='failed_stu_course')
+        profile, _ = Profile.objects.get_or_create(user=student)
+        profile.role = 'student'
+        profile.save()
+        course = Course.objects.create(course_code='CSE311', course_name='Software Engineering')
+
+        def fail_m2m(*args, **kwargs):
+            raise RollbackError()
+
+        m2m_changed.connect(fail_m2m, sender=User.enrolled_courses.through)
+        try:
+            self.client.post(reverse('edit_student_courses', args=[student.id]),
+                             {'action': 'add', 'course_id': course.id})
+        except RollbackError:
+            pass
+        finally:
+            m2m_changed.disconnect(fail_m2m, sender=User.enrolled_courses.through)
+
+        self.assertNotIn(course, student.enrolled_courses.all())

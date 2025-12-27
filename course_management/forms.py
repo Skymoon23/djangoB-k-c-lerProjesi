@@ -4,14 +4,11 @@ from .models import (
     LearningOutcome,
     Course,
     ProgramOutcome,
-    # yeni model ve not modeli:
-    OutcomeWeight,
     Grade,
 )
 from django.contrib.auth import get_user_model
 
 
-# user modelini al
 User = get_user_model()
 
 
