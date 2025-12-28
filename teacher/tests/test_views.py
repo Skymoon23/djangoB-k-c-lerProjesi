@@ -1,4 +1,7 @@
 from decimal import Decimal
+from io import BytesIO
+
+import pandas as pd
 from django.contrib.auth.models import User
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -344,7 +347,7 @@ class TeacherRollbackTest(TransactionTestCase):
 
         self.assertFalse(OutcomeWeight.objects.filter(component=self.component, outcome=self.outcome).exists())
 
-    def test_upload_grades_bulk_rollback(self):
+    def test_upload_grades_excel_rollback(self):
         with patch('course_management.models.Grade.objects.update_or_create', side_effect=RollbackError):
             try:
                 with transaction.atomic():
@@ -353,3 +356,57 @@ class TeacherRollbackTest(TransactionTestCase):
                 pass
 
         self.assertEqual(Grade.objects.filter(student=self.student).count(), 1)
+
+    def test_grade_multiple_rollback(self):
+        s2 = User.objects.create_user(username="student2", password="123")
+        self.course.students.add(s2)
+        Grade.objects.create(student=s2, component=self.component, score=Decimal("40.0"))
+
+        url = reverse('manage_course', args=[self.course.id])
+        post_data = {
+            'submit_grades': '1',
+            f'grade_{self.student.id}_{self.component.id}': '100',
+            f'grade_{s2.id}_{self.component.id}': '100'
+        }
+
+        with patch.object(Grade, 'save', side_effect=[None, RollbackError]):
+            try:
+                self.client.post(url, post_data)
+            except RollbackError:
+                pass
+
+        self.assertEqual(Grade.objects.get(student=self.student, component=self.component).score, Decimal("50.0"))
+        self.assertEqual(Grade.objects.get(student=s2, component=self.component).score, Decimal("40.0"))
+
+    def test_weight_integrity_rollback(self):
+        OutcomeWeight.objects.create(component=self.component, outcome=self.outcome, weight=10)
+        url = reverse('manage_course_component_weights', args=[self.course.id])
+        post_data = {'component_id': self.component.id, f'weight_{self.component.id}_{self.outcome.id}': ''}
+
+        with patch('course_management.models.OutcomeWeight.objects.filter', side_effect=RollbackError):
+            try:
+                self.client.post(url, post_data)
+            except RollbackError:
+                pass
+
+        self.assertTrue(OutcomeWeight.objects.filter(weight=10).exists())
+
+    def test_excel_upload_rollback(self):
+        df = pd.DataFrame({
+            'username': [self.student.username, 'non_existent'],
+            'component_name': [self.component.name, self.component.name],
+            'score': [100, 80]
+        })
+        excel = BytesIO();
+        df.to_excel(excel, index=False);
+        excel.seek(0);
+        excel.name = 'test.xlsx'
+
+        url = reverse('upload_grades', args=[self.course.id])
+        with patch('course_management.models.Grade.objects.update_or_create', side_effect=[None, RollbackError]):
+            try:
+                self.client.post(url, {'file': excel})
+            except RollbackError:
+                pass
+
+        self.assertEqual(Grade.objects.get(student=self.student).score, Decimal("50.0"))

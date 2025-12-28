@@ -741,3 +741,28 @@ class DepartmentHeadRollbackTest(TransactionTestCase):
             m2m_changed.disconnect(fail_m2m, sender=User.enrolled_courses.through)
 
         self.assertNotIn(course, student.enrolled_courses.all())
+
+    def test_department_head_quick_actions_rollback(self):
+        class_name = self.__class__.__name__.lower()
+        instructor = User.objects.create_user(
+            username=f'{class_name}_fail_inst',
+            password='testpass123'
+        )
+        profile, _ = Profile.objects.get_or_create(user=instructor)
+        profile.role = 'instructor'
+        profile.save()
+
+        with patch('course_management.forms.CourseCreateForm.save', side_effect=RollbackError):
+            try:
+                self.client.post(
+                    reverse('department_head_quick_actions'),
+                    {
+                        'course_code': 'CSE311',
+                        'course_name': 'Software Engineering',
+                        'instructors': [instructor.id]
+                    }
+                )
+            except RollbackError:
+                pass
+
+        self.assertFalse(Course.objects.filter(course_code='CSE311').exists())

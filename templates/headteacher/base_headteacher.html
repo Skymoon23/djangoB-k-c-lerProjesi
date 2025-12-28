@@ -268,7 +268,6 @@ document.addEventListener("DOMContentLoaded", function () {
     wrapper.classList.toggle("open");
   });
 
-  // Tıklanan link dışındaysa menüyü kapatmak isterseniz bu kısmı aktif tutabilirsiniz
   document.addEventListener("click", function (e) {
     if (!wrapper.contains(e.target)) {
       wrapper.classList.remove("open");
