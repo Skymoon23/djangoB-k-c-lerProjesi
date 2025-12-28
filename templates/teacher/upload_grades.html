@@ -1,6 +1,6 @@
 {% extends "teacher/base_course.html" %}
 
-{% block title %}Toplu Not Yükleme | {{ course.course_code }}{% endblock %}
+{% block title %}{{ course.course_code }} | Toplu Not Yükleme {% endblock %}
 
 {% block extra_head %}
 <style>
@@ -158,7 +158,7 @@
                 <ul><strong>Önemli Not!</strong> Bileşen isimleri oluşturduğunuz şekilde olmalıdır. Büyük küçük harflere dikkat ediniz!</ul>
                 <li><strong>score:</strong> Öğrencinin aldığı not (0-100 arası).</li>
             </ul>
-            <p class="small text-muted mt-3 mb-0 italic">Desteklenen formatlar: <strong>.xlsx</strong> (Excel) veya <strong>.csv</strong></p>
+            <p class="small text-muted mt-3 mb-0 italic">Desteklenen formatlar: <strong>.xlsx</strong> (Excel) </p>
         </div>
 
         <form method="post" enctype="multipart/form-data">
@@ -187,8 +187,5 @@
         </form>
     </div>
 
-    <footer class="mt-5 text-center text-muted small">
-        <p>&copy; 2024 ALMS Akademik Başarı Takip Sistemi</p>
-    </footer>
 </div>
 {% endblock %}

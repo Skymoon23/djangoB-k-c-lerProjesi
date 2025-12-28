@@ -1,6 +1,6 @@
 {% extends "teacher/base_course.html" %}
 
-{% block title %}Dersi Yönet: {{ course.course_code }}{% endblock %}
+{% block title %}{{ course.course_code }}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -249,7 +249,7 @@
         </div>
         <div class="mt-4 d-flex gap-3">
           <button type="submit" name="submit_grades" class="btn-primary-main"><i class="bi bi-save2 me-2"></i> Tüm Notları Kaydet</button>
-          <a href="{% url 'upload_grades' course.id %}" class="btn-primary-main" style="background:#0b2a4a; text-decoration:none;"><i class="bi bi-filetype-csv me-2"></i> CSV ile Not Yükle</a>
+          <a href="{% url 'upload_grades' course.id %}" class="btn-primary-main" style="background:#0b2a4a; text-decoration:none;"><i class="bi bi-filetype-csv me-2"></i> Excel ile Not Yükle</a>
         </div>
       </form>
     {% endif %}

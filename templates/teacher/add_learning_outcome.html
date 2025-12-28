@@ -1,6 +1,6 @@
 {% extends "teacher/base_course.html" %}
 
-{% block title %}{{ course.course_code }} – Yeni Learning Outcome{% endblock %}
+{% block title %}{{ course.course_code }} – Learning Outcome{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -135,7 +135,7 @@
       {% csrf_token %}
 
       <div class="form-group mb-4">
-        <label>Outcome (Öğrenim Çıktısı) Açıklaması</label>
+        <label>Learning Outcome (Öğrenim Çıktısı) Açıklaması</label>
         {{ form.description }}
         {% if form.description.help_text %}
           <div class="form-text text-muted mt-2 small">{{ form.description.help_text }}</div>
